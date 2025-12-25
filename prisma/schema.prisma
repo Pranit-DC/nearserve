@@ -1,0 +1,265 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                                           String            @id @default(uuid())
+  email                                        String            @unique
+  phone                                        String            @unique
+  name                                         String
+  role                                         UserRole          @default(UNASSIGNED)
+  createdAt                                    DateTime          @default(now())
+  updatedAt                                    DateTime          @updatedAt
+  clerkUserId                                  String            @unique
+  customerProfile                              CustomerProfile?
+  jobsCreated                                  Job[]             @relation("CustomerJobs")
+  jobsAssigned                                 Job[]             @relation("WorkerJobs")
+  JobApplication                               JobApplication[]
+  JobPosting_JobPosting_employerIdToUser       JobPosting[]      @relation("JobPosting_employerIdToUser")
+  JobPosting_JobPosting_selectedWorkerIdToUser JobPosting[]      @relation("JobPosting_selectedWorkerIdToUser")
+  reviewsGiven                                 Review[]          @relation("ReviewsByCustomer")
+  reviewsReceived                              Review[]          @relation("ReviewsForWorker")
+  transactions                                 Transaction[]
+  workerProfile                                WorkerProfile?
+}
+
+model WorkerProfile {
+  id              String         @id @default(uuid())
+  userId          String         @unique
+  skilledIn       String[]
+  qualification   String?
+  certificates    String[]
+  aadharNumber    String         @unique
+  yearsExperience Int?
+  profilePic      String?
+  bio             String?
+  address         String
+  city            String
+  state           String
+  country         String
+  postalCode      String
+  availableAreas  String[]
+  createdAt       DateTime       @default(now())
+  updatedAt       DateTime       @updatedAt
+  hourlyRate      Float?
+  minimumFee      Float?
+  latitude        Float?
+  longitude       Float?
+  previousWorks   PreviousWork[]
+  user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model PreviousWork {
+  id          String        @id @default(uuid())
+  workerId    String
+  title       String?
+  description String?
+  images      String[]
+  location    String?
+  createdAt   DateTime      @default(now())
+  worker      WorkerProfile @relation(fields: [workerId], references: [id], onDelete: Cascade)
+}
+
+model CustomerProfile {
+  id         String   @id @default(uuid())
+  userId     String   @unique
+  address    String
+  city       String
+  state      String
+  country    String
+  postalCode String
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+  user       User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Job {
+  id                  String         @id @default(uuid())
+  description         String
+  details             String?
+  date                DateTime
+  time                DateTime
+  location            String
+  charge              Float
+  status              JobStatus      @default(PENDING)
+  customerId          String
+  workerId            String?
+  createdAt           DateTime       @default(now())
+  updatedAt           DateTime       @updatedAt
+  // Payment fields
+  platformFee         Float?
+  workerEarnings      Float?
+  paymentStatus       PaymentStatus  @default(PENDING)
+  paymentReferenceId  String?
+  razorpayOrderId     String?
+  razorpayPaymentId   String?
+  razorpaySignature   String?
+  // Proof of work fields
+  startProofPhoto     String?
+  startProofGpsLat    Float?
+  startProofGpsLng    Float?
+  startedAt           DateTime?
+  completedAt         DateTime?
+  customer            User           @relation("CustomerJobs", fields: [customerId], references: [id])
+  worker              User?          @relation("WorkerJobs", fields: [workerId], references: [id])
+  review              Review?
+  Transaction         Transaction[]
+  JobLog              JobLog[]
+
+  @@index([customerId, status])
+  @@index([workerId, status])
+}
+
+model Transaction {
+  id        String          @id @default(uuid())
+  userId    String
+  jobId     String?
+  amount    Float
+  type      TransactionType
+  createdAt DateTime        @default(now())
+  job       Job?            @relation(fields: [jobId], references: [id])
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Review {
+  id         String   @id @default(uuid())
+  jobId      String   @unique
+  customerId String
+  workerId   String
+  rating     Int
+  comment    String?
+  createdAt  DateTime @default(now())
+  customer   User     @relation("ReviewsByCustomer", fields: [customerId], references: [id])
+  job        Job      @relation(fields: [jobId], references: [id])
+  worker     User     @relation("ReviewsForWorker", fields: [workerId], references: [id])
+}
+
+
+model JobApplication {
+  id           String               @id @default(dbgenerated("(gen_random_uuid())::text"))
+  jobPostingId String
+  workerId     String
+  coverLetter  String?
+  status       JobApplicationStatus @default(PENDING)
+  appliedAt    DateTime             @default(now())
+  updatedAt    DateTime             @default(now())
+  reviewedAt   DateTime?
+  JobPosting   JobPosting           @relation(fields: [jobPostingId], references: [id], onDelete: Cascade)
+  User         User                 @relation(fields: [workerId], references: [id], onDelete: Cascade)
+
+  @@unique([jobPostingId, workerId])
+  @@index([jobPostingId, status])
+  @@index([workerId, status])
+}
+
+model JobPosting {
+  id                                     String           @id @default(dbgenerated("(gen_random_uuid())::text"))
+  title                                  String
+  description                            String
+  employmentType                         EmploymentType
+  requiredSkills                         String[]         @default([])
+  location                               String
+  city                                   String
+  state                                  String
+  latitude                               Float?
+  longitude                              Float?
+  salaryMin                              Float?
+  salaryMax                              Float?
+  experienceRequired                     Int?
+  status                                 JobPostingStatus @default(OPEN)
+  employerId                             String
+  selectedWorkerId                       String?
+  createdAt                              DateTime         @default(now())
+  updatedAt                              DateTime         @default(now())
+  expiresAt                              DateTime?
+  JobApplication                         JobApplication[]
+  User_JobPosting_employerIdToUser       User             @relation("JobPosting_employerIdToUser", fields: [employerId], references: [id], onDelete: Cascade)
+  User_JobPosting_selectedWorkerIdToUser User?            @relation("JobPosting_selectedWorkerIdToUser", fields: [selectedWorkerId], references: [id])
+
+  @@index([employerId, status])
+  @@index([latitude, longitude])
+  @@index([status, createdAt])
+}
+
+model TranslationCache {
+  id             String   @id
+  hashKey        String   @unique
+  originalText   String
+  translatedText String
+  sourceLanguage String
+  targetLanguage String
+  context        String?
+  createdAt      DateTime @default(now())
+  lastAccessedAt DateTime @default(now())
+
+  @@index([hashKey])
+  @@index([sourceLanguage, targetLanguage])
+}
+
+enum UserRole {
+  CUSTOMER
+  WORKER
+  UNASSIGNED
+}
+
+enum JobStatus {
+  PENDING
+  ACCEPTED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum TransactionType {
+  PAYMENT
+  PAYOUT
+  REFUND
+}
+
+
+enum EmploymentType {
+  FULL_TIME
+  PART_TIME
+  TEMPORARY
+}
+
+enum JobApplicationStatus {
+  PENDING
+  ACCEPTED
+  REJECTED
+  WITHDRAWN
+}
+
+enum JobPostingStatus {
+  OPEN
+  CLOSED
+  FILLED
+  EXPIRED
+}
+
+enum PaymentStatus {
+  PENDING
+  PROCESSING
+  SUCCESS
+  FAILED
+  REFUNDED
+}
+
+model JobLog {
+  id           String    @id @default(uuid())
+  jobId        String
+  fromStatus   JobStatus?
+  toStatus     JobStatus
+  action       String
+  performedBy  String
+  metadata     Json?
+  createdAt    DateTime  @default(now())
+  job          Job       @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  @@index([jobId, createdAt])
+}
