@@ -300,3 +300,152 @@
     animation: none;
     mix-blend-mode: normal;
 }
+
+/* Premium Hero Animations */
+@keyframes float {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+@keyframes float-delayed {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-8px);
+  }
+}
+
+@keyframes glow-pulse {
+  0%, 100% {
+    opacity: 0.5;
+  }
+  50% {
+    opacity: 0.8;
+  }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+.animate-float-delayed {
+  animation: float-delayed 7s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-glow-pulse {
+  animation: glow-pulse 4s ease-in-out infinite;
+}
+
+/* Perspective utilities for 3D transforms */
+.perspective-1000 {
+  perspective: 1000px;
+}
+
+.perspective-1200 {
+  perspective: 1200px;
+}
+
+.preserve-3d {
+  transform-style: preserve-3d;
+}
+
+/* Reduced motion support */
+@media (prefers-reduced-motion: reduce) {
+  .animate-float,
+  .animate-float-delayed,
+  .animate-glow-pulse,
+  .animate-appear,
+  .animate-appear-zoom {
+    animation: none;
+  }
+}
+
+/* ============================================================================
+   LaunchUI Hero Animations & Utilities
+   ============================================================================ */
+
+/* Container max-width utility */
+.max-w-container {
+  max-width: 1280px;
+}
+
+/* Fade bottom effect for hero sections */
+.fade-bottom {
+  mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black 60%, transparent 100%);
+}
+
+/* Appear animation - fade in and slide up */
+@keyframes appear {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-appear {
+  animation: appear 0.8s ease-out forwards;
+}
+
+/* Appear zoom animation - for glow effects */
+@keyframes appear-zoom {
+  from {
+    opacity: 0;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1);
+  }
+}
+
+.animate-appear-zoom {
+  animation: appear-zoom 1s ease-out forwards;
+}
+
+/* Animation delays */
+.delay-100 {
+  animation-delay: 100ms;
+}
+
+.delay-300 {
+  animation-delay: 300ms;
+}
+
+.delay-500 {
+  animation-delay: 500ms;
+}
+
+.delay-700 {
+  animation-delay: 700ms;
+}
+
+.delay-1000 {
+  animation-delay: 1000ms;
+}
+
+/* Brand colors for glow effects */
+:root {
+  --brand: oklch(0.55 0.18 240);
+  --brand-foreground: oklch(0.75 0.15 240);
+}
+
+.dark {
+  --brand: oklch(0.6 0.2 240);
+  --brand-foreground: oklch(0.8 0.18 240);
+}
+
+/* Radial gradient utility for glow */
+.bg-radial {
+  background: radial-gradient(var(--tw-gradient-stops));
+}

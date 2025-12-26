@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { MainMenusGradientCard } from "@/components/eldoraui/animatedcard";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import ShapeHero from "@/components/kokonutui/shape-hero";
+import PremiumHero from "@/components/premium-hero";
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 import ScrollText from "@/components/kokonutui/scroll-text";
 import TypewriterTitle from "@/components/kokonutui/type-writer";
@@ -52,13 +52,9 @@ export default function Home() {
 
   return (
     <div className="relative bg-slate-900">
-      <div className="bg-white dark:bg-black text-foreground pb-20 rounded-b-[3rem] relative z-10">
-        {/* Hero Section with ShapeHero */}
-        <ShapeHero
-          title1="Connect. Work."
-          title2="Grow."
-          subtitle="The modern platform connecting blue-collar workers with opportunities."
-        />
+      <div className="bg-white dark:bg-[#0B0F14] text-foreground pb-20 rounded-b-[3rem] relative z-10">
+        {/* Hero Section with Premium Hero */}
+        <PremiumHero />
 
         {/* Platform Demo Section */}
         <div className="flex flex-col overflow-hidden">
