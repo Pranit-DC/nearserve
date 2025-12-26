@@ -108,7 +108,7 @@ export default function HelpPage() {
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
             Write to us at{" "}
-            <span className="font-medium">support@rozgaarsetu.com</span>
+            <span className="font-medium">support@nearserve.com</span>
           </p>
         </Card>
 

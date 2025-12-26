@@ -54,7 +54,7 @@ export async function POST(request: NextRequest) {
 
     // Determine folder based on type
     const folder =
-      type === "profile" ? "rozgaarsetu/profiles" : "rozgaarsetu/previous-work";
+      type === "profile" ? "nearserve/profiles" : "nearserve/previous-work";
 
     // Upload to Cloudinary
     const result = await new Promise<CloudinaryUploadResult>(

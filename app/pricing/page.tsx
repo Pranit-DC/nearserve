@@ -221,9 +221,9 @@ export default function PricingPage() {
             Have questions about pricing? Reach out at
             <a
               className="text-primary underline-offset-4 hover:underline ml-1"
-              href="mailto:support@rozgaarsetu.com"
+              href="mailto:support@nearserve.com"
             >
-              support@rozgaarsetu.com
+              support@nearserve.com
             </a>
           </p>
         </div>

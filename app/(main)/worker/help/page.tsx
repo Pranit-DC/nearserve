@@ -114,7 +114,7 @@ export default function WorkerHelpPage() {
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
             Write to us at{" "}
-            <span className="font-medium">workersupport@rozgaarsetu.com</span>
+            <span className="font-medium">workersupport@nearserve.com</span>
           </p>
         </Card>
 
