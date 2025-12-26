@@ -13,8 +13,8 @@ export default function StickyFooterContent() {
 const Section2 = () => {
     return (
         <div className='flex justify-between items-end'>
-            <h1 className='text-[8vw] md:text-[14vw] leading-[0.8] mt-10 font-bold'>RozgaarSetu</h1>
-            <p className='text-slate-400'>©2024 RozgaarSetu. All rights reserved.</p>
+            <h1 className='text-[8vw] md:text-[14vw] leading-[0.8] mt-10 font-bold'>NearServe</h1>
+            <p className='text-slate-400'>©2024 NearServe. All rights reserved.</p>
         </div>
     )
 }

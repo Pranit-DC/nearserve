@@ -66,7 +66,7 @@ export default function Home() {
             titleComponent={
               <>
                 <h1 className="text-4xl font-semibold text-black dark:text-white">
-                  Experience RozgaarSetu in Action <br />
+                  Experience NearServe in Action <br />
                   <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
                     Your Success Platform
                   </span>
@@ -194,7 +194,7 @@ export default function Home() {
         <section className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-light text-gray-900 dark:text-white mb-4">
-              Why Choose RozgaarSetu?
+              Why Choose NearServe?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Empowering connections between skilled workers and opportunities
@@ -488,7 +488,7 @@ export default function Home() {
               items={[
                 {
                   quote:
-                    "RozgaarSetu changed my life. I found steady work and the payments are always on time.",
+                    "NearServe changed my life. I found steady work and the payments are always on time.",
                   name: "Rajesh Kumar",
                   title: "Electrician",
                 },
@@ -506,13 +506,13 @@ export default function Home() {
                 },
                 {
                   quote:
-                    "Finding consistent work was a challenge. RozgaarSetu gave me the stability I needed.",
+                    "Finding consistent work was a challenge. NearServe gave me the stability I needed.",
                   name: "Deepak Verma",
                   title: "Painter",
                 },
                 {
                   quote:
-                    "Excellent support and user-friendly app. I recommend RozgaarSetu to all workers.",
+                    "Excellent support and user-friendly app. I recommend NearServe to all workers.",
                   name: "Sunita Devi",
                   title: "Cook",
                 },
@@ -589,7 +589,7 @@ export default function Home() {
                   10,000+ skilled workers
                 </span>{" "}
                 who have already discovered better opportunities and secured
-                their financial future with RozgaarSetu.
+                their financial future with NearServe.
               </p>
 
               {/* Apple-style CTA buttons */}

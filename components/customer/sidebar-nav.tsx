@@ -203,19 +203,19 @@ export function CustomerSidebar({
               {" "}
               <img
                 src="/hard-hat_11270170.svg"
-                alt="RozgaarSetu Logo"
+                alt="NearServe Logo"
                 className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
               />
             </Link>
             <span className="font-semibold text-gray-900 dark:text-white tracking-tight">
-              RozgaarSetu
+              NearServe
             </span>
           </motion.div>
         ) : (
           <div className="flex justify-center">
             <img
               src="/hard-hat_11270170.svg"
-              alt="RozgaarSetu Logo"
+              alt="NearServe Logo"
               className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
             />
           </div>

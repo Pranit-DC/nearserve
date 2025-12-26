@@ -170,7 +170,7 @@ export default function CustomerBookingsPage() {
       key: razorpayOrder.keyId,
       amount: razorpayOrder.amount,
       currency: razorpayOrder.currency,
-      name: "RozgaarSetu",
+      name: "NearServe",
       description: `Payment for ${job.description}`,
       order_id: razorpayOrder.orderId,
       handler: async function (response: any) {

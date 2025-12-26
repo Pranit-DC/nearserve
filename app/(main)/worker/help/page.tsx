@@ -22,9 +22,9 @@ import Link from "next/link";
 export default function WorkerHelpPage() {
   const faqs = [
     {
-      question: "What is RozgaarSetu for Workers?",
+      question: "What is NearServe for Workers?",
       answer:
-        "RozgaarSetu helps skilled workers like plumbers, electricians, drivers, cleaners, and other professionals connect directly with customers who need their services. It ensures fair opportunities and consistent job access.",
+        "NearServe helps skilled workers like plumbers, electricians, drivers, cleaners, and other professionals connect directly with customers who need their services. It ensures fair opportunities and consistent job access.",
     },
     {
       question: "How can I register as a worker?",
@@ -39,7 +39,7 @@ export default function WorkerHelpPage() {
     {
       question: "When and how do I receive payments?",
       answer:
-        "Payments are made directly to your registered bank account or UPI after successful job completion. RozgaarSetu ensures transparent transactions with low service charges.",
+        "Payments are made directly to your registered bank account or UPI after successful job completion. NearServe ensures transparent transactions with low service charges.",
     },
     {
       question: "What if a customer cancels or doesn’t pay?",
@@ -69,7 +69,7 @@ export default function WorkerHelpPage() {
           Worker Help & Support
         </h1>
         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Everything you need to know about using RozgaarSetu as a worker — from
+          Everything you need to know about using NearServe as a worker — from
           registration to payments and support.
         </p>
       </div>
@@ -124,7 +124,7 @@ export default function WorkerHelpPage() {
             Live Chat
           </h3>
           <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Chat with our RozgaarSetu support team from 9AM – 6PM daily.
+            Chat with our NearServe support team from 9AM – 6PM daily.
           </p>
           <Link href="#">
             <button className="mt-3 bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 text-sm rounded-md transition-all duration-200">
@@ -143,7 +143,7 @@ export default function WorkerHelpPage() {
               Worker Protection & Safety
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-              RozgaarSetu values worker dignity and safety. We verify all
+              NearServe values worker dignity and safety. We verify all
               customers, ensure secure payments, and provide direct support for
               disputes or emergencies. Your data and work records remain fully
               confidential.

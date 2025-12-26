@@ -6,7 +6,7 @@ import { GeocodeResult } from "./location";
 const NOMINATIM_BASE = "https://nominatim.openstreetmap.org";
 const OSM_USER_AGENT =
   process.env.NOMINATIM_USER_AGENT ||
-  "RozgaarSetu/1.0 (contact: support@rozgaarsetu.local)";
+  "NearServe/1.0 (contact: support@rozgaarsetu.local)";
 const APP_REFERER = process.env.NEXT_PUBLIC_APP_URL || "http://localhost:3000";
 
 // simple in-memory cache

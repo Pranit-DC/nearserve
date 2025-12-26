@@ -21,9 +21,9 @@ import Link from "next/link";
 export default function HelpPage() {
   const faqs = [
     {
-      question: "What is RozgaarSetu?",
+      question: "What is NearServe?",
       answer:
-        "RozgaarSetu is a digital bridge connecting customers with verified blue-collar workers such as plumbers, electricians, drivers, cleaners, and more. It helps customers find skilled professionals easily and enables workers to get fair and frequent job opportunities.",
+        "NearServe is a digital bridge connecting customers with verified blue-collar workers such as plumbers, electricians, drivers, cleaners, and more. It helps customers find skilled professionals easily and enables workers to get fair and frequent job opportunities.",
     },
     {
       question: "How do I book a worker?",
@@ -38,7 +38,7 @@ export default function HelpPage() {
     {
       question: "How are workers verified?",
       answer:
-        "All workers undergo a basic verification process, including ID proof and skill validation. RozgaarSetu ensures transparency and safety for both customers and workers.",
+        "All workers undergo a basic verification process, including ID proof and skill validation. NearServe ensures transparency and safety for both customers and workers.",
     },
     {
       question: "What if the worker doesn't show up or cancels?",
@@ -63,7 +63,7 @@ export default function HelpPage() {
           Help & Support
         </h1>
         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Have questions about using RozgaarSetu? Find answers, guidance, and
+          Have questions about using NearServe? Find answers, guidance, and
           support below.
         </p>
       </div>
@@ -137,7 +137,7 @@ export default function HelpPage() {
               Safety and Trust Commitment
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-              RozgaarSetu prioritizes the safety of both customers and workers.
+              NearServe prioritizes the safety of both customers and workers.
               All profiles are verified, and your data is protected using
               industry-standard security measures.
             </p>
