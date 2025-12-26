@@ -110,15 +110,27 @@ export default function Hero({
                 className="animate-appear-zoom delay-1000 pointer-events-none"
               />
               
-              {/* 3D perspective container */}
-              <div className="relative" style={{ perspective: '2500px', perspectiveOrigin: 'center top' }}>
-                <div className="relative mx-auto" style={{ transformStyle: 'preserve-3d' }}>
+              {/* 3D perspective container - single camera angle for all */}
+              <div 
+                className="relative" 
+                style={{ 
+                  perspective: '1500px', 
+                  perspectiveOrigin: '50% 50%',
+                }}
+              >
+                <div 
+                  className="relative mx-auto" 
+                  style={{ 
+                    transformStyle: 'preserve-3d',
+                    transform: 'rotateX(20deg) rotateY(0deg) rotateZ(-18deg)',
+                  }}
+                >
                   
                   {/* Back layer - slight left */}
                   <div 
-                    className="animate-appear delay-900 absolute top-5 -left-28 w-full"
+                    className="animate-appear delay-900 absolute top-0 -left-18 w-full"
                     style={{
-                      transform: 'translateZ(-180px) rotateX(-12deg) rotateY(-6deg) scale(0.92)',
+                      transform: 'translateZ(-120px) scale(0.92)',
                       transformOrigin: 'center center',
                       filter: 'blur(0.5px) brightness(0.6)',
                       opacity: 0.5,
@@ -138,9 +150,9 @@ export default function Hero({
                   
                   {/* Middle layer - center */}
                   <div 
-                    className="animate-appear delay-800 absolute top-30 left-0 w-full"
+                    className="animate-appear delay-800 absolute top-15 left-20 w-full"
                     style={{
-                      transform: 'translateZ(-90px) rotateX(-10deg) rotateY(-5deg) scale(0.96)',
+                      transform: 'translateZ(-60px) scale(0.96)',
                       transformOrigin: 'center center',
                       filter: 'blur(0.25px) brightness(0.75)',
                       opacity: 0.7,
@@ -160,9 +172,9 @@ export default function Hero({
                   
                   {/* Front layer - slight right */}
                   <div 
-                    className="animate-appear delay-700 relative top-55 left-28 z-10"
+                    className="animate-appear delay-700 relative top-30 left-48 z-10"
                     style={{
-                      transform: 'translateZ(0) rotateX(-8deg) rotateY(-3deg) scale(1)',
+                      transform: 'translateZ(0) scale(1)',
                       transformOrigin: 'center center',
                     }}
                   >
