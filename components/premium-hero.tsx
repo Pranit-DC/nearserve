@@ -61,7 +61,7 @@ export default function Hero({
       variant: "default" as const,
     },
     {
-      href: "https://github.com",
+      href: "https://github.com/Pranit-DC/nearserve",
       text: "Github",
       variant: "outline" as const,
       icon: <Github className="mr-2 size-4" />,
@@ -104,22 +104,82 @@ export default function Hero({
             </div>
           )}
           {mockup !== false && (
-            <div className="relative mx-auto w-full max-w-5xl pt-12">
+            <div className="relative mx-auto w-full max-w-6xl pt-20 pb-32">
               <Glow
                 variant="above"
                 className="animate-appear-zoom delay-1000 pointer-events-none"
               />
-              <MockupFrame
-                className="animate-appear delay-700 relative z-10"
-                size="small"
-              >
-                <Mockup
-                  type="responsive"
-                  className="bg-background/90 w-full rounded-xl border-0"
-                >
-                  {mockup}
-                </Mockup>
-              </MockupFrame>
+              
+              {/* 3D perspective container */}
+              <div className="relative" style={{ perspective: '2500px', perspectiveOrigin: 'center top' }}>
+                <div className="relative mx-auto" style={{ transformStyle: 'preserve-3d' }}>
+                  
+                  {/* Back layer - slight left */}
+                  <div 
+                    className="animate-appear delay-900 absolute top-5 -left-28 w-full"
+                    style={{
+                      transform: 'translateZ(-180px) rotateX(-12deg) rotateY(-6deg) scale(0.92)',
+                      transformOrigin: 'center center',
+                      filter: 'blur(0.5px) brightness(0.6)',
+                      opacity: 0.5,
+                    }}
+                  >
+                    <div className="shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5)]">
+                      <MockupFrame size="small">
+                        <Mockup
+                          type="responsive"
+                          className="bg-background/50 w-full rounded-xl border border-white/5"
+                        >
+                          {mockup}
+                        </Mockup>
+                      </MockupFrame>
+                    </div>
+                  </div>
+                  
+                  {/* Middle layer - center */}
+                  <div 
+                    className="animate-appear delay-800 absolute top-30 left-0 w-full"
+                    style={{
+                      transform: 'translateZ(-90px) rotateX(-10deg) rotateY(-5deg) scale(0.96)',
+                      transformOrigin: 'center center',
+                      filter: 'blur(0.25px) brightness(0.75)',
+                      opacity: 0.7,
+                    }}
+                  >
+                    <div className="shadow-[0_25px_70px_-15px_rgba(0,0,0,0.4)]">
+                      <MockupFrame size="small">
+                        <Mockup
+                          type="responsive"
+                          className="bg-background/70 w-full rounded-xl border border-white/10"
+                        >
+                          {mockup}
+                        </Mockup>
+                      </MockupFrame>
+                    </div>
+                  </div>
+                  
+                  {/* Front layer - slight right */}
+                  <div 
+                    className="animate-appear delay-700 relative top-55 left-28 z-10"
+                    style={{
+                      transform: 'translateZ(0) rotateX(-8deg) rotateY(-3deg) scale(1)',
+                      transformOrigin: 'center center',
+                    }}
+                  >
+                    <div className="shadow-[0_20px_60px_-10px_rgba(0,0,0,0.35),0_40px_100px_-20px_rgba(0,0,0,0.25)]">
+                      <MockupFrame size="small">
+                        <Mockup
+                          type="responsive"
+                          className="bg-background/95 w-full rounded-xl border border-white/20"
+                        >
+                          {mockup}
+                        </Mockup>
+                      </MockupFrame>
+                    </div>
+                  </div>
+                  
+                </div>
+              </div>
             </div>
           )}
         </div>

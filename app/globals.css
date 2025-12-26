@@ -449,3 +449,42 @@
 .bg-radial {
   background: radial-gradient(var(--tw-gradient-stops));
 }
+
+/* 3D transform utilities for stacked mockups */
+.perspective-\[2000px\] {
+  perspective: 2000px;
+}
+
+.transform-style-3d {
+  transform-style: preserve-3d;
+}
+
+.rotate-x-6 {
+  transform: rotateX(6deg);
+}
+
+.rotate-x-12 {
+  transform: rotateX(12deg);
+}
+
+/* Enhanced 3D stacking shadows */
+@layer utilities {
+  .shadow-stack-deep {
+    box-shadow: 
+      0 30px 90px -20px rgba(0, 0, 0, 0.5),
+      0 50px 120px -30px rgba(0, 0, 0, 0.3);
+  }
+  
+  .shadow-stack-mid {
+    box-shadow: 
+      0 25px 70px -15px rgba(0, 0, 0, 0.4),
+      0 40px 100px -25px rgba(0, 0, 0, 0.25);
+  }
+  
+  .shadow-stack-front {
+    box-shadow: 
+      0 20px 60px -10px rgba(0, 0, 0, 0.35),
+      0 40px 100px -20px rgba(0, 0, 0, 0.25),
+      0 10px 30px -5px rgba(0, 0, 0, 0.2);
+  }
+}
