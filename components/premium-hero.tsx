@@ -76,8 +76,8 @@ export default function Hero({
         className,
       )}
     >
-      <div className="max-w-container mx-auto flex flex-col gap-12 pt-16 sm:gap-24">
-        <div className="flex flex-col items-center gap-6 text-center sm:gap-12">
+      <div className="max-w-container mx-auto flex flex-col gap-6 pt-8 sm:gap-12">
+        <div className="flex flex-col items-center gap-5 text-center sm:gap-10">
           {badge !== false && badge}
           <h1 className="animate-appear from-foreground to-foreground dark:to-muted-foreground relative z-10 inline-block bg-linear-to-r bg-clip-text text-3xl leading-tight font-semibold text-balance text-transparent drop-shadow-2xl sm:text-5xl sm:leading-tight md:text-7xl md:leading-tight">
             {title}
@@ -105,8 +105,12 @@ export default function Hero({
           )}
           {mockup !== false && (
             <div className="relative mx-auto w-full max-w-5xl pt-12">
+              <Glow
+                variant="above"
+                className="animate-appear-zoom delay-1000 pointer-events-none"
+              />
               <MockupFrame
-                className="animate-appear delay-700"
+                className="animate-appear delay-700 relative z-10"
                 size="small"
               >
                 <Mockup
@@ -116,10 +120,6 @@ export default function Hero({
                   {mockup}
                 </Mockup>
               </MockupFrame>
-              <Glow
-                variant="top"
-                className="animate-appear-zoom delay-1000"
-              />
             </div>
           )}
         </div>
