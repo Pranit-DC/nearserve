@@ -9,7 +9,7 @@ const mockupVariants = cva(
     variants: {
       type: {
         mobile: "rounded-[48px] max-w-[350px]",
-        responsive: "rounded-md",
+        responsive: "rounded-2xl",
       },
     },
     defaultVariants: {
@@ -33,7 +33,7 @@ function Mockup({ className, type, ...props }: MockupProps) {
 }
 
 const frameVariants = cva(
-  "bg-border/50 flex relative z-10 overflow-hidden rounded-2xl dark:bg-border/10",
+  "bg-border/50 flex relative z-10 overflow-hidden rounded-3xl dark:bg-border/10",
   {
     variants: {
       size: {
