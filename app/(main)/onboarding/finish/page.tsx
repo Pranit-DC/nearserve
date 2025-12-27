@@ -139,7 +139,7 @@ export default function FinishPage() {
               transition={{ delay: 0.5, duration: 0.5 }}
               className="text-3xl md:text-4xl lg:text-5xl font-bold text-gray-900 dark:text-white mb-4"
             >
-              Welcome to RozgaarSetu! 🎉
+              Welcome to NearServe! 🎉
             </motion.h1>
 
             <motion.p

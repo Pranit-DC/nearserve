@@ -2,7 +2,7 @@ import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
 // light-weight geocode helper (same logic as lib/geocoding but self-contained for this script)
 const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org'
-const OSM_USER_AGENT = process.env.NOMINATIM_USER_AGENT || 'RozgaarSetu/1.0 (contact: support@rozgaarsetu.local)'
+const OSM_USER_AGENT = process.env.NOMINATIM_USER_AGENT || 'NearServe/1.0 (contact: support@nearserve.local)'
 const APP_REFERER = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
 
 let _lastSearchAt = 0

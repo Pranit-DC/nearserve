@@ -101,7 +101,7 @@ export const LogoItem = ({
   );
 };
 
-// Work Category Component for RozgaarSetu
+// Work Category Component for NearServe
 export const WorkCategoryOrigami = () => {
   const workCategories = [
     <LogoItem key={1} className="bg-orange-300 text-neutral-900">

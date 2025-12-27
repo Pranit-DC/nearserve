@@ -5,7 +5,7 @@ import { motion } from "framer-motion";
 import { MainMenusGradientCard } from "@/components/eldoraui/animatedcard";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
-import ShapeHero from "@/components/kokonutui/shape-hero";
+import PremiumHero from "@/components/premium-hero";
 import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
 import ScrollText from "@/components/kokonutui/scroll-text";
 import TypewriterTitle from "@/components/kokonutui/type-writer";
@@ -52,13 +52,9 @@ export default function Home() {
 
   return (
     <div className="relative bg-slate-900">
-      <div className="bg-white dark:bg-black text-foreground pb-20 rounded-b-[3rem] relative z-10">
-        {/* Hero Section with ShapeHero */}
-        <ShapeHero
-          title1="Connect. Work."
-          title2="Grow."
-          subtitle="The modern platform connecting blue-collar workers with opportunities."
-        />
+      <div className="bg-white dark:bg-[#0B0F14] text-foreground pb-20 rounded-b-[3rem] relative z-10">
+        {/* Hero Section with Premium Hero */}
+        <PremiumHero />
 
         {/* Platform Demo Section */}
         <div className="flex flex-col overflow-hidden">
@@ -66,7 +62,7 @@ export default function Home() {
             titleComponent={
               <>
                 <h1 className="text-4xl font-semibold text-black dark:text-white">
-                  Experience RozgaarSetu in Action <br />
+                  Experience NearServe in Action <br />
                   <span className="text-4xl md:text-[6rem] font-bold mt-1 leading-none">
                     Your Success Platform
                   </span>
@@ -194,7 +190,7 @@ export default function Home() {
         <section className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-light text-gray-900 dark:text-white mb-4">
-              Why Choose RozgaarSetu?
+              Why Choose NearServe?
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
               Empowering connections between skilled workers and opportunities
@@ -488,7 +484,7 @@ export default function Home() {
               items={[
                 {
                   quote:
-                    "RozgaarSetu changed my life. I found steady work and the payments are always on time.",
+                    "NearServe changed my life. I found steady work and the payments are always on time.",
                   name: "Rajesh Kumar",
                   title: "Electrician",
                 },
@@ -506,13 +502,13 @@ export default function Home() {
                 },
                 {
                   quote:
-                    "Finding consistent work was a challenge. RozgaarSetu gave me the stability I needed.",
+                    "Finding consistent work was a challenge. NearServe gave me the stability I needed.",
                   name: "Deepak Verma",
                   title: "Painter",
                 },
                 {
                   quote:
-                    "Excellent support and user-friendly app. I recommend RozgaarSetu to all workers.",
+                    "Excellent support and user-friendly app. I recommend NearServe to all workers.",
                   name: "Sunita Devi",
                   title: "Cook",
                 },
@@ -589,7 +585,7 @@ export default function Home() {
                   10,000+ skilled workers
                 </span>{" "}
                 who have already discovered better opportunities and secured
-                their financial future with RozgaarSetu.
+                their financial future with NearServe.
               </p>
 
               {/* Apple-style CTA buttons */}

@@ -50,7 +50,7 @@ const AuthLayout = ({ children }: { children: ReactNode }) => {
                 
                 <div className="space-y-4">
                   <ShimmerText
-                    text="RozgaarSetu"
+                    text="NearServe"
                     className="text-5xl font-semibold text-slate-800 dark:text-white tracking-tight"
                   />
                   <h2 className="text-xl text-slate-700 dark:text-slate-200 font-medium animate-fade-in">

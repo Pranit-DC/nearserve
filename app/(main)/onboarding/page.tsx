@@ -77,7 +77,7 @@ export default function OnboardingPage() {
 
         <h1 className="text-3xl md:text-4xl lg:text-5xl font-semibold tracking-tight">
           <ShimmerText
-            text="Welcome to RozgaarSetu"
+            text="Welcome to NearServe"
             className="text-gray-900 dark:text-white"
           />
         </h1>

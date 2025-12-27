@@ -30,7 +30,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "RozgaarSetu",
+  title: "NearServe",
   description: "A platform for blue-collar workers and employers",
 };
 

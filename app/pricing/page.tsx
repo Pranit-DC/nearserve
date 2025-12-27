@@ -11,7 +11,7 @@ import {
 import { Button } from "@/components/ui/button";
 
 export const metadata: Metadata = {
-  title: "Pricing • RozgaarSetu",
+  title: "Pricing • NearServe",
   description: "Simple platform fee model. Pay only when you complete work.",
 };
 
@@ -175,7 +175,7 @@ export default function PricingPage() {
 
           {/* Key Benefits */}
           <div className="mt-16 text-center">
-            <h3 className="text-lg font-semibold mb-6">Why RozgaarSetu?</h3>
+            <h3 className="text-lg font-semibold mb-6">Why NearServe?</h3>
             <div className="grid grid-cols-1 md:grid-cols-4 gap-6 text-sm">
               <div className="p-4">
                 <div className="text-3xl mb-2">💰</div>
@@ -221,9 +221,9 @@ export default function PricingPage() {
             Have questions about pricing? Reach out at
             <a
               className="text-primary underline-offset-4 hover:underline ml-1"
-              href="mailto:support@rozgaarsetu.com"
+              href="mailto:support@nearserve.com"
             >
-              support@rozgaarsetu.com
+              support@nearserve.com
             </a>
           </p>
         </div>
