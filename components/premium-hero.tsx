@@ -133,7 +133,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
   );
 }
 
-export default function Hero({
+export default function PremiumHero({
   title = "Find skilled workers near you, instantly",
   description = "The modern platform connecting blue-collar workers with local opportunities. Built for reliability. Designed for growth.",
   mockup = (
@@ -165,7 +165,7 @@ export default function Hero({
     },
     {
       href: "https://github.com/Pranit-DC/nearserve",
-      text: "Github",
+      text: "GitHub",
       variant: "outline" as const,
       icon: <Github className="mr-2 size-4" />,
     },
@@ -192,7 +192,7 @@ export default function Hero({
             <div className="animate-appear relative z-10 flex justify-start gap-4 opacity-0 delay-300">
               {buttons.map((button, index) => (
                 <Button
-                  key={index}
+                  key={`${button.href}-${index}`}
                   variant={button.variant || "default"}
                   size="lg"
                   asChild
