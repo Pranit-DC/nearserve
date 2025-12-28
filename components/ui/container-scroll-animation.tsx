@@ -29,6 +29,7 @@ export const ContainerScroll = ({
     target: containerRef,
   });
   const [isMobile, setIsMobile] = React.useState(false);
+  const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
     const checkMobile = () => {
@@ -36,6 +37,8 @@ export const ContainerScroll = ({
     };
     checkMobile();
     window.addEventListener("resize", checkMobile);
+    // mark client after mount to avoid rendering browser-only elements on server
+    setIsClient(true);
     return () => {
       window.removeEventListener("resize", checkMobile);
     };
@@ -63,7 +66,7 @@ export const ContainerScroll = ({
         <Header translate={translate} titleComponent={titleComponent} />
         <Card rotate={rotate} translate={translate} scale={scale}>
           {/* If a videoSrc is provided, render a demo video that absolutely fills the card area. */}
-          {videoSrc ? (
+          {videoSrc && isClient ? (
             <>
               {/* leave a small inset so the outside frame/border remains visible */}
               <div className="absolute inset-2 md:inset-2 rounded-2xl overflow-hidden">
