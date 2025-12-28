@@ -69,6 +69,12 @@ export default function Home() {
                 </h1>
               </>
             }
+            videoSrc="/premium%20Hero%20section.mp4"
+            poster="/demo.png"
+            showOnline={true}
+            autoplay={true}
+            muted={true}
+            loop={true}
           >
             <div className="mx-auto rounded-2xl object-cover h-full object-left-top bg-white dark:bg-gray-900 border-4 border-gray-200 dark:border-gray-700 shadow-2xl">
               <div className="bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 h-full rounded-xl p-8">
