@@ -100,7 +100,7 @@ export const ContainerScroll = ({
   );
 };
 
-export const Header = ({
+const Header = ({
   translate,
   titleComponent,
 }: {
@@ -119,7 +119,7 @@ export const Header = ({
   );
 };
 
-export const Card = ({
+const Card = ({
   rotate,
   scale,
   children,

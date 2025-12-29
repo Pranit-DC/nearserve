@@ -222,12 +222,13 @@ export default function PremiumHero({
           background: "linear-gradient(to top, var(--background) 0%, transparent 100%)",
         }}
       />
-      {/* Dark mode gradient using HEX #0b0f14 */}
+         {/* Dark mode gradient using theme variable with fallback to HEX #0b0f14 */}
       <div
         aria-hidden
         className="absolute left-0 right-0 bottom-0 h-36 pointer-events-none hidden dark:block"
         style={{
-          background: "linear-gradient(to top, #0b0f14 0%, transparent 100%)",
+          background:
+            "linear-gradient(to top, var(--premium-hero-dark-background, #0b0f14) 0%, transparent 100%)",
         }}
       />
     </Section>
