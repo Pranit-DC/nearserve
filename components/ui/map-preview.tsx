@@ -1,10 +1,9 @@
 "use client";
 
-import React, { useEffect, useMemo } from "react";
+import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 
-import L from "leaflet";
-import { useRef } from "react";
+const GOOGLE_MAPS_API_KEY = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY || "";
 
 type Worker = {
   id: string;
@@ -49,24 +48,80 @@ function pickLatLng(w: Worker): { lat: number; lng: number } | null {
   return null;
 }
 
-// Ensure leaflet CSS is present on the client
-function useLeafletCss() {
-  useEffect(() => {
-    const id = "leaflet-css";
-    if (document.getElementById(id)) return;
-    const link = document.createElement("link");
-    link.id = id;
-    link.rel = "stylesheet";
-    link.href = "https://unpkg.com/leaflet@1.9.4/dist/leaflet.css";
-    link.crossOrigin = "";
-    document.head.appendChild(link);
-    return () => {
-      // keep it for other pages; don't remove
-    };
-  }, []);
-}
+// Load Google Maps script
+function useGoogleMapsScript() {
+  const [loaded, setLoaded] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
-// We'll use a map ref and whenCreated to manage view changes
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    
+    // Check if API key is available
+    if (!GOOGLE_MAPS_API_KEY) {
+      console.error("NEXT_PUBLIC_GOOGLE_MAPS_API_KEY is not set");
+      setError("Google Maps API key not configured");
+      return;
+    }
+
+    if ((window as any).google?.maps) {
+      console.log("Google Maps already loaded");
+      setLoaded(true);
+      return;
+    }
+
+    const scriptId = "google-maps-script";
+    const existingScript = document.getElementById(scriptId);
+    
+    if (existingScript) {
+      console.log("Google Maps script tag exists, waiting for load...");
+      const checkInterval = setInterval(() => {
+        if ((window as any).google?.maps) {
+          console.log("Google Maps loaded (existing script)");
+          setLoaded(true);
+          clearInterval(checkInterval);
+        }
+      }, 100);
+      
+      // Timeout after 10 seconds
+      setTimeout(() => {
+        clearInterval(checkInterval);
+        if (!(window as any).google?.maps) {
+          setError("Google Maps failed to load (timeout)");
+          console.error("Google Maps load timeout");
+        }
+      }, 10000);
+      
+      return () => clearInterval(checkInterval);
+    }
+
+    console.log("Loading Google Maps script...");
+    const script = document.createElement("script");
+    script.id = scriptId;
+    script.src = `https://maps.googleapis.com/maps/api/js?key=${GOOGLE_MAPS_API_KEY}`;
+    script.async = true;
+    script.defer = true;
+    script.onload = () => {
+      console.log("Google Maps loaded successfully");
+      setLoaded(true);
+    };
+    script.onerror = (e) => {
+      const errorMsg = "Failed to load Google Maps. This might be due to: 1) Invalid API key, 2) Billing not enabled in Google Cloud, or 3) Required APIs not enabled.";
+      console.error(errorMsg, e);
+      setError(errorMsg);
+    };
+    
+    // Listen for Google Maps API errors
+    (window as any).gm_authFailure = () => {
+      const errorMsg = "Google Maps authentication failed. Please check your API key and billing settings.";
+      console.error(errorMsg);
+      setError(errorMsg);
+    };
+    
+    document.head.appendChild(script);
+  }, []);
+
+  return { loaded, error };
+}
 
 export default function MapPreview({
   workers,
@@ -79,11 +134,12 @@ export default function MapPreview({
   zoom?: number;
   height?: number;
 }) {
-  useLeafletCss();
-  const mapRef = useRef<L.Map | null>(null);
+  const { loaded: mapsLoaded, error: mapsError } = useGoogleMapsScript();
+  const mapRef = useRef<google.maps.Map | null>(null);
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const markersRef = useRef<google.maps.Marker[]>([]);
+  const infoWindowRef = useRef<google.maps.InfoWindow | null>(null);
   const router = useRouter();
-  const markerMapRef = useRef<Map<string, L.Marker>>(new Map());
 
   const markers = useMemo(() => {
     const m: {
@@ -97,7 +153,6 @@ export default function MapPreview({
     for (const w of workers || []) {
       const p = pickLatLng(w);
       if (!p) continue;
-      // try to infer category/skill from common places on the worker object
       const category =
         w.category ??
         w.workerProfile?.category ??
@@ -130,222 +185,120 @@ export default function MapPreview({
     center ??
     (markers.length > 0 ? { lat: markers[0].lat, lng: markers[0].lng } : null);
 
-  // helper to create a colored div icon for a category
-  function createIcon(color: string) {
-    return L.divIcon({
-      className: "marker-custom",
-      html: `<span class="block w-3 h-3 rounded-full border-2 border-white" style="background:${color};display:inline-block;width:12px;height:12px;border-radius:9999px"></span>`,
-      iconSize: [18, 18],
-      iconAnchor: [9, 9],
-    });
-  }
-
   const CATEGORY_COLORS: Record<string, string> = {
-    plumber: "#ef4444", // red
-    electrician: "#f59e0b", // amber
-    carpenter: "#10b981", // green
-    cleaner: "#3b82f6", // blue
+    plumber: "#ef4444",
+    electrician: "#f59e0b",
+    carpenter: "#10b981",
+    cleaner: "#3b82f6",
     default: "#6366f1",
   };
+
   useEffect(() => {
-    // guard: do nothing if centerPoint not available yet
-    if (!containerRef.current || !centerPoint) return;
+    if (!containerRef.current || !centerPoint || !mapsLoaded) return;
+    if (typeof window === "undefined" || !(window as any).google?.maps) return;
 
-    // initialize map if needed
+    // Initialize map
     if (!mapRef.current) {
-      const m = L.map(containerRef.current, {
-        center: [centerPoint.lat, centerPoint.lng],
-        zoom,
-        scrollWheelZoom: false,
-      });
-      L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-        attribution: "&copy; OpenStreetMap contributors",
-      }).addTo(m);
-      mapRef.current = m;
-    }
-
-    // clear existing markers
-    const existingLayer = (mapRef.current as any)._markerLayer;
-    if (existingLayer) {
       try {
-        mapRef.current.removeLayer(existingLayer);
-      } catch (e) {
-        /* ignore */
+        mapRef.current = new google.maps.Map(containerRef.current, {
+          center: centerPoint,
+          zoom,
+          disableDefaultUI: false,
+          zoomControl: true,
+          mapTypeControl: false,
+          streetViewControl: false,
+          fullscreenControl: true,
+          gestureHandling: "auto",
+        });
+        infoWindowRef.current = new google.maps.InfoWindow();
+      } catch (error) {
+        console.error("Failed to initialize Google Maps:", error);
+        return;
       }
     }
 
-    const markerGroup = L.layerGroup();
-    for (const mk of markers) {
+    // Clear existing markers
+    markersRef.current.forEach((m) => m.setMap(null));
+    markersRef.current = [];
+
+    // Create markers
+    markers.forEach((mk) => {
+      if (!mapRef.current) return;
+
       const color =
         (mk.category && CATEGORY_COLORS[String(mk.category).toLowerCase()]) ??
         CATEGORY_COLORS.default;
-      const marker = L.marker([mk.lat, mk.lng], { icon: createIcon(color) });
-      // popup content uses a simple HTML string with a link back to the app and a Book button
-      // Use classes similar to the app's Button component for consistent design.
-      // We can't render the React Button component inside Leaflet popup (HTML string), so apply equivalent Tailwind classes.
-      const viewBtnClasses =
-        "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-8 px-3 bg-white border text-neutral-900";
-      const bookBtnClasses = `inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-8 px-3 text-white`;
-      const popupHtml = `<div class="map-popup" style="min-width:170px"><div class="map-popup-name" style="font-weight:600">${escapeHtml(
-        mk.name || "Worker"
-      )}</div>${
-        mk.skill
-          ? `<div class="map-popup-skill" style="font-size:0.9rem;color:#6b7280;margin-top:4px">${escapeHtml(
-              mk.skill
-            )}</div>`
-          : ""
-      }<div style="margin-top:8px;display:flex;gap:8px"><a href="/workers/${
-        mk.id
-      }" class="${viewBtnClasses}" data-popup-worker-id="${
-        mk.id
-      }">View</a></div></div>`;
-      // keep popup open while interacting with it
-      marker.bindPopup(popupHtml, {
-        closeButton: true,
-        autoClose: false,
-        closeOnClick: false,
-      });
-      // open popup on hover
-      marker.on("mouseover", () => marker.openPopup());
-      // when the popup opens, attach listeners to the popup element so leaving the popup closes it
-      marker.on("popupopen", (e: any) => {
-        const popupEl =
-          e.popup &&
-          (e.popup.getElement ? e.popup.getElement() : e.popup._container);
-        // highlight the corresponding worker card
-        try {
-          const card = document.querySelector(`[data-worker-id="${mk.id}"]`);
-          if (card) card.classList.add("worker-highlight");
-        } catch (err) {}
-        if (popupEl) {
-          const enter = () => marker.openPopup();
-          const leave = () => marker.closePopup();
-          popupEl.addEventListener("mouseenter", enter);
-          popupEl.addEventListener("mouseleave", leave);
-          // intercept clicks on the popup link to use client navigation
-          const link = popupEl.querySelector(
-            "[data-popup-worker-id]"
-          ) as HTMLAnchorElement | null;
-          const bookBtn = popupEl.querySelector(
-            "[data-popup-book-id]"
-          ) as HTMLButtonElement | null;
-          const onClick = (ev: MouseEvent) => {
-            ev.preventDefault();
-            try {
-              router.push(`/worker/${mk.id}`);
-            } catch (err) {
-              if (typeof window !== "undefined") {
-                window.location.href = `/worker/${mk.id}`;
-              }
-            }
-          };
-          const onBook = (ev: MouseEvent) => {
-            ev.preventDefault();
-            if (typeof window !== "undefined") {
-              try {
-                const hasListeners =
-                  (window as { __rozgaar_book_listeners_count?: number })
-                    .__rozgaar_book_listeners_count || 0 > 0;
-                if (hasListeners) {
-                  // dispatch open request
-                  const custom = new CustomEvent("rozgaar:openBook", {
-                    detail: { workerId: mk.id },
-                  });
-                  console.debug("[map-preview] dispatch openBook for", mk.id);
-                  window.dispatchEvent(custom);
-                  // wait for confirmation that the dialog opened
-                  let handled = false;
-                  const onOpened = (e: Event) => {
-                    try {
-                      const detail = (e as CustomEvent).detail || {};
-                      if (detail.workerId === mk.id) handled = true;
-                    } catch (err) {}
-                  };
-                  window.addEventListener(
-                    "rozgaar:bookOpened",
-                    onOpened as EventListener
-                  );
-                  // short timeout to fallback to navigation if not handled
-                  setTimeout(() => {
-                    try {
-                      window.removeEventListener(
-                        "rozgaar:bookOpened",
-                        onOpened as EventListener
-                      );
-                    } catch (e) {}
-                    if (!handled) {
-                      console.debug(
-                        "[map-preview] bookOpened not received for",
-                        mk.id,
-                        "falling back to navigation"
-                      );
-                      try {
-                        router.push(`/worker/${mk.id}?action=book`);
-                      } catch (err) {
-                        window.location.href = `/worker/${mk.id}?action=book`;
-                      }
-                    }
-                  }, 350);
-                  return;
-                }
-              } catch (err) {}
-            }
-            // fallback to navigation
-            console.debug(
-              "[map-preview] no listeners, navigating to worker page for",
-              mk.id
-            );
-            try {
-              router.push(`/worker/${mk.id}?action=book`);
-            } catch (err) {
-              if (typeof window !== "undefined") {
-                window.location.href = `/worker/${mk.id}?action=book`;
-              }
-            }
-          };
-          if (link) link.addEventListener("click", onClick);
-          if (bookBtn) bookBtn.addEventListener("click", onBook);
-          // ensure cleanup when popup closes
-          marker.on("popupclose", () => {
-            try {
-              popupEl.removeEventListener("mouseenter", enter);
-              popupEl.removeEventListener("mouseleave", leave);
-              if (link) link.removeEventListener("click", onClick);
-              if (bookBtn) bookBtn.removeEventListener("click", onBook);
-            } catch (err) {}
-            try {
-              const card = document.querySelector(
-                `[data-worker-id="${mk.id}"]`
-              );
-              if (card) card.classList.remove("worker-highlight");
-            } catch (err) {}
-          });
-        }
-      });
-      markerGroup.addLayer(marker);
-      try {
-        markerMapRef.current.set(mk.id, marker);
-      } catch (err) {}
-    }
-    markerGroup.addTo(mapRef.current as L.Map);
-    // store reference so we can remove later
-    (mapRef.current as any)._markerLayer = markerGroup;
 
-    // set view to centerPoint
-    try {
-      (mapRef.current as any).setView(
-        [centerPoint.lat, centerPoint.lng],
-        zoom,
-        { animate: true }
-      );
-    } catch (e) {}
+      try {
+        // Use standard Marker for better compatibility
+        const marker = new google.maps.Marker({
+          map: mapRef.current,
+          position: { lat: mk.lat, lng: mk.lng },
+          title: mk.name || "Worker",
+          icon: {
+            path: google.maps.SymbolPath.CIRCLE,
+            fillColor: color,
+            fillOpacity: 1,
+            strokeColor: "#ffffff",
+            strokeWeight: 2,
+            scale: 7,
+          },
+        });
+
+        // Add click listener for info window
+        marker.addListener("click", () => {
+          if (!infoWindowRef.current || !mapRef.current) return;
+
+          const viewBtnClasses =
+            "inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium h-8 px-3 bg-white border text-neutral-900 hover:bg-gray-50 cursor-pointer";
+
+          const content = `
+            <div class="map-popup" style="padding:8px;min-width:170px">
+              <div class="map-popup-name" style="font-weight:600;font-size:0.95rem">${escapeHtml(
+                mk.name || "Worker"
+              )}</div>
+              ${
+                mk.skill
+                  ? `<div class="map-popup-skill" style="font-size:0.9rem;color:#6b7280;margin-top:4px">${escapeHtml(
+                      mk.skill
+                    )}</div>`
+                  : ""
+              }
+              <div style="margin-top:8px">
+                <a href="/workers/${
+                  mk.id
+                }" class="${viewBtnClasses}" style="text-decoration:none">View Profile</a>
+              </div>
+            </div>
+          `;
+
+          infoWindowRef.current.setContent(content);
+          infoWindowRef.current.open(mapRef.current, marker);
+
+          // Highlight worker card
+          try {
+            const card = document.querySelector(`[data-worker-id="${mk.id}"]`);
+            if (card) card.classList.add("worker-highlight");
+          } catch (err) {}
+        });
+
+        markersRef.current.push(marker);
+      } catch (error) {
+        console.error("Failed to create marker:", error);
+      }
+    });
+
+    // Set center
+    if (mapRef.current && centerPoint) {
+      mapRef.current.setCenter(centerPoint);
+      mapRef.current.setZoom(zoom);
+    }
 
     return () => {
-      try {
-        markerGroup.clearLayers();
-      } catch (e) {}
+      markersRef.current.forEach((m) => m.setMap(null));
+      markersRef.current = [];
     };
-  }, [containerRef, markers, centerPoint, zoom]);
+  }, [containerRef, markers, centerPoint, zoom, mapsLoaded]);
 
   if (!centerPoint) {
     return (
@@ -368,17 +321,28 @@ export default function MapPreview({
         className="rounded-xl border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 overflow-hidden"
         style={{ height }}
       >
-        <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+        {mapsError ? (
+          <div className="w-full h-full flex items-center justify-center p-4">
+            <div className="text-center text-red-500">
+              <p className="font-semibold mb-2">Map Loading Error</p>
+              <p className="text-sm">{mapsError}</p>
+              <p className="text-xs mt-2 text-gray-500">
+                Please check console for details
+              </p>
+            </div>
+          </div>
+        ) : !mapsLoaded ? (
+          <div className="w-full h-full flex items-center justify-center">
+            <div className="text-neutral-500">Loading map...</div>
+          </div>
+        ) : (
+          <div ref={containerRef} style={{ width: "100%", height: "100%" }} />
+        )}
       </div>
       <style>{`
-        .marker-custom { display: flex; align-items: center; justify-content: center; }
         .map-popup { font-family: Inter, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', Arial; }
         .map-popup-name { font-size:0.95rem; }
         .map-popup-skill { color: #6b7280; }
-        .marker-custom { display: flex; align-items: center; justify-content: center; }
-        /* ensure leaflet map and popups sit below modals/dialogs */
-        .leaflet-container { z-index: 0 !important; }
-        .leaflet-popup { z-index: 100 !important; }
       `}</style>
     </div>
   );
