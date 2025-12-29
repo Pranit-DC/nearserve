@@ -2,12 +2,11 @@
 
 import { useCallback, useEffect, useRef, useState } from "react"
 import { Moon, Sun } from "lucide-react"
-import { useTheme } from "next-themes"
+import { flushSync } from "react-dom"
 
 import { cn } from "@/lib/utils"
 
-interface AnimatedThemeTogglerProps
-  extends React.ComponentPropsWithoutRef<"button"> {
+interface AnimatedThemeTogglerProps extends React.ComponentPropsWithoutRef<"button"> {
   duration?: number
 }
 
@@ -16,9 +15,7 @@ export const AnimatedThemeToggler = ({
   duration = 400,
   ...props
 }: AnimatedThemeTogglerProps) => {
-  const { setTheme } = useTheme()
   const [isDark, setIsDark] = useState(false)
-  const [isAnimating, setIsAnimating] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
@@ -38,33 +35,40 @@ export const AnimatedThemeToggler = ({
   }, [])
 
   const toggleTheme = useCallback(async () => {
-    if (!buttonRef.current || isAnimating) return
+    if (!buttonRef.current) return
 
-    setIsAnimating(true)
+    await document.startViewTransition(() => {
+      flushSync(() => {
+        const newTheme = !isDark
+        setIsDark(newTheme)
+        document.documentElement.classList.toggle("dark")
+        localStorage.setItem("theme", newTheme ? "dark" : "light")
+      })
+    }).ready
 
-    // Add smooth fade-out effect to entire page
-    document.documentElement.style.transition = 'opacity 0.25s ease-in-out'
-    document.documentElement.style.opacity = '0.5'
+    const { top, left, width, height } =
+      buttonRef.current.getBoundingClientRect()
+    const x = left + width / 2
+    const y = top + height / 2
+    const maxRadius = Math.hypot(
+      Math.max(left, window.innerWidth - left),
+      Math.max(top, window.innerHeight - top)
+    )
 
-    // Wait for fade-out
-    await new Promise(resolve => setTimeout(resolve, 100))
-
-    // Toggle theme
-    setTheme(isDark ? "light" : "dark")
-
-    // Wait a bit for theme to apply
-    await new Promise(resolve => setTimeout(resolve, 50))
-
-    // Fade back in
-    document.documentElement.style.opacity = '1'
-
-    // Clean up and reset after animation completes
-    setTimeout(() => {
-      document.documentElement.style.transition = ''
-      document.documentElement.style.opacity = ''
-      setIsAnimating(false)
-    }, 200)
-  }, [isDark, setTheme, isAnimating])
+    document.documentElement.animate(
+      {
+        clipPath: [
+          `circle(0px at ${x}px ${y}px)`,
+          `circle(${maxRadius}px at ${x}px ${y}px)`,
+        ],
+      },
+      {
+        duration,
+        easing: "ease-in-out",
+        pseudoElement: "::view-transition-new(root)",
+      }
+    )
+  }, [isDark, duration])
 
   return (
     <button
@@ -74,6 +78,7 @@ export const AnimatedThemeToggler = ({
       {...props}
     >
       {isDark ? <Sun /> : <Moon />}
+      <span className="sr-only">Toggle theme</span>
     </button>
   )
 }

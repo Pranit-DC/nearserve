@@ -14,6 +14,7 @@ import Glow from "@/components/ui/glow";
 import { Mockup, MockupFrame } from "@/components/ui/mockup";
 import Screenshot from "@/components/ui/screenshot";
 import { Section } from "@/components/ui/section";
+import BlurText from "@/components/BlurText";
 
 interface HeroButtonProps {
   href: string;
@@ -78,8 +79,8 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
             style={{
               transform: isHovered ? `translateX(${BACK_X}px) rotate(${BACK_ROT}deg) scale(0.92)` : 'none',
               transformOrigin: 'center center',
-              filter: 'blur(0.5px) brightness(0.85)',
-              opacity: 0.7,
+              filter: 'blur(0.5px) brightness(0.90)',
+              opacity: 1.0,
               transition: `transform ${ANIM_DURATION}s ease-out`
             }}
           >
@@ -98,7 +99,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
               transform: isHovered ? `rotate(${MID_ROT}deg) scale(0.96)` : 'none',
               transformOrigin: 'center center',
               filter: 'blur(0.25px) brightness(0.95)',
-              opacity: 0.9,
+              opacity: 1.0,
               transition: `transform ${ANIM_DURATION}s ease-out`
             }}
           >
@@ -138,8 +139,8 @@ export default function PremiumHero({
   description = "The modern platform connecting blue-collar workers with local opportunities. Built for reliability. Designed for growth.",
   mockup = (
     <Screenshot
-      srcLight="/customer%20search.png"
-      srcDark="/customer%20search_dark.png"
+      srcLight="/customer_search.png"
+      srcDark="/customer_search_dark.png"
       alt="NearServe dashboard screenshot"
       width={1248}
       height={765}
@@ -147,7 +148,7 @@ export default function PremiumHero({
     />
   ),
   badge = (
-    <Badge variant="outline" className="animate-appear">
+    <Badge variant="outline">
       <span className="text-muted-foreground">
         NearServe is now available!
       </span>
@@ -175,21 +176,21 @@ export default function PremiumHero({
   return (
     <Section
       className={cn(
-        "fade-bottom overflow-hidden pb-0 sm:pb-0 md:pb-0",
+        "relative overflow-hidden pb-0 sm:pb-0 md:pb-0",
         className,
       )}
     >
       <div className="max-w-container mx-auto flex flex-col gap-6 pt-10 sm:gap-12 px-20">
         <div className="flex flex-col items-start gap-5 text-left sm:gap-8 max-w-2xl">
           {badge !== false && badge}
-          <h1 className="animate-appear from-foreground to-foreground dark:to-muted-foreground relative z-10 inline-block bg-linear-to-r bg-clip-text text-3xl leading-tight font-semibold text-balance text-transparent drop-shadow-2xl sm:text-5xl sm:leading-tight md:text-5xl md:leading-tight">
-            {title}
+          <h1 className="relative z-10 inline-block text-3xl leading-tight font-semibold sm:text-5xl md:text-5xl">
+            <BlurText text={title} className="text-3xl sm:text-5xl md:text-5xl font-semibold" />
           </h1>
-          <p className="text-md animate-appear text-muted-foreground relative z-10 max-w-[540px] font-medium text-balance opacity-0 delay-100 sm:text-lg">
+          <p className="text-md text-muted-foreground relative z-10 max-w-[540px] font-medium text-balance sm:text-lg animate-fade-in-up delay-100 dark:text-muted-foreground/95">
             {description}
           </p>
           {buttons !== false && buttons.length > 0 && (
-            <div className="animate-appear relative z-10 flex justify-start gap-4 opacity-0 delay-300">
+            <div className="relative z-10 flex justify-start gap-4">
               {buttons.map((button, index) => (
                 <Button
                   key={`${button.href}-${index}`}
@@ -211,6 +212,25 @@ export default function PremiumHero({
         {/* Mockups - centered separately */}
         {mockup !== false && <HoverableMockups mockup={mockup} />}
       </div>
+      {/* Smooth transition gradient to the next section. Separate elements for light/dark so the dark
+          gradient uses the requested HEX color (#0b0f14) while light uses the theme background. */}
+      {/* Light mode gradient (falls back to var(--background)) */}
+      <div
+        aria-hidden
+        className="absolute left-0 right-0 bottom-0 h-36 pointer-events-none block dark:hidden"
+        style={{
+          background: "linear-gradient(to top, var(--background) 0%, transparent 100%)",
+        }}
+      />
+         {/* Dark mode gradient using theme variable with fallback to HEX #0b0f14 */}
+      <div
+        aria-hidden
+        className="absolute left-0 right-0 bottom-0 h-36 pointer-events-none hidden dark:block"
+        style={{
+          background:
+            "linear-gradient(to top, var(--premium-hero-dark-background, #0b0f14) 0%, transparent 100%)",
+        }}
+      />
     </Section>
   );
 }
