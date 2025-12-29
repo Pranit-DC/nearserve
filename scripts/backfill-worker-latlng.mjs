@@ -1,29 +1,27 @@
 import 'dotenv/config'
 import { PrismaClient } from '@prisma/client'
-// light-weight geocode helper (same logic as lib/geocoding but self-contained for this script)
-const NOMINATIM_BASE = 'https://nominatim.openstreetmap.org'
-const OSM_USER_AGENT = process.env.NOMINATIM_USER_AGENT || 'NearServe/1.0 (contact: support@nearserve.local)'
-const APP_REFERER = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-
-let _lastSearchAt = 0
-async function throttleSearch(){
-  const now = Date.now(); const elapsed = now - _lastSearchAt; const wait = elapsed >= 1000 ? 0 : 1000 - elapsed
-  if(wait>0) await new Promise(r=>setTimeout(r, wait))
-  _lastSearchAt = Date.now()
-}
+// Google Maps Geocoding API helper for this script
+const GOOGLE_MAPS_API_KEY = process.env.GOOGLE_MAPS_API_KEY || ''
+const GEOCODING_BASE = 'https://maps.googleapis.com/maps/api/geocode/json'
 
 async function geocodeFreeOSM(query){
   if(!query?.trim()) return []
-  await throttleSearch()
-  const url = new URL(NOMINATIM_BASE + '/search')
-  url.searchParams.set('q', query)
-  url.searchParams.set('format', 'jsonv2')
-  url.searchParams.set('addressdetails', '1')
-  url.searchParams.set('limit', '3')
-  const res = await fetch(url.toString(), { headers: { 'User-Agent': OSM_USER_AGENT, 'Referer': APP_REFERER, 'Accept': 'application/json' } })
+  if(!GOOGLE_MAPS_API_KEY) {
+    console.error('GOOGLE_MAPS_API_KEY not configured')
+    return []
+  }
+  const url = new URL(GEOCODING_BASE)
+  url.searchParams.set('address', query)
+  url.searchParams.set('key', GOOGLE_MAPS_API_KEY)
+  const res = await fetch(url.toString(), { headers: { 'Accept': 'application/json' } })
   if(!res.ok) return []
   const data = await res.json()
-  return (data || []).map(d=>({ lat: parseFloat(d.lat), lon: parseFloat(d.lon), display_name: d.display_name }))
+  if(data.status !== 'OK' || !data.results) return []
+  return (data.results || []).slice(0, 3).map(d=>({ 
+    lat: d.geometry.location.lat, 
+    lon: d.geometry.location.lng, 
+    display_name: d.formatted_address 
+  }))
 }
 
 const prisma = new PrismaClient()
@@ -86,8 +84,8 @@ async function main(){
     }catch(e){
       console.error('Error for', p.id, e)
     }
-    // Be polite to Nominatim (1 request per second)
-    await sleep(1100)
+    // Small delay between requests
+    await sleep(200)
   }
   console.log('\nBackfill complete. Updated', updated, 'profiles')
   await prisma.$disconnect()

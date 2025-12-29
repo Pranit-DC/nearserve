@@ -8,11 +8,15 @@ export async function GET(req: Request) {
     return NextResponse.json({ results: [] });
   }
   try {
+    console.log("[API /geocode] Query:", q);
     const results = await geocodeFreeOSM(q);
+    console.log("[API /geocode] Success, found", results.length, "results");
     return NextResponse.json({ results });
   } catch (e) {
+    const errorMessage = e instanceof Error ? e.message : "geocode failed";
+    console.error("[API /geocode] Error:", errorMessage);
     return NextResponse.json(
-      { error: e instanceof Error ? e.message : "geocode failed" },
+      { error: errorMessage, results: [] },
       { status: 500 }
     );
   }
