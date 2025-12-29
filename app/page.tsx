@@ -69,8 +69,8 @@ export default function Home() {
                 </h1>
               </>
             }
-            videoSrc="/premium%20Hero%20section.mp4"
-            poster="/customer%20search_dark.png"
+            videoSrc="/premium_Hero_section.mp4"
+            poster="/customer_search_dark.png"
             showOnline={true}
             autoplay={true}
             muted={true}

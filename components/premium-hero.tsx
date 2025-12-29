@@ -139,8 +139,8 @@ export default function PremiumHero({
   description = "The modern platform connecting blue-collar workers with local opportunities. Built for reliability. Designed for growth.",
   mockup = (
     <Screenshot
-      srcLight="/customer%20search.png"
-      srcDark="/customer%20search_dark.png"
+      srcLight="/customer_search.png"
+      srcDark="/customer_search_dark.png"
       alt="NearServe dashboard screenshot"
       width={1248}
       height={765}
