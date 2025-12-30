@@ -16,10 +16,9 @@ Go to [Google Cloud Console](https://console.cloud.google.com/google/maps-apis) 
 3. **Places API** (optional) - For autocomplete search
 
 ### API Key Configuration:
-Your API key is already configured in `.env`:
 ```
-GOOGLE_MAPS_API_KEY=AIzaSyDzdbJvbLMccN3mve6SVgwlUhjsvwHETUA
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyDzdbJvbLMccN3mve6SVgwlUhjsvwHETUA
+GOOGLE_MAPS_API_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ```
 
 ### Security (Important!):

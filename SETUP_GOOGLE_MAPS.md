@@ -25,7 +25,7 @@ Go to: https://console.cloud.google.com/apis/library
 
 Go to: https://console.cloud.google.com/apis/credentials
 
-1. Click on your API key: `AIzaSyDzdbJvbLMccN3mve6SVgwlUhjsvwHETUA`
+1. Click on your API key: 
 2. Under "API restrictions":
    - Select "Restrict key"
    - Check: ✅ Geocoding API
@@ -43,8 +43,8 @@ Go to: https://console.cloud.google.com/apis/credentials
 
 Your `.env` file should have:
 ```env
-GOOGLE_MAPS_API_KEY=AIzaSyDzdbJvbLMccN3mve6SVgwlUhjsvwHETUA
-NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=AIzaSyDzdbJvbLMccN3mve6SVgwlUhjsvwHETUA
+GOOGLE_MAPS_API_KEY=
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=
 ```
 
 Both are needed:
