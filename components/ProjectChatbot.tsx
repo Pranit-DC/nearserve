@@ -122,7 +122,7 @@ export default function ProjectChatbot() {
             : DOCK_BORDER_RADIUS,
         }}
         className={cx(
-          "relative z-3 flex flex-col items-center overflow-hidden border bg-background shadow-2xl"
+          "relative z-3 flex flex-col items-center overflow-hidden border bg-background shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]"
         )}
         initial={false}
         ref={rootRef}
