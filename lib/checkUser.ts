@@ -1,50 +1,88 @@
-import { auth, currentUser } from "@clerk/nextjs/server";
-import prisma from "./prisma";
+import { adminAuth, adminDb } from "./firebase-admin";
+import { cookies } from "next/headers";
+import { COLLECTIONS, UserRole } from "./firestore";
+import { serializeFirestoreData } from "./firestore-serialization";
 
 export const checkUser = async () => {
   try {
-    const { userId } = await auth();
-    if (!userId) {
+    // Get the session token from cookies
+    const cookieStore = await cookies();
+    const sessionCookie = cookieStore.get('__session')?.value;
+
+    if (!sessionCookie) {
       return null;
     }
 
-    // Try to find existing user first
-    const existingUser = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-      include: { workerProfile: true, customerProfile: true },
-    });
+    // Verify the Firebase session cookie
+    const decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
+    const firebaseUid = decodedToken.uid;
 
-    if (existingUser) {
-      return existingUser;
+    // Get user from Firestore
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+
+    if (userQuery.empty) {
+      // User doesn't exist in database yet - create from Firebase Auth user
+      const firebaseUser = await adminAuth.getUser(firebaseUid);
+      
+      const newUserId = adminDb.collection('temp').doc().id; // Generate unique ID
+      
+      const newUser = {
+        email: firebaseUser.email || `no-email-${firebaseUid}@placeholder.local`,
+        phone: firebaseUser.phoneNumber || `no-phone-${firebaseUid}`,
+        name: firebaseUser.displayName || firebaseUser.email?.split('@')[0] || 'User',
+        role: UserRole.UNASSIGNED,
+        createdAt: new Date(),
+        updatedAt: new Date(),
+        firebaseUid: firebaseUid,
+      };
+
+      console.log('Creating new user in Firestore:', { userId: newUserId, firebaseUid, email: newUser.email });
+
+      // Save to Firestore with explicit document ID
+      await usersRef.doc(newUserId).set(newUser);
+      
+      console.log('✅ User created successfully in Firestore');
+      
+      // Return user with ID - serialize dates
+      return serializeFirestoreData({ 
+        id: newUserId, 
+        ...newUser, 
+        workerProfile: null, 
+        customerProfile: null 
+      });
     }
 
-    // If user doesn't exist in DB but is authenticated, create a basic user record
-    const clerkUser = await currentUser();
-    if (!clerkUser) {
-      return null;
+    // Return existing user with profiles
+    const userDoc = userQuery.docs[0];
+    const userData = { id: userDoc.id, ...userDoc.data() };
+    
+    // Fetch worker profile if user is a worker
+    let workerProfile = null;
+    if (userData.role === 'WORKER') {
+      const workerQuery = await adminDb.collection(COLLECTIONS.WORKER_PROFILES)
+        .where('userId', '==', userDoc.id)
+        .limit(1)
+        .get();
+      if (!workerQuery.empty) {
+        workerProfile = { id: workerQuery.docs[0].id, ...workerQuery.docs[0].data() };
+      }
     }
-
-    const first = clerkUser.firstName?.trim() ?? "";
-    const last = clerkUser.lastName?.trim() ?? "";
-    const name = `${first} ${last}`.trim() || clerkUser.username || "User";
-
-    const clerkEmail = clerkUser.emailAddresses?.[0]?.emailAddress;
-    const clerkPhone = clerkUser.phoneNumbers?.[0]?.phoneNumber;
-    const email = clerkEmail ?? `no-email-${clerkUser.id}@placeholder.local`;
-    const phone = clerkPhone ?? `no-phone-${clerkUser.id}`;
-
-    // Create a basic user record
-    const newUser = await prisma.user.create({
-      data: {
-        clerkUserId: clerkUser.id,
-        name,
-        email,
-        phone,
-      },
-      include: { workerProfile: true, customerProfile: true },
-    });
-
-    return newUser;
+    
+    // Fetch customer profile if user is a customer
+    let customerProfile = null;
+    if (userData.role === 'CUSTOMER') {
+      const customerQuery = await adminDb.collection(COLLECTIONS.CUSTOMER_PROFILES)
+        .where('userId', '==', userDoc.id)
+        .limit(1)
+        .get();
+      if (!customerQuery.empty) {
+        customerProfile = { id: customerQuery.docs[0].id, ...customerQuery.docs[0].data() };
+      }
+    }
+    
+    // Serialize all Firestore Timestamps before returning
+    return serializeFirestoreData({ ...userData, workerProfile, customerProfile });
   } catch (error) {
     console.error("Error in checkUser:", error);
     return null;

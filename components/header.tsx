@@ -1,13 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import {
-  SignInButton,
-  SignUpButton,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
+import { FirebaseUserButton } from "./firebase-user-button";
 import {
   Navbar,
   NavBody,
@@ -20,7 +15,6 @@ import {
 import { useState, useEffect } from "react";
 import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
-import { Sun, Moon, Circle } from "lucide-react";
 import { Button } from "./ui/button";
 import { useUserProfile } from "@/hooks/use-user-profile";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
@@ -46,6 +40,7 @@ export function Header() {
   const [mounted, setMounted] = useState(false);
   const pathname = usePathname();
   const { userProfile, loading, error } = useUserProfile();
+  const { user, loading: authLoading } = useAuth();
 
   useEffect(() => setMounted(true), []);
 
@@ -133,46 +128,31 @@ export function Header() {
           {/* Animated Theme Toggler */}
           <AnimatedThemeToggler />
 
-          <SignedIn>
-            <ProfileButton />
-          </SignedIn>
+          {!user && !authLoading && <ProfileButton />}
+          {user && <ProfileButton />}
 
-          <SignedOut>
+          {!user && !authLoading && (
             <div className="hidden md:flex items-center space-x-2">
-              <SignInButton>
-                <NavbarButton
-                  variant="secondary"
-                  className="bg-gray-100/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 border-0 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 backdrop-blur font-medium transition-all duration-200 rounded-full"
-                >
-                  Sign In
-                </NavbarButton>
-              </SignInButton>
-              <SignUpButton>
-                <NavbarButton
-                  variant="primary"
-                  className="bg-blue-500 hover:bg-blue-600 text-white border-0 font-medium shadow-sm hover:shadow-md transition-all duration-200 rounded-full"
-                >
-                  Sign Up
-                </NavbarButton>
-              </SignUpButton>
+              <NavbarButton
+                href="/sign-in"
+                variant="secondary"
+                className="bg-gray-100/80 dark:bg-gray-800/80 text-gray-900 dark:text-gray-100 border-0 hover:bg-gray-200/80 dark:hover:bg-gray-700/80 backdrop-blur font-medium transition-all duration-200 rounded-full"
+              >
+                Sign In
+              </NavbarButton>
+              <NavbarButton
+                href="/sign-up"
+                variant="primary"
+                className="bg-blue-500 hover:bg-blue-600 text-white border-0 font-medium shadow-sm hover:shadow-md transition-all duration-200 rounded-full"
+              >
+                Sign Up
+              </NavbarButton>
             </div>
-          </SignedOut>
+          )}
 
-          <SignedIn>
-            <UserButton
-              appearance={{
-                elements: {
-                  avatarBox:
-                    "w-9 h-9 rounded-full ring-1 ring-gray-200 dark:ring-gray-700 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all duration-200",
-                  userButtonPopoverCard:
-                    "shadow-xl rounded-xl backdrop-blur-xl bg-white/95 dark:bg-gray-900/95 border border-gray-200/50 dark:border-gray-800/50",
-                  userPreviewMainIdentifier:
-                    "font-medium text-gray-900 dark:text-gray-100",
-                },
-              }}
-              afterSignOutUrl="/"
-            />
-          </SignedIn>
+          {user && (
+            <FirebaseUserButton />
+          )}
 
           {/* Mobile Menu Toggle */}
           <div className="md:hidden">
@@ -236,26 +216,32 @@ export function Header() {
                 <AnimatedThemeToggler />
               </div>
 
-              <SignedOut>
-                <SignInButton>
-                  <button className="w-full text-left px-4 py-3 rounded-full text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200 font-medium">
+              {!user && !authLoading && (
+                <>
+                  <Link 
+                    href="/sign-in" 
+                    onClick={() => setIsOpen(false)}
+                    className="w-full text-left px-4 py-3 rounded-full text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200 font-medium block"
+                  >
                     Sign In
-                  </button>
-                </SignInButton>
-                <SignUpButton>
-                  <button className="w-full bg-blue-500 text-white px-4 py-3 rounded-full hover:bg-blue-600 transition-all duration-200 font-medium shadow-sm">
+                  </Link>
+                  <Link 
+                    href="/sign-up" 
+                    onClick={() => setIsOpen(false)}
+                    className="w-full bg-blue-500 text-white px-4 py-3 rounded-full hover:bg-blue-600 transition-all duration-200 font-medium shadow-sm block text-center"
+                  >
                     Sign Up
-                  </button>
-                </SignUpButton>
-              </SignedOut>
-              <SignedIn>
+                  </Link>
+                </>
+              )}
+              {user && (
                 <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50">
-                  <UserButton />
+                  <FirebaseUserButton />
                   <span className="text-sm text-gray-600 dark:text-gray-400 font-medium">
                     Your Account
                   </span>
                 </div>
-              </SignedIn>
+              )}
             </div>
           </div>
         </MobileNavMenu>

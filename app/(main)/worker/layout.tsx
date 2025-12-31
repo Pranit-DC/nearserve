@@ -1,7 +1,7 @@
 "use client"
 
 import { ReactNode, useState, useEffect } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
 import { WorkerSidebar } from "@/components/worker/sidebar-nav";
 
 // Force dynamic rendering for this route group
@@ -14,7 +14,8 @@ export default function WorkerLayout({
 }) {
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
-  const { user, isLoaded } = useUser();
+  const { user, loading } = useAuth();
+  const isLoaded = !loading;
 
   // Show loading state while auth is loading
   if (!isLoaded) {

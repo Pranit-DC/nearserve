@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
@@ -65,7 +65,7 @@ type Job = {
 };
 
 export default function CustomerProfilePage() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -401,11 +401,11 @@ export default function CustomerProfilePage() {
                     </span>
                   </div>
 
-                  {data.phone && !data.phone.startsWith("no-phone-") && (
-                    <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                        <FiPhone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
-                      </div>
+                {data.phone && !String(data.phone).startsWith("no-phone-") && (
+                  <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                      <FiPhone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
+                    </div>
                       <span className="text-gray-700 dark:text-gray-300">
                         {data.phone}
                       </span>
@@ -505,7 +505,7 @@ export default function CustomerProfilePage() {
                           </p>
                         </div>
                       </div>
-                      {data.phone && !data.phone.startsWith("no-phone-") && (
+                      {data.phone && !String(data.phone).startsWith("no-phone-") && (
                         <div>
                           <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                             Phone Number

@@ -1,33 +1,51 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { COLLECTIONS } from "@/lib/firestore";
+import { cookies } from "next/headers";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function PUT(req: NextRequest) {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
+    // Get session cookie
+    const sessionCookie = (await cookies()).get("__session")?.value;
+    if (!sessionCookie) {
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    // Get the user from our database
-    const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-      include: { customerProfile: true },
-    });
+    // Verify session
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
 
-    if (!user) {
+    const firebaseUid = decodedToken.uid;
+
+    // Get the user from database
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+
+    if (userQuery.empty) {
       return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
 
-    if (user.role !== "CUSTOMER") {
+    const userDoc = userQuery.docs[0];
+    const userData = userDoc.data();
+    const userId = userDoc.id;
+
+    if (userData.role !== "CUSTOMER") {
       return NextResponse.json(
         { error: "Only customers can update customer profile" },
         { status: 403 }
       );
     }
 
-    if (!user.customerProfile) {
+    // Find customer profile
+    const customerProfilesRef = adminDb.collection(COLLECTIONS.CUSTOMER_PROFILES);
+    const profileQuery = await customerProfilesRef.where('userId', '==', userId).limit(1).get();
+
+    if (profileQuery.empty) {
       return NextResponse.json(
         { error: "Customer profile not found" },
         { status: 404 }
@@ -75,20 +93,24 @@ export async function PUT(req: NextRequest) {
     }
 
     // Update the customer profile
-    const updatedProfile = await prisma.customerProfile.update({
-      where: { id: user.customerProfile.id },
-      data: {
-        address,
-        city,
-        state,
-        postalCode,
-        country,
-      },
+    const profileDoc = profileQuery.docs[0];
+    await profileDoc.ref.update({
+      address,
+      city,
+      state,
+      postalCode,
+      country,
+      updatedAt: FieldValue.serverTimestamp(),
     });
+
+    const updatedProfileData = (await profileDoc.ref.get()).data();
 
     return NextResponse.json({
       success: true,
-      profile: updatedProfile,
+      profile: {
+        id: profileDoc.id,
+        ...updatedProfileData,
+      },
     });
   } catch (error) {
     console.error("Error updating customer profile:", error);

@@ -156,13 +156,31 @@ export default function WorkerJobsPage() {
     const formData = new FormData();
     formData.append("file", file);
 
+    console.log("Uploading file:", { name: file.name, type: file.type, size: file.size });
+
     const res = await fetch("/api/upload", {
       method: "POST",
       body: formData,
     });
 
     if (!res.ok) {
-      throw new Error("Failed to upload photo");
+      const responseText = await res.text();
+      console.error("Upload failed - Status:", res.status);
+      console.error("Upload failed - Status Text:", res.statusText);
+      console.error("Upload failed - Response:", responseText);
+      
+      let errorMessage = `Failed to upload photo: ${res.status}`;
+      try {
+        const errorData = JSON.parse(responseText);
+        console.error("Upload failed - Parsed error:", errorData);
+        errorMessage = errorData.error || errorData.details || errorMessage;
+      } catch (e) {
+        console.error("Upload failed - Could not parse response as JSON");
+        errorMessage = responseText || errorMessage;
+      }
+      
+      toast.error(errorMessage);
+      throw new Error(errorMessage);
     }
 
     const data = await res.json();
