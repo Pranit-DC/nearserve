@@ -27,6 +27,18 @@ const CLOSE_DELAY = 0.08;
 const FEEDBACK_WIDTH = 500;
 const FEEDBACK_HEIGHT = 600;
 
+// Get responsive dimensions
+const getResponsiveDimensions = () => {
+  if (typeof window === 'undefined') {
+    return { width: FEEDBACK_WIDTH, height: FEEDBACK_HEIGHT };
+  }
+  const isMobile = window.innerWidth < 640; // sm breakpoint
+  return {
+    width: isMobile ? window.innerWidth - 32 : FEEDBACK_WIDTH,
+    height: isMobile ? window.innerHeight - 100 : FEEDBACK_HEIGHT,
+  };
+};
+
 export default function ProjectChatbot() {
   const rootRef = useRef<HTMLDivElement>(null);
   const feedbackRef = useRef<HTMLTextAreaElement | null>(null);
@@ -36,6 +48,7 @@ export default function ProjectChatbot() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [dimensions, setDimensions] = useState({ width: FEEDBACK_WIDTH, height: FEEDBACK_HEIGHT });
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "bot",
@@ -43,6 +56,19 @@ export default function ProjectChatbot() {
         "Hi! Ask me anything about the NearServe architecture or features.",
     },
   ]);
+
+  // Initialize and update dimensions on client side
+  useEffect(() => {
+    // Set initial dimensions after mount
+    setDimensions(getResponsiveDimensions());
+    
+    const handleResize = () => {
+      setDimensions(getResponsiveDimensions());
+    };
+    
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
@@ -105,24 +131,24 @@ export default function ProjectChatbot() {
     if (e.key === "Escape") {
       closeFeedback();
     }
-    if (e.key === "Enter" && e.metaKey) {
+    if (e.key === "Enter" && !e.shiftKey) {
       e.preventDefault();
       submitRef.current?.click();
     }
   };
 
   return (
-    <div className="fixed bottom-8 right-8 z-50 max-sm:bottom-6 max-sm:right-6">
+    <div className="fixed bottom-12 right-6 z-50 max-sm:bottom-4 max-sm:right-4">
       <motion.div
         animate={{
-          width: showFeedback ? FEEDBACK_WIDTH : "auto",
-          height: showFeedback ? FEEDBACK_HEIGHT : DOCK_HEIGHT,
+          width: showFeedback ? dimensions.width : "auto",
+          height: showFeedback ? dimensions.height : DOCK_HEIGHT,
           borderRadius: showFeedback
             ? FEEDBACK_BORDER_RADIUS
             : DOCK_BORDER_RADIUS,
         }}
         className={cx(
-          "relative z-3 flex flex-col items-center overflow-hidden border bg-background shadow-[0_8px_30px_rgb(0,0,0,0.12)] dark:shadow-[0_8px_30px_rgb(0,0,0,0.4)]"
+          "relative z-3 flex flex-col items-center overflow-hidden border bg-background shadow-[0_12px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.6)] ring-0 hover:shadow-[0_20px_80px_rgba(0,0,0,0.28)] hover:dark:shadow-[0_22px_90px_rgba(0,0,0,0.7)] hover:-translate-y-1 hover:ring-4 hover:ring-primary/12 transition-shadow transition-transform duration-200 ease-out"
         )}
         initial={false}
         ref={rootRef}
@@ -182,8 +208,8 @@ export default function ProjectChatbot() {
             className="absolute bottom-0"
             onSubmit={handleSubmit}
             style={{
-              width: FEEDBACK_WIDTH,
-              height: FEEDBACK_HEIGHT,
+              width: dimensions.width,
+              height: dimensions.height,
               pointerEvents: showFeedback ? "all" : "none",
             }}
           >
@@ -202,21 +228,21 @@ export default function ProjectChatbot() {
                   }}
                 >
                   {/* Header */}
-                  <div className="flex justify-between py-1 px-2">
-                    <p className="z-2 ml-[38px] flex select-none items-center gap-[6px] text-foreground font-semibold">
-                      NearServe AI 🤖
+                  <div className="flex justify-between py-3 px-2 max-sm:py-2 relative items-center">
+                    <p className="z-2 pl-[38px] max-sm:pl-[38px] flex select-none items-center gap-[6px] text-foreground font-semibold text-sm max-sm:text-base">
+                      NearServe AI
                     </p>
                     <button
-                      className="flex cursor-pointer select-none items-center justify-center gap-1 rounded-[12px] bg-transparent pr-1 text-center text-foreground hover:bg-muted"
+                      className="flex cursor-pointer select-none items-center justify-center gap-1 rounded-[12px] bg-transparent pr-1 text-center text-foreground hover:bg-muted max-sm:pr-0 max-sm:p-1.5"
                       onClick={closeFeedback}
                       type="button"
                     >
-                      <X size={18} />
+                      <X size={18} className="max-sm:w-5 max-sm:h-5" />
                     </button>
                   </div>
 
                   {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto p-4 space-y-4 rounded-md bg-muted/30">
+                  <div className="flex-1 overflow-y-auto p-4 max-sm:p-2 space-y-4 max-sm:space-y-3 rounded-md bg-muted/30">
                     {messages.map((msg, idx) => (
                       <div
                         key={idx}
@@ -225,7 +251,7 @@ export default function ProjectChatbot() {
                         }`}
                       >
                         <div
-                          className={`max-w-[85%] rounded-lg p-3 text-sm ${
+                          className={`max-w-[85%] max-sm:max-w-[90%] rounded-lg p-3 max-sm:p-2 text-sm max-sm:text-xs ${
                             msg.role === "user"
                               ? "bg-primary text-primary-foreground"
                               : "bg-background border shadow-sm"
@@ -237,7 +263,7 @@ export default function ProjectChatbot() {
                     ))}
                     {isLoading && (
                       <div className="flex justify-start">
-                        <div className="bg-background p-3 rounded-lg border shadow-sm">
+                        <div className="bg-background p-3 max-sm:p-2 rounded-lg border shadow-sm">
                           <Loader2 className="w-4 h-4 animate-spin" />
                         </div>
                       </div>
@@ -246,10 +272,10 @@ export default function ProjectChatbot() {
                   </div>
 
                   {/* Input Area */}
-                  <div className="p-2">
-                    <div className="flex items-end gap-2">
+                  <div className="p-2 max-sm:p-1.5">
+                    <div className="flex items-end gap-2 max-sm:gap-1.5">
                       <textarea
-                        className="flex-1 resize-none rounded-md bg-muted p-3 outline-0 min-h-[60px] max-h-[120px]"
+                        className="flex-1 resize-none rounded-md bg-muted p-3 max-sm:p-2 outline-0 min-h-[60px] max-sm:min-h-[50px] max-h-[120px] max-sm:max-h-[100px] text-sm max-sm:text-xs"
                         name="message"
                         onKeyDown={onKeyDown}
                         placeholder="Ask me anything..."
@@ -259,13 +285,13 @@ export default function ProjectChatbot() {
                         rows={2}
                       />
                       <button
-                        className="flex items-center justify-center gap-1 rounded-[12px] bg-primary text-primary-foreground px-3 py-2 hover:bg-primary/90 disabled:opacity-50"
+                        className="flex items-center justify-center gap-1 rounded-[12px] bg-primary text-primary-foreground px-3 py-2 max-sm:px-2 max-sm:py-1.5 hover:bg-primary/90 disabled:opacity-50"
                         ref={submitRef}
                         type="submit"
                         disabled={isLoading || !input.trim()}
+                        aria-label="Send message"
                       >
-                        <Kbd>⌘</Kbd>
-                        <Kbd className="w-fit">↵</Kbd>
+                        <Kbd className="w-fit max-sm:text-xs">↵</Kbd>
                       </button>
                     </div>
                   </div>
@@ -274,13 +300,13 @@ export default function ProjectChatbot() {
             </AnimatePresence>
             <AnimatePresence>
               {showFeedback && (
-                <motion.div
-                  animate={{ opacity: 1 }}
-                  className="absolute top-2 left-3"
-                  exit={{ opacity: 0 }}
-                  initial={{ opacity: 0 }}
-                  transition={{ duration: 0.2 }}
-                >
+                  <motion.div
+                    animate={{ opacity: 1 }}
+                    className="absolute left-3 top-6 -translate-y-1/2 max-sm:left-3 max-sm:top-3"
+                    exit={{ opacity: 0 }}
+                    initial={{ opacity: 0 }}
+                    transition={{ duration: 0.2 }}
+                  >
                   <SiriOrb
                     colors={{
                       bg: "oklch(22.64% 0 0)",

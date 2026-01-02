@@ -508,7 +508,7 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 right-8 z-50 group inline-flex items-center justify-center w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 ease-out hover:scale-110 hover:-translate-y-1"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 group inline-flex items-center justify-center w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 ease-out hover:scale-110 hover:-translate-y-1 max-sm:bottom-20"
             aria-label="Scroll to top"
           >
             <svg
