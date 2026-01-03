@@ -34,7 +34,7 @@ export default function Screenshot({
         alt={alt}
         width={width}
         height={height}
-        className="block dark:hidden w-full h-auto"
+        className="block dark:hidden w-full h-full object-cover absolute inset-0"
         unoptimized
       />
       {srcDark && (
@@ -43,7 +43,7 @@ export default function Screenshot({
           alt={alt}
           width={width}
           height={height}
-          className="hidden dark:block w-full h-auto absolute inset-0"
+          className="hidden dark:block w-full h-full object-cover absolute inset-0"
           unoptimized
         />
       )}

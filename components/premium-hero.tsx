@@ -3,6 +3,7 @@
 import { type VariantProps } from "class-variance-authority";
 import { ArrowRightIcon } from "lucide-react";
 import { ReactNode, useState, useEffect } from "react";
+import { motion } from 'motion/react';
 import Link from "next/link"
 
 import { cn } from "@/lib/utils";
@@ -63,7 +64,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
       />
 
       <div
-        className="relative cursor-pointer min-h-[520px] pointer-events-auto"
+        className="relative cursor-pointer min-h-[360px] sm:min-h-[420px] lg:min-h-[520px] pointer-events-auto"
         style={{ perspective: "1500px", perspectiveOrigin: "50% 50%" }}
         onMouseEnter={(e) => { console.log('HoverableMockups: mouseenter', e.type); setIsHovered(true); }}
         onMouseLeave={(e) => { console.log('HoverableMockups: mouseleave', e.type); setIsHovered(false); }}
@@ -84,7 +85,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
               transition: `transform ${ANIM_DURATION}s ease-out`
             }}
           >
-            <div className="shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5),0_8px_24px_-4px_rgba(0,0,0,0.2)]">
+            <div className="shadow-2xl">
               <MockupFrame size="small" className="shadow-lg">
                 <Mockup type="responsive" className="bg-background/50 w-full rounded-xl border border-white/5">
                   {mockup}
@@ -103,7 +104,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
               transition: `transform ${ANIM_DURATION}s ease-out`
             }}
           >
-            <div className="shadow-[0_25px_70px_-15px_rgba(0,0,0,0.4),0_8px_24px_-4px_rgba(0,0,0,0.2)]">
+            <div className="shadow-xl">
               <MockupFrame size="small" className="shadow-lg">
                 <Mockup type="responsive" className="bg-background/70 w-full rounded-xl border border-white/10">
                   {mockup}
@@ -120,7 +121,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
               transition: `transform ${ANIM_DURATION}s ease-out`
             }}
           >
-            <div className="shadow-[0_20px_60px_-10px_rgba(0,0,0,0.35),0_40px_100px_-20px_rgba(0,0,0,0.25),0_8px_24px_-4px_rgba(0,0,0,0.2)]">
+            <div className="shadow-2xl">
               <MockupFrame size="small" className="shadow-xl">
                 <Mockup type="responsive" className="bg-background/95 w-full rounded-xl border border-white/20">
                   {mockup}
@@ -149,12 +150,30 @@ export default function PremiumHero({
   ),
   badge = (
     <Badge variant="outline">
-      <span className="text-muted-foreground">
+      <motion.span
+        initial={{ filter: 'blur(10px)', opacity: 0, y: -20 }}
+        animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+        transition={{ duration: 0.6, delay: 0.15 }}
+        className="text-muted-foreground"
+      >
         NearServe is now available!
-      </span>
+      </motion.span>
       <Link href="/onboarding" className="flex items-center gap-1">
-        Get started
-        <ArrowRightIcon className="size-3" />
+        <motion.span
+          initial={{ filter: 'blur(10px)', opacity: 0, y: -20 }}
+          animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+          transition={{ duration: 0.6, delay: 0.25 }}
+        >
+          Get started
+        </motion.span>
+        <motion.span
+          initial={{ filter: 'blur(10px)', opacity: 0, y: -20 }}
+          animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+          transition={{ duration: 0.5, delay: 0.3 }}
+          className="flex items-center"
+        >
+          <ArrowRightIcon className="size-3" />
+        </motion.span>
       </Link>
     </Badge>
   ),
@@ -180,37 +199,63 @@ export default function PremiumHero({
         className,
       )}
     >
-      <div className="max-w-container mx-auto flex flex-col gap-6 pt-10 sm:gap-12 px-20">
+      <div className="max-w-container mx-auto flex flex-col gap-6 pt-10 sm:gap-12 px-6 sm:px-8 lg:px-12">
         <div className="flex flex-col items-start gap-5 text-left sm:gap-8 max-w-2xl">
           {badge !== false && badge}
-          <h1 className="relative z-10 inline-block text-3xl leading-tight font-semibold sm:text-5xl md:text-5xl">
-            <BlurText text={title} className="text-3xl sm:text-5xl md:text-5xl font-semibold" />
+          <h1 className="relative z-10 inline-block text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
+            <BlurText text={title} className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight" />
           </h1>
-          <p className="text-md text-muted-foreground relative z-10 max-w-[540px] font-medium text-balance sm:text-lg animate-fade-in-up delay-100 dark:text-muted-foreground/95">
-            {description}
-          </p>
+          <BlurText
+            text={description}
+            className="text-lg sm:text-xl text-foreground/80 relative z-10 max-w-[600px] font-medium text-balance animate-fade-in-up delay-100 dark:text-muted-foreground/95"
+          />
           {buttons !== false && buttons.length > 0 && (
             <div className="relative z-10 flex justify-start gap-4">
-              {buttons.map((button, index) => (
-                <Button
-                  key={`${button.href}-${index}`}
-                  variant={button.variant || "default"}
-                  size="lg"
-                  asChild
-                >
-                  <Link href={button.href}>
-                    {button.icon}
-                    {button.text}
-                    {button.iconRight}
-                  </Link>
-                </Button>
-              ))}
+                  {buttons.map((button, index) => (
+                    <motion.div
+                      key={`${button.href}-${index}`}
+                      initial={{ filter: 'blur(10px)', opacity: 0, y: -16 }}
+                      animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+                      transition={{ duration: 0.6, delay: 0.2 + index * 0.06 }}
+                      className="inline-block"
+                    >
+                      <Button
+                        variant={button.variant || "default"}
+                        size="lg"
+                        asChild
+                      >
+                        <Link href={button.href}>
+                          {button.icon && (
+                            <motion.span
+                              initial={{ filter: 'blur(10px)', opacity: 0, y: -16 }}
+                              animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+                              transition={{ duration: 0.6, delay: 0.18 + index * 0.06 }}
+                            >
+                              {button.icon}
+                            </motion.span>
+                          )}
+                          <span>
+                            {button.text}
+                          </span>
+                          {button.iconRight}
+                        </Link>
+                      </Button>
+                    </motion.div>
+                  ))}
             </div>
           )}
         </div>
         
         {/* Mockups - centered separately */}
-        {mockup !== false && <HoverableMockups mockup={mockup} />}
+        {mockup !== false && (
+          <motion.div
+            initial={{ filter: 'blur(10px)', opacity: 0, y: 12 }}
+            animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
+            transition={{ duration: 0.8, delay: 0.35 }}
+          >
+            <HoverableMockups mockup={mockup} />
+          </motion.div>
+        )}
       </div>
       {/* Smooth transition gradient to the next section. Separate elements for light/dark so the dark
           gradient uses the requested HEX color (#0b0f14) while light uses the theme background. */}
