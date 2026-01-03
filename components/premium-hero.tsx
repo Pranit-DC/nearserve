@@ -64,7 +64,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
       />
 
       <div
-        className="relative cursor-pointer min-h-[520px] pointer-events-auto"
+        className="relative cursor-pointer min-h-[360px] sm:min-h-[420px] lg:min-h-[520px] pointer-events-auto"
         style={{ perspective: "1500px", perspectiveOrigin: "50% 50%" }}
         onMouseEnter={(e) => { console.log('HoverableMockups: mouseenter', e.type); setIsHovered(true); }}
         onMouseLeave={(e) => { console.log('HoverableMockups: mouseleave', e.type); setIsHovered(false); }}
@@ -85,7 +85,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
               transition: `transform ${ANIM_DURATION}s ease-out`
             }}
           >
-            <div className="shadow-[0_30px_90px_-20px_rgba(0,0,0,0.5),0_8px_24px_-4px_rgba(0,0,0,0.2)]">
+            <div className="shadow-2xl">
               <MockupFrame size="small" className="shadow-lg">
                 <Mockup type="responsive" className="bg-background/50 w-full rounded-xl border border-white/5">
                   {mockup}
@@ -104,7 +104,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
               transition: `transform ${ANIM_DURATION}s ease-out`
             }}
           >
-            <div className="shadow-[0_25px_70px_-15px_rgba(0,0,0,0.4),0_8px_24px_-4px_rgba(0,0,0,0.2)]">
+            <div className="shadow-xl">
               <MockupFrame size="small" className="shadow-lg">
                 <Mockup type="responsive" className="bg-background/70 w-full rounded-xl border border-white/10">
                   {mockup}
@@ -121,7 +121,7 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
               transition: `transform ${ANIM_DURATION}s ease-out`
             }}
           >
-            <div className="shadow-[0_20px_60px_-10px_rgba(0,0,0,0.35),0_40px_100px_-20px_rgba(0,0,0,0.25),0_8px_24px_-4px_rgba(0,0,0,0.2)]">
+            <div className="shadow-2xl">
               <MockupFrame size="small" className="shadow-xl">
                 <Mockup type="responsive" className="bg-background/95 w-full rounded-xl border border-white/20">
                   {mockup}
@@ -199,15 +199,15 @@ export default function PremiumHero({
         className,
       )}
     >
-      <div className="max-w-container mx-auto flex flex-col gap-6 pt-10 sm:gap-12 px-20">
+      <div className="max-w-container mx-auto flex flex-col gap-6 pt-10 sm:gap-12 px-6 sm:px-8 lg:px-12">
         <div className="flex flex-col items-start gap-5 text-left sm:gap-8 max-w-2xl">
           {badge !== false && badge}
-          <h1 className="relative z-10 inline-block text-3xl leading-tight font-semibold sm:text-5xl md:text-5xl">
-            <BlurText text={title} className="text-3xl sm:text-5xl md:text-5xl font-semibold" />
+          <h1 className="relative z-10 inline-block text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
+            <BlurText text={title} className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight" />
           </h1>
           <BlurText
             text={description}
-            className="text-md text-foreground/85 relative z-10 max-w-[540px] font-medium text-balance sm:text-lg animate-fade-in-up delay-100 dark:text-muted-foreground/95"
+            className="text-lg sm:text-xl text-foreground/80 relative z-10 max-w-[600px] font-medium text-balance animate-fade-in-up delay-100 dark:text-muted-foreground/95"
           />
           {buttons !== false && buttons.length > 0 && (
             <div className="relative z-10 flex justify-start gap-4">

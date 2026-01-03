@@ -22,6 +22,7 @@
     "@kokonutui": "https://kokonutui.com/r/{name}.json",
     "@react-bits": "https://reactbits.dev/r/{name}.json",
     "@magicui": "https://magicui.design/r/{name}.json",
-    "@smoothui": "https://smoothui.dev/r/{name}.json"
+    "@smoothui": "https://smoothui.dev/r/{name}.json",
+    "@tailark": "https://tailark.com/r/{name}.json"
   }
 }

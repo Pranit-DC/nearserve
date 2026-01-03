@@ -8,8 +8,8 @@ import { Button } from "@/components/ui/button";
 import { cx } from "class-variance-authority";
 import { AnimatePresence, motion } from "motion/react";
 import React from "react";
-import SiriOrb from "@/src/components/smoothui/siri-orb";
-import { useClickOutside } from "@/src/components/smoothui/ai-input/use-click-outside";
+import SiriOrb from "@/components/smoothui/siri-orb";
+import { useClickOutside } from "@/components/smoothui/ai-input/use-click-outside";
 
 type Message = {
   role: "user" | "bot";
