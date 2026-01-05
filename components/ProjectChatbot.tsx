@@ -41,10 +41,15 @@ const getResponsiveDimensions = () => {
   if (typeof window === 'undefined') {
     return { width: FEEDBACK_WIDTH, height: FEEDBACK_HEIGHT };
   }
-  const isMobile = window.innerWidth < MOBILE_BREAKPOINT; // sm breakpoint
+  const v = (window as any).visualViewport;
+  const viewportWidth = v?.width ?? window.innerWidth;
+  const viewportHeight = v?.height ?? window.innerHeight;
+  const isMobile = viewportWidth < MOBILE_BREAKPOINT; // sm breakpoint
+
   return {
-    width: isMobile ? window.innerWidth - 32 : FEEDBACK_WIDTH,
-    height: isMobile ? window.innerHeight - 100 : FEEDBACK_HEIGHT,
+    width: isMobile ? viewportWidth - 32 : FEEDBACK_WIDTH,
+    // Use visualViewport height when available to account for on-screen keyboards
+    height: isMobile ? viewportHeight - 100 : FEEDBACK_HEIGHT,
   };
 };
 
@@ -81,9 +86,19 @@ export default function ProjectChatbot() {
       });
     };
 
+    // Prefer visualViewport resize events when available (handles virtual keyboard).
+    const vv = (window as any).visualViewport;
+    if (vv && typeof vv.addEventListener === "function") {
+      vv.addEventListener("resize", handleResize);
+    }
+
     window.addEventListener("resize", handleResize);
+
     return () => {
       if (rafId !== null) cancelAnimationFrame(rafId);
+      if (vv && typeof vv.removeEventListener === "function") {
+        vv.removeEventListener("resize", handleResize);
+      }
       window.removeEventListener("resize", handleResize);
     };
   }, []);
