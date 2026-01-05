@@ -7,6 +7,7 @@ import { AuthProvider } from "@/contexts/AuthContext";
 import ConditionalHeader from "@/components/conditional-header";
 import { Toaster } from "sonner";
 import ConditionalFooter from "@/components/conditional-footer";
+import ProjectChatbot from "@/components/ProjectChatbot";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -29,7 +30,7 @@ export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
-}>) { 
+}>) {
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.className}`} suppressHydrationWarning>

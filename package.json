@@ -9,6 +9,9 @@
     "lint": "eslint"
   },
   "dependencies": {
+    "@clerk/nextjs": "^6.31.6",
+    "@clerk/themes": "^2.4.22",
+    "@google/generative-ai": "^0.24.1",
     "@hookform/resolvers": "^5.2.1",
     "firebase": "^11.1.0",
     "firebase-admin": "^13.0.1",
@@ -43,6 +46,7 @@
     "react-dropzone": "^14.3.8",
     "react-hook-form": "^7.62.0",
     "react-icons": "^5.5.0",
+    "react-markdown": "^10.1.0",
     "rough-notation": "^0.5.1",
     "sonner": "^2.0.7",
     "tailwind-merge": "^3.3.1",
@@ -52,6 +56,7 @@
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
     "@types/canvas-confetti": "^1.9.0",
+    "@types/google.maps": "^3.58.1",
     "@types/leaflet": "1.9.3",
     "@types/node": "^20",
     "@types/react": "^19",
