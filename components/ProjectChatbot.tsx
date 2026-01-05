@@ -27,6 +27,9 @@ const CLOSE_DELAY = 0.08;
 const FEEDBACK_WIDTH = 500;
 const FEEDBACK_HEIGHT = 600;
 
+// Mirrors Tailwind's `sm` breakpoint (default 640px). Keep in sync with tailwind.config.js
+const MOBILE_BREAKPOINT = 640;
+
 // Classname groups for readability and maintainability
 const CHATBOT_BASE = "relative z-3 flex flex-col items-center overflow-hidden border bg-background";
 const CHATBOT_SHADOWS = "shadow-[0_12px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.6)]";
@@ -38,7 +41,7 @@ const getResponsiveDimensions = () => {
   if (typeof window === 'undefined') {
     return { width: FEEDBACK_WIDTH, height: FEEDBACK_HEIGHT };
   }
-  const isMobile = window.innerWidth < 640; // sm breakpoint
+  const isMobile = window.innerWidth < MOBILE_BREAKPOINT; // sm breakpoint
   return {
     width: isMobile ? window.innerWidth - 32 : FEEDBACK_WIDTH,
     height: isMobile ? window.innerHeight - 100 : FEEDBACK_HEIGHT,
@@ -210,14 +213,16 @@ export default function ProjectChatbot() {
                 </AnimatePresence>
               </div>
 
-              <Button
-                className="flex h-fit flex-1 justify-end rounded-full px-2 py-0.5!"
-                onClick={openFeedback}
-                type="button"
-                variant="ghost"
-              >
-                <span className="truncate">Ask AI</span>
-              </Button>
+              {!showFeedback && (
+                <Button
+                  className="flex h-fit flex-1 justify-end rounded-full px-2 py-0.5!"
+                  onClick={openFeedback}
+                  type="button"
+                  variant="ghost"
+                >
+                  <span className="truncate">Ask AI</span>
+                </Button>
+              )}
             </div>
           </footer>
 
@@ -246,7 +251,7 @@ export default function ProjectChatbot() {
                   }}
                 >
                   {/* Header */}
-                  <div className="flex justify-between py-3 px-2 max-sm:py-2 relative items-center">
+                  <div className="flex justify-between py-6 px-2 max-sm:py-2 relative items-center">
                     <p className="z-2 pl-[38px] max-sm:pl-[38px] flex select-none items-center gap-[6px] text-foreground font-semibold text-sm max-sm:text-base">
                       NearServe AI
                     </p>
@@ -312,6 +317,9 @@ export default function ProjectChatbot() {
                         <Kbd className="w-fit max-sm:text-xs">↵</Kbd>
                       </button>
                     </div>
+                    <div className="mt-1 text-xs text-muted-foreground">
+                      Enter to send — Shift+Enter for newline
+                    </div>
                   </div>
                 </motion.div>
               )}
@@ -320,7 +328,7 @@ export default function ProjectChatbot() {
               {showFeedback && (
                   <motion.div
                     animate={{ opacity: 1 }}
-                    className="absolute left-3 top-6 -translate-y-1/2 max-sm:left-3 max-sm:top-3"
+                    className="absolute left-3 top-6 max-sm:left-3 max-sm:top-3"
                     exit={{ opacity: 0 }}
                     initial={{ opacity: 0 }}
                     transition={{ duration: 0.2 }}
