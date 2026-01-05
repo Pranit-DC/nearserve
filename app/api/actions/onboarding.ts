@@ -1,8 +1,11 @@
 "use server";
 
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { COLLECTIONS, generateId, WorkerProfile, CustomerProfile, PreviousWork } from "@/lib/firestore";
 import { revalidatePath } from "next/cache";
+import { cookies } from "next/headers";
+import { FieldValue } from "firebase-admin/firestore";
+import { serializeFirestoreData } from "@/lib/firestore-serialization";
 
 export type WorkerFormData = {
   skilledIn: string[];
@@ -33,19 +36,33 @@ export type CustomerFormData = {
 export async function setUserRole(
   formData: FormData
 ): Promise<{ success: boolean; redirect?: string; error?: string }> {
-  const { userId } = await auth();
-  if (!userId) throw new Error("Unauthorized");
+  // Get session cookie
+  const sessionCookie = (await cookies()).get("__session")?.value;
+  if (!sessionCookie) throw new Error("Unauthorized");
+
+  // Verify session
+  let decodedToken;
+  try {
+    decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
+  } catch {
+    throw new Error("Unauthorized");
+  }
+
+  const firebaseUid = decodedToken.uid;
 
   // Get user record
-  const user = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-    select: {
-      id: true,
-    },
-  });
-  if (!user) throw new Error("User not found in database");
+  const usersRef = adminDb.collection(COLLECTIONS.USERS);
+  const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+  
+  if (userQuery.empty) {
+    console.error('❌ User not found in database for firebaseUid:', firebaseUid);
+    throw new Error("User not found in database");
+  }
+  
+  const userDoc = userQuery.docs[0];
+  const userId = userDoc.id;
 
-  console.log("Processing form data for user:", userId);
+  console.log("✅ Processing form data for user:", { firebaseUid, userId, role: userDoc.data().role });
 
   const roleRaw = formData.get("role");
   const role = typeof roleRaw === "string" ? roleRaw.toUpperCase() : "";
@@ -65,24 +82,36 @@ export async function setUserRole(
         throw new Error("Missing required fields for customer");
       }
 
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { clerkUserId: userId },
-          data: { role: "CUSTOMER" },
-        }),
-        prisma.customerProfile.upsert({
-          where: { userId: user.id },
-          update: { address, city, state, country, postalCode },
-          create: {
-            userId: user.id,
-            address,
-            city,
-            state,
-            country,
-            postalCode,
-          },
-        }),
-      ]);
+      // Update user role
+      await userDoc.ref.update({ role: "CUSTOMER" });
+      console.log('✅ Updated user role to CUSTOMER');
+
+      // Create or update customer profile
+      const customerProfilesRef = adminDb.collection(COLLECTIONS.CUSTOMER_PROFILES);
+      const existingProfileQuery = await customerProfilesRef.where('userId', '==', userId).limit(1).get();
+      
+      const customerData: Partial<CustomerProfile> = {
+        userId,
+        address,
+        city,
+        state,
+        country,
+        postalCode,
+        updatedAt: FieldValue.serverTimestamp() as any,
+      };
+
+      if (existingProfileQuery.empty) {
+        // Create new profile
+        const newProfileRef = await customerProfilesRef.add({
+          ...customerData,
+          createdAt: FieldValue.serverTimestamp(),
+        });
+        console.log('✅ Created customer profile:', newProfileRef.id);
+      } else {
+        // Update existing profile
+        await existingProfileQuery.docs[0].ref.update(customerData);
+        console.log('✅ Updated existing customer profile:', existingProfileQuery.docs[0].id);
+      }
 
       revalidatePath("/");
       return { success: true, redirect: "/onboarding/finish" };
@@ -181,14 +210,18 @@ export async function setUserRole(
       }
 
       // Check if aadharNumber is already used by another user
-      const existingAadhar = await prisma.workerProfile.findFirst({
-        where: {
-          aadharNumber,
-          NOT: { userId: user.id },
-        },
-        select: { id: true },
-      });
-      if (existingAadhar) {
+      // Note: We query for all matching aadhar numbers and filter in-memory to avoid needing a composite index
+      const workerProfilesRef = adminDb.collection(COLLECTIONS.WORKER_PROFILES);
+      const existingAadharQuery = await workerProfilesRef
+        .where('aadharNumber', '==', aadharNumber)
+        .get();
+      
+      // Filter out the current user's profile
+      const otherUserWithAadhar = existingAadharQuery.docs.find(
+        doc => doc.data().userId !== userId
+      );
+      
+      if (otherUserWithAadhar) {
         return {
           success: false,
           error: "Aadhar number already exists for another worker.",
@@ -202,16 +235,17 @@ export async function setUserRole(
       const longitude = lngRaw ? parseFloat(lngRaw) : undefined;
 
       // Build profile payload and include lat/lng when present
-      const profileData = {
+      const profileData: Partial<WorkerProfile> = {
+        userId,
         skilledIn,
-        qualification,
+        qualification: qualification || null,
         certificates,
         aadharNumber,
-        yearsExperience,
+        yearsExperience: yearsExperience || null,
         hourlyRate,
         minimumFee,
-        profilePic,
-        bio,
+        profilePic: profilePic || null,
+        bio: bio || null,
         address,
         city,
         state,
@@ -224,49 +258,68 @@ export async function setUserRole(
         ...(typeof longitude === "number" && !Number.isNaN(longitude)
           ? { longitude }
           : {}),
+        updatedAt: FieldValue.serverTimestamp() as any,
       };
 
-      await prisma.$transaction([
-        prisma.user.update({
-          where: { clerkUserId: userId },
-          data: { role: "WORKER" },
-        }),
-        prisma.workerProfile.upsert({
-          where: { userId: user.id },
-          update: profileData,
-          create: { userId: user.id, ...profileData },
-        }),
-      ]);
+      // Update user role
+      await userDoc.ref.update({ role: "WORKER" });
+      console.log('✅ Updated user role to WORKER');
+
+      // Create or update worker profile
+      const existingWorkerQuery = await workerProfilesRef.where('userId', '==', userId).limit(1).get();
+      
+      let workerProfileId: string;
+      if (existingWorkerQuery.empty) {
+        // Create new profile
+        const newProfileRef = await workerProfilesRef.add({
+          ...profileData,
+          createdAt: FieldValue.serverTimestamp(),
+        });
+        workerProfileId = newProfileRef.id;
+        console.log('✅ Created worker profile:', workerProfileId);
+      } else {
+        // Update existing profile
+        workerProfileId = existingWorkerQuery.docs[0].id;
+        await existingWorkerQuery.docs[0].ref.update(profileData);
+        console.log('✅ Updated existing worker profile:', workerProfileId);
+      }
 
       // Handle previous works if any
       if (previousWorks.length > 0) {
-        const workerProfile = await prisma.workerProfile.findUnique({
-          where: { userId: user.id },
-          select: { id: true },
-        });
-
-        if (workerProfile) {
-          // Delete existing previous works and create new ones
-          await prisma.previousWork.deleteMany({
-            where: { workerId: workerProfile.id },
+        console.log(`📝 Processing ${previousWorks.length} previous works`);
+        const previousWorksRef = adminDb.collection(COLLECTIONS.PREVIOUS_WORKS);
+        
+        // Delete existing previous works for this worker
+        const existingWorksQuery = await previousWorksRef.where('workerId', '==', workerProfileId).get();
+        if (!existingWorksQuery.empty) {
+          const batch = adminDb.batch();
+          existingWorksQuery.docs.forEach(doc => {
+            batch.delete(doc.ref);
           });
-
-          await prisma.previousWork.createMany({
-            data: previousWorks.map(
-              (work: {
-                id: string;
-                title: string;
-                description: string;
-                imageUrl: string;
-              }) => ({
-                workerId: workerProfile.id,
-                title: work.title,
-                description: work.description || null,
-                images: [work.imageUrl].filter(Boolean),
-              })
-            ),
-          });
+          await batch.commit();
+          console.log(`🗑️ Deleted ${existingWorksQuery.size} existing previous works`);
         }
+
+        // Create new previous works
+        const worksBatch = adminDb.batch();
+        previousWorks.forEach((work: {
+          id: string;
+          title: string;
+          description: string;
+          imageUrl: string;
+        }) => {
+          const workRef = previousWorksRef.doc();
+          worksBatch.set(workRef, {
+            workerId: workerProfileId,
+            title: work.title,
+            description: work.description || null,
+            images: [work.imageUrl].filter(Boolean),
+            createdAt: FieldValue.serverTimestamp(),
+            updatedAt: FieldValue.serverTimestamp(),
+          });
+        });
+        await worksBatch.commit();
+        console.log(`✅ Created ${previousWorks.length} previous works`);
       }
 
       revalidatePath("/");
@@ -286,22 +339,63 @@ export async function setUserRole(
  * Get current user + profile info
  */
 export async function getCurrentUser() {
-  const { userId } = await auth();
-  if (!userId) return null;
+  // Get session cookie
+  const sessionCookie = (await cookies()).get("__session")?.value;
+  if (!sessionCookie) return null;
 
   try {
-    const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-      include: {
-        workerProfile: {
-          include: {
-            previousWorks: true,
-          },
-        },
-        customerProfile: true,
-      },
+    const decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
+    const firebaseUid = decodedToken.uid;
+
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+    
+    if (userQuery.empty) return null;
+
+    const userDoc = userQuery.docs[0];
+    const userData = userDoc.data();
+    const userId = userDoc.id;
+
+    // Fetch worker profile if exists
+    let workerProfile = null;
+    let previousWorks = null;
+    if (userData.role === 'WORKER') {
+      const workerProfilesRef = adminDb.collection(COLLECTIONS.WORKER_PROFILES);
+      const workerQuery = await workerProfilesRef.where('userId', '==', userId).limit(1).get();
+      
+      if (!workerQuery.empty) {
+        const workerDoc = workerQuery.docs[0];
+        workerProfile = { id: workerDoc.id, ...workerDoc.data() };
+        
+        // Fetch previous works
+        const previousWorksRef = adminDb.collection(COLLECTIONS.PREVIOUS_WORKS);
+        const worksQuery = await previousWorksRef.where('workerId', '==', workerDoc.id).get();
+        previousWorks = worksQuery.docs.map(doc => ({ id: doc.id, ...doc.data() }));
+      }
+    }
+
+    // Fetch customer profile if exists
+    let customerProfile = null;
+    if (userData.role === 'CUSTOMER') {
+      const customerProfilesRef = adminDb.collection(COLLECTIONS.CUSTOMER_PROFILES);
+      const customerQuery = await customerProfilesRef.where('userId', '==', userId).limit(1).get();
+      
+      if (!customerQuery.empty) {
+        const customerDoc = customerQuery.docs[0];
+        customerProfile = { id: customerDoc.id, ...customerDoc.data() };
+      }
+    }
+
+    // Serialize all Firestore Timestamps before returning
+    return serializeFirestoreData({
+      id: userId,
+      ...userData,
+      workerProfile: workerProfile ? {
+        ...workerProfile,
+        previousWorks: previousWorks || []
+      } : null,
+      customerProfile,
     });
-    return user;
   } catch (error) {
     console.error("Error fetching user:", error);
     return null;

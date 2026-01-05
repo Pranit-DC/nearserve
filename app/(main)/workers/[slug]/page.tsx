@@ -1,11 +1,12 @@
-import prisma from "@/lib/prisma";
+import { adminDb, COLLECTIONS } from "@/lib/firebase-admin";
+import { checkUser } from "@/lib/checkUser";
+import { serializeFirestoreData } from "@/lib/firestore-serialization";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 import BookWorkerButton from "@/components/book-worker-button";
 import OpenBookFromQuery from "@/components/open-book-from-query";
-import { auth } from "@clerk/nextjs/server";
 import {
   FiUser,
   FiBriefcase,
@@ -53,26 +54,43 @@ export default async function WorkerOrSpecialityPage({
   params: Promise<Params>;
 }) {
   const { slug } = await params;
-  const { userId } = await auth();
-  const current = userId
-    ? await prisma.user.findUnique({
-        where: { clerkUserId: userId },
-        select: { id: true, role: true },
-      })
-    : null;
+  const current = await checkUser().catch(() => null);
 
   if (isUuidLike(slug)) {
-    const worker = await prisma.user.findUnique({
-      where: { id: slug },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        phone: true,
-        workerProfile: true,
-      },
+    const workerDoc = await adminDb
+      .collection(COLLECTIONS.USERS)
+      .doc(slug)
+      .get();
+    
+    if (!workerDoc.exists) {
+      return (
+        <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-black dark:to-gray-800">
+          <div className="flex items-center justify-center min-h-screen p-4">
+            <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/20 shadow-xl p-8 text-center max-w-md w-full">
+              <FiUser className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
+                Worker Not Found
+              </h2>
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                The worker profile you&apos;re looking for doesn&apos;t exist or
+                has been removed.
+              </p>
+            </Card>
+          </div>
+        </main>
+      );
+    }
+
+    const workerData = workerDoc.data();
+    const worker = serializeFirestoreData({
+      id: workerDoc.id,
+      name: workerData?.name || "Unknown",
+      email: workerData?.email || "",
+      phone: workerData?.phone || "",
+      workerProfile: workerData?.workerProfile || null,
     });
-    if (!worker || !worker.workerProfile) {
+
+    if (!worker.workerProfile) {
       return (
         <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-black dark:to-gray-800">
           <div className="flex items-center justify-center min-h-screen p-4">
@@ -154,7 +172,7 @@ export default async function WorkerOrSpecialityPage({
                       </span>
                     </div>
 
-                    {worker.phone && !worker.phone.startsWith("no-phone-") && (
+                    {worker.phone && !String(worker.phone).startsWith("no-phone-") && (
                       <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
                         <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                           <FiPhone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
@@ -335,27 +353,27 @@ export default async function WorkerOrSpecialityPage({
   }
 
   const normalized = slug.replace(/-/g, " ").toLowerCase().trim();
-  const workersRaw = await prisma.user.findMany({
-    where: { role: "WORKER" },
-    select: {
-      id: true,
-      name: true,
-      workerProfile: {
-        select: {
-          skilledIn: true,
-          city: true,
-          availableAreas: true,
-          yearsExperience: true,
-          qualification: true,
-          profilePic: true,
-          bio: true,
-        },
-      },
-    },
-    take: 200,
+  
+  // Fetch workers from Firestore
+  const workersSnapshot = await adminDb
+    .collection(COLLECTIONS.USERS)
+    .where("role", "==", "WORKER")
+    .limit(200)
+    .get();
+
+  const workersRaw = workersSnapshot.docs.map((doc) => {
+    const data = doc.data();
+    return {
+      id: doc.id,
+      name: data.name || "",
+      workerProfile: data.workerProfile || null,
+    };
   });
-  const workers = workersRaw.filter((w) =>
-    flattenStrings(w.workerProfile?.skilledIn).includes(normalized)
+
+  const workers = serializeFirestoreData(
+    workersRaw.filter((w) =>
+      flattenStrings(w.workerProfile?.skilledIn).includes(normalized)
+    )
   );
 
   return (

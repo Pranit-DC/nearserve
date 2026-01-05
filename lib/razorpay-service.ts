@@ -4,10 +4,19 @@ import crypto from "crypto";
 // Platform fee configuration (10% of job charge)
 const PLATFORM_FEE_PERCENTAGE = 10;
 
+// Test mode - set to true to bypass Razorpay and use dummy payments
+const TEST_MODE = process.env.RAZORPAY_TEST_MODE === "true" || 
+                   !process.env.RAZORPAY_KEY_ID || 
+                   !process.env.RAZORPAY_KEY_SECRET;
+
 // Lazy initialization of Razorpay instance
 let razorpayInstance: Razorpay | null = null;
 
 function getRazorpayInstance(): Razorpay {
+  if (TEST_MODE) {
+    throw new Error("Test mode enabled - Razorpay not initialized");
+  }
+  
   if (!razorpayInstance) {
     const keyId = process.env.RAZORPAY_KEY_ID;
     const keySecret = process.env.RAZORPAY_KEY_SECRET;
@@ -25,6 +34,10 @@ function getRazorpayInstance(): Razorpay {
   }
 
   return razorpayInstance;
+}
+
+export function isTestMode(): boolean {
+  return TEST_MODE;
 }
 
 /**
@@ -57,6 +70,30 @@ export async function createRazorpayOrder(
   customerPhone: string
 ) {
   try {
+    // Test mode - return dummy order
+    if (TEST_MODE) {
+      console.log("[TEST MODE] Creating dummy Razorpay order");
+      const amountInPaise = Math.round(amount * 100);
+      return {
+        id: `test_order_${jobId}_${Date.now()}`,
+        entity: "order",
+        amount: amountInPaise,
+        amount_paid: 0,
+        amount_due: amountInPaise,
+        currency: "INR",
+        receipt: `job_${jobId}`,
+        status: "created",
+        attempts: 0,
+        notes: {
+          jobId,
+          customerEmail,
+          customerPhone,
+          description: "Job completion payment (TEST MODE)",
+        },
+        created_at: Math.floor(Date.now() / 1000),
+      };
+    }
+    
     const razorpay = getRazorpayInstance();
     
     // Convert amount to paise (Razorpay requires amount in smallest currency unit)
@@ -94,6 +131,12 @@ export function verifyPaymentSignature(
   signature: string
 ): boolean {
   try {
+    // Test mode - always verify successfully for test orders
+    if (TEST_MODE || orderId.startsWith("test_order_")) {
+      console.log("[TEST MODE] Payment signature verified (dummy)");
+      return true;
+    }
+    
     const keySecret = process.env.RAZORPAY_KEY_SECRET || "";
 
     // Generate expected signature

@@ -2,8 +2,8 @@ import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BookWorkerButton from "@/components/book-worker-button";
-import prisma from "@/lib/prisma";
-import { UserRole } from "@prisma/client";
+import { adminDb, COLLECTIONS } from "@/lib/firebase-admin";
+import { serializeFirestoreData } from "@/lib/firestore-serialization";
 import {
   Wrench,
   Plug,
@@ -80,26 +80,34 @@ const categories = [
 ];
 
 export default async function CustomerDashboardPage() {
-  const workers = await prisma.user.findMany({
-    where: { role: "WORKER" },
-    select: {
-      id: true,
-      name: true,
-      workerProfile: {
-        select: {
-          skilledIn: true,
-          city: true,
-          availableAreas: true,
-          yearsExperience: true,
-          qualification: true,
-          profilePic: true,
-          bio: true,
-        },
-      },
-    },
-    take: 6,
-    orderBy: { createdAt: "desc" },
-  });
+  // Fetch workers from Firestore
+  const workersSnapshot = await adminDb
+    .collection(COLLECTIONS.USERS)
+    .where("role", "==", "WORKER")
+    .limit(50) // Get more initially, then sort and limit in-memory
+    .get();
+
+  // Sort by createdAt and take first 6 in-memory to avoid composite index
+  const workers = serializeFirestoreData(
+    workersSnapshot.docs
+      .map((doc) => {
+        const data = doc.data();
+        return {
+          id: doc.id,
+          name: data.name || null,
+          workerProfile: data.workerProfile || null,
+          createdAt: data.createdAt,
+        };
+      })
+      .sort((a, b) => {
+        // Sort by createdAt descending
+        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return bTime - aTime;
+      })
+      .slice(0, 6)
+      .map(({ createdAt, ...worker }) => worker) // Remove createdAt from final result
+  );
 
   return (
     <div className="space-y-8">

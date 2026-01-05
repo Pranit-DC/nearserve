@@ -23,7 +23,7 @@ import { setUserRole } from "@/app/api/actions/onboarding";
 import useFetch from "@/hooks/use-fetch";
 import ShimmerText from "@/components/kokonutui/shimmer-text";
 import { TypewriterEffect } from "@/components/ui/typewriter-effect";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
 import ClickSpark from "@/components/ClickSpark";
 
 // Profile Image Component with fallback
@@ -207,7 +207,7 @@ type PreviousWork = {
 
 export default function PreviewPage() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { user, loading: authLoading } = useAuth();
   const [workerDetails, setWorkerDetails] = useState<WorkerDetails | null>(
     null
   );
@@ -223,7 +223,7 @@ export default function PreviewPage() {
   } = useFetch<[FormData], OnboardingResponse>(setUserRole);
 
   // Get user's full name
-  const userName = user?.fullName || user?.firstName || "Professional";
+  const userName = user?.displayName || "Professional";
 
   useEffect(() => {
     // Check if user is worker or customer based on stored data

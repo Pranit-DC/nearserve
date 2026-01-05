@@ -20,7 +20,7 @@ import {
   DialogDescription,
 } from "@/components/ui/dialog";
 import { X as XIcon, AlertCircle as AlertCircleIcon } from "lucide-react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
@@ -49,7 +49,7 @@ const STEPS = [
 ];
 
 export default function BookWorkerButton({ workerId, className }: Props) {
-  const { isSignedIn } = useUser();
+  const { user } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -306,7 +306,7 @@ export default function BookWorkerButton({ workerId, className }: Props) {
 
   // Open dialog
   const openDialog = () => {
-    if (!isSignedIn) {
+    if (!user) {
       window.location.href = "/sign-in";
       return;
     }

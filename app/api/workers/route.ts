@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { adminDb } from "@/lib/firebase-admin";
+import { COLLECTIONS } from "@/lib/firestore";
 import { distanceKm } from "@/lib/location";
+import { serializeFirestoreData } from "@/lib/firestore-serialization";
 
 type SearchParams = {
   q?: string | null;
@@ -86,119 +88,39 @@ export async function GET(req: NextRequest) {
     const lat = sp.lat ? parseFloat(sp.lat) : undefined;
     const lng = sp.lng ? parseFloat(sp.lng) : undefined;
 
-    // If lat/lng provided and sort=nearest, perform a DB-side distance sort using Haversine
-    if (
-      typeof lat === "number" &&
-      typeof lng === "number" &&
-      sort === "nearest"
-    ) {
-      try {
-        // Use a parameterized raw query to compute distance and order.
-        const rows = (await prisma.$queryRaw`
-          SELECT u."id" as id, u."name" as name, u."role" as role, wp.* , (
-            6371 * acos(
-              cos(radians(${lat})) * cos(radians(wp."latitude")) * cos(radians(wp."longitude") - radians(${lng})) +
-              sin(radians(${lat})) * sin(radians(wp."latitude"))
-            )
-          ) AS distance_km
-          FROM "User" u
-          JOIN "WorkerProfile" wp ON wp."userId" = u."id"
-          WHERE u."role" = 'WORKER'
-          ORDER BY distance_km ASC
-          LIMIT ${limit}
-        `) as Array<{
-          id: string;
-          name: string | null;
-          role: string;
-          skilledIn?: string[] | null;
-          skilled_in?: string[] | null;
-          city?: string | null;
-          availableAreas?: string[] | null;
-          available_areas?: string[] | null;
-          yearsExperience?: number | null;
-          years_experience?: number | null;
-          qualification?: string | null;
-          profilePic?: string | null;
-          profile_pic?: string | null;
-          bio?: string | null;
-          latitude?: number | null;
-          longitude?: number | null;
-          distance_km: number | string;
-        }>;
-
-        const mapped = rows.map((r) => ({
-          id: r.id,
-          name: r.name,
-          role: r.role,
-          workerProfile: {
-            skilledIn: r.skilledIn ?? r.skilled_in,
-            city: r.city,
-            availableAreas: r.availableAreas ?? r.available_areas,
-            yearsExperience: r.yearsExperience ?? r.years_experience,
-            qualification: r.qualification,
-            profilePic: r.profilePic ?? r.profile_pic,
-            bio: r.bio,
-            latitude: r.latitude,
-            longitude: r.longitude,
-          },
-          distanceKm:
-            typeof r.distance_km === "number"
-              ? r.distance_km
-              : parseFloat(r.distance_km),
-        }));
-
-        const filtered = mapped.filter((w) => {
-          const categoryOk = category
-            ? flattenStringArray(w.workerProfile?.skilledIn).includes(category)
-            : true;
-          const keywordOk = matchesKeyword(q, w);
-          return categoryOk && keywordOk;
-        });
-        return NextResponse.json({ count: filtered.length, workers: filtered });
-      } catch (e) {
-        // Likely the DB doesn't have latitude/longitude columns yet (migration not applied).
-        // Fall back to the JS-based fetch below instead of returning 500.
-        try {
-          console.warn(
-            "/api/workers nearest query failed, falling back to JS filter:",
-            JSON.stringify(e)
-          );
-        } catch {
-          console.warn(
-            "/api/workers nearest query failed, falling back to JS filter",
-            e
-          );
-        }
-      }
+    // Fetch all workers with role = WORKER
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const workersQuery = await usersRef.where('role', '==', 'WORKER').limit(200).get();
+    
+    if (workersQuery.empty) {
+      return NextResponse.json({ count: 0, workers: [] });
     }
 
-    // Fallback: fetch small set and filter in JS
-    const workersRaw = (await prisma.user.findMany({
-      where: { role: "WORKER" },
-      select: {
-        id: true,
-        name: true,
-        role: true,
-        // select the whole relation so we can access newly-added columns without compile-time type errors
-        workerProfile: true,
-      },
-      take: 200,
-    })) as Array<{
-      id: string;
-      name: string | null;
-      role: string;
-      workerProfile: {
-        skilledIn?: string[] | null;
-        city?: string | null;
-        availableAreas?: string[] | null;
-        yearsExperience?: number | null;
-        qualification?: string | null;
-        profilePic?: string | null;
-        bio?: string | null;
-        latitude?: number | null;
-        longitude?: number | null;
-      } | null;
-    }>;
+    // Fetch worker profiles for all workers
+    const workerProfilesRef = adminDb.collection(COLLECTIONS.WORKER_PROFILES);
+    const userIds = workersQuery.docs.map(doc => doc.id);
+    
+    // Firestore doesn't support 'in' queries with more than 10 items, so we batch
+    const workerProfilesMap = new Map();
+    for (let i = 0; i < userIds.length; i += 10) {
+      const batch = userIds.slice(i, i + 10);
+      const profilesQuery = await workerProfilesRef.where('userId', 'in', batch).get();
+      profilesQuery.docs.forEach(doc => {
+        workerProfilesMap.set(doc.data().userId, { id: doc.id, ...doc.data() });
+      });
+    }
+
+    // Build workers array with profiles
+    const workersRaw = workersQuery.docs.map(doc => {
+      const userData = doc.data();
+      const workerProfile = workerProfilesMap.get(doc.id) || null;
+      return {
+        id: doc.id,
+        name: userData.name || null,
+        role: userData.role,
+        workerProfile,
+      };
+    });
 
     // Compute distances where possible (JS fallback). This lets the frontend show distances
     // even before DB-side Haversine ordering is used.
@@ -248,7 +170,7 @@ export async function GET(req: NextRequest) {
     }
 
     result = result.slice(0, limit);
-    return NextResponse.json({ count: result.length, workers: result });
+    return NextResponse.json({ count: result.length, workers: serializeFirestoreData(result) });
   } catch (err) {
     console.error("/api/workers error", err);
     return NextResponse.json(
