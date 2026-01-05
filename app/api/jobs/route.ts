@@ -1,15 +1,16 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { adminDb } from "@/lib/firebase-admin";
+import { COLLECTIONS, Job, JobLog } from "@/lib/firestore";
 import { protectCustomerApi } from "@/lib/api-auth";
 import { calculateFees } from "@/lib/razorpay-service";
-import type { User } from "@prisma/client";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function POST(req: NextRequest) {
   try {
     const { user, response } = await protectCustomerApi(req);
     if (response) return response;
 
-    const customer = user as User;
+    const customer = user;
 
     const body = await req.json();
     const { workerId, description, details, datetime, location, charge } =
@@ -46,17 +47,19 @@ export async function POST(req: NextRequest) {
     const time = dt; // store the exact requested time as DateTime
 
     // Validate worker exists and is role WORKER
-    const worker = await prisma.user.findUnique({ where: { id: workerId } });
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const workerDoc = await usersRef.doc(workerId).get();
 
-    if (!worker) {
+    if (!workerDoc.exists) {
       return NextResponse.json({ error: "Worker not found" }, { status: 404 });
     }
 
-    if (worker.role !== "WORKER") {
+    const workerData = workerDoc.data();
+    if (workerData?.role !== "WORKER") {
       return NextResponse.json(
         {
           error: "Invalid worker",
-          details: `User exists but has role '${worker.role}' instead of 'WORKER'`,
+          details: `User exists but has role '${workerData?.role}' instead of 'WORKER'`,
         },
         { status: 400 }
       );
@@ -66,41 +69,50 @@ export async function POST(req: NextRequest) {
     const { platformFee, workerEarnings } = calculateFees(charge);
 
     // Create job with payment tracking fields
-    const job = await prisma.job.create({
-      data: {
-        customerId: customer.id,
-        workerId: worker.id,
-        description,
-        details: details || null,
-        date,
-        time,
-        location,
-        charge,
-        status: "PENDING",
-        platformFee,
-        workerEarnings,
-        paymentStatus: "PENDING",
-      },
-    });
+    const jobsRef = adminDb.collection(COLLECTIONS.JOBS);
+    const jobData: Partial<Job> = {
+      customerId: customer.id,
+      workerId: workerId,
+      description,
+      details: details || null,
+      date: date,
+      time: time,
+      location,
+      charge,
+      status: "PENDING",
+      platformFee,
+      workerEarnings,
+      paymentStatus: "PENDING",
+      createdAt: FieldValue.serverTimestamp() as any,
+      updatedAt: FieldValue.serverTimestamp() as any,
+    };
+
+    const jobRef = await jobsRef.add(jobData);
+    const jobId = jobRef.id;
 
     // Create audit log for job creation
-    await prisma.jobLog.create({
-      data: {
-        jobId: job.id,
-        fromStatus: null,
-        toStatus: "PENDING",
-        action: "JOB_CREATED",
-        performedBy: customer.id,
-        metadata: {
-          charge,
-          platformFee,
-          workerEarnings,
-          location,
-        },
+    const jobLogsRef = adminDb.collection(COLLECTIONS.JOB_LOGS);
+    const logData: Partial<JobLog> = {
+      jobId,
+      fromStatus: null,
+      toStatus: "PENDING",
+      action: "JOB_CREATED",
+      performedBy: customer.id,
+      metadata: {
+        charge,
+        platformFee,
+        workerEarnings,
+        location,
       },
-    });
+      createdAt: FieldValue.serverTimestamp() as any,
+    };
 
-    return NextResponse.json({ success: true, job });
+    await jobLogsRef.add(logData);
+
+    return NextResponse.json({ 
+      success: true, 
+      job: { id: jobId, ...jobData }
+    });
   } catch (err) {
     console.error("POST /api/jobs error", err);
     return NextResponse.json(

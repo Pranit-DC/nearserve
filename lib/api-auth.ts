@@ -1,32 +1,75 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import { getCurrentUser } from "@/app/api/actions/onboarding";
+import { adminAuth, adminDb } from "./firebase-admin";
+import { COLLECTIONS } from "./firestore";
 
 export type UserRole = "CUSTOMER" | "WORKER";
+
+/**
+ * Get current user from Firebase Auth token in request
+ */
+async function getCurrentUserFromRequest(request: NextRequest) {
+  try {
+    // Get the authorization header
+    const authHeader = request.headers.get('authorization');
+    
+    if (!authHeader || !authHeader.startsWith('Bearer ')) {
+      // Try to get from cookie
+      const sessionToken = request.cookies.get('__session')?.value;
+      
+      if (!sessionToken) {
+        return null;
+      }
+      
+      // Verify session cookie
+      const decodedToken = await adminAuth.verifySessionCookie(sessionToken);
+      const firebaseUid = decodedToken.uid;
+      
+      // Get user from Firestore
+      const usersRef = adminDb.collection(COLLECTIONS.USERS);
+      const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+      
+      if (userQuery.empty) {
+        return null;
+      }
+      
+      const userDoc = userQuery.docs[0];
+      return { id: userDoc.id, ...userDoc.data() };
+    }
+    
+    // Extract token from Authorization header
+    const token = authHeader.substring(7);
+    
+    // Verify the Firebase ID token (Bearer tokens are ID tokens, not session cookies)
+    const decodedToken = await adminAuth.verifyIdToken(token);
+    const firebaseUid = decodedToken.uid;
+    
+    // Get user from Firestore
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+    
+    if (userQuery.empty) {
+      return null;
+    }
+    
+    const userDoc = userQuery.docs[0];
+    return { id: userDoc.id, ...userDoc.data() };
+  } catch (error) {
+    console.error("Error getting current user from request:", error);
+    return null;
+  }
+}
 
 export async function protectApiRoute(
   request: NextRequest,
   requiredRole?: UserRole
-): Promise<{ user: unknown; response?: NextResponse }> {
+): Promise<{ user: any; response?: NextResponse }> {
   try {
-    const { userId } = await auth();
-
-    if (!userId) {
-      return {
-        user: null,
-        response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
-      };
-    }
-
-    const user = await getCurrentUser();
+    const user = await getCurrentUserFromRequest(request);
 
     if (!user) {
       return {
         user: null,
-        response: NextResponse.json(
-          { error: "User not found" },
-          { status: 404 }
-        ),
+        response: NextResponse.json({ error: "Unauthorized" }, { status: 401 }),
       };
     }
 

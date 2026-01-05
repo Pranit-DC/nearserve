@@ -2,12 +2,13 @@
 
 import { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
 
 export default function AuthRedirect() {
   const router = useRouter();
-  const { user, isLoaded } = useUser();
+  const { user, loading } = useAuth();
+  const isLoaded = !loading;
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {

@@ -1,17 +1,32 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth } from "@clerk/nextjs/server";
-import prisma from "@/lib/prisma";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { COLLECTIONS } from "@/lib/firestore";
+import { cookies } from "next/headers";
+import { FieldValue } from "firebase-admin/firestore";
 
 export async function PUT(req: NextRequest) {
   try {
-    const { userId } = await auth();
-    
-    if (!userId) {
+    // Get session cookie
+    const sessionCookie = (await cookies()).get("__session")?.value;
+    if (!sessionCookie) {
       return NextResponse.json(
         { error: "Unauthorized" },
         { status: 401 }
       );
     }
+
+    // Verify session
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
+    } catch {
+      return NextResponse.json(
+        { error: "Unauthorized" },
+        { status: 401 }
+      );
+    }
+
+    const firebaseUid = decodedToken.uid;
 
     const body = await req.json();
     const {
@@ -50,52 +65,75 @@ export async function PUT(req: NextRequest) {
       );
     }
 
-    // Find the user's worker profile
-    const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-      include: { workerProfile: true },
-    });
+    // Find the user
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
 
-    if (!user || !user.workerProfile) {
+    if (userQuery.empty) {
+      return NextResponse.json(
+        { error: "User not found" },
+        { status: 404 }
+      );
+    }
+
+    const userId = userQuery.docs[0].id;
+
+    // Find the worker profile
+    const workerProfilesRef = adminDb.collection(COLLECTIONS.WORKER_PROFILES);
+    const profileQuery = await workerProfilesRef.where('userId', '==', userId).limit(1).get();
+
+    if (profileQuery.empty) {
       return NextResponse.json(
         { error: "Worker profile not found" },
         { status: 404 }
       );
     }
 
+    const profileDoc = profileQuery.docs[0];
+
     // Update the worker profile
-    const updatedProfile = await prisma.workerProfile.update({
-      where: { id: user.workerProfile.id },
-      data: {
-        bio,
-        skilledIn,
-        qualification,
-        yearsExperience: yearsExperience ? parseInt(yearsExperience) : undefined,
-        hourlyRate: hourlyRate ? parseFloat(hourlyRate) : undefined,
-        minimumFee: minimumFee ? parseFloat(minimumFee) : undefined,
-        address,
-        city,
-        state,
-        postalCode,
-        country,
-      },
-      include: {
-        previousWorks: {
-          orderBy: { createdAt: "desc" },
-        },
-        user: {
-          select: {
-            name: true,
-            email: true,
-            phone: true,
-          },
-        },
-      },
+    await profileDoc.ref.update({
+      bio: bio || null,
+      skilledIn,
+      qualification: qualification || null,
+      yearsExperience: yearsExperience ? parseInt(yearsExperience) : null,
+      hourlyRate: hourlyRate ? parseFloat(hourlyRate) : null,
+      minimumFee: minimumFee ? parseFloat(minimumFee) : null,
+      address: address || null,
+      city: city || null,
+      state: state || null,
+      postalCode: postalCode || null,
+      country: country || null,
+      updatedAt: FieldValue.serverTimestamp(),
     });
+
+    // Fetch updated profile with previous works
+    const updatedProfileData = (await profileDoc.ref.get()).data();
+    const previousWorksRef = adminDb.collection(COLLECTIONS.PREVIOUS_WORKS);
+    const worksQuery = await previousWorksRef.where('workerId', '==', profileDoc.id).get();
+    const previousWorks = worksQuery.docs
+      .map(doc => ({ id: doc.id, ...doc.data() }))
+      .sort((a: any, b: any) => {
+        const aTime = a.createdAt?.toDate?.() ? a.createdAt.toDate().getTime() : 0;
+        const bTime = b.createdAt?.toDate?.() ? b.createdAt.toDate().getTime() : 0;
+        return bTime - aTime;
+      });
+
+    // Fetch user data
+    const userData = userQuery.docs[0].data();
 
     return NextResponse.json({
       success: true,
-      profile: updatedProfile,
+      profile: {
+        id: profileDoc.id,
+        ...updatedProfileData,
+        previousWorks,
+        user: {
+          name: userData.name,
+          email: userData.email,
+          phone: userData.phone || null,
+        },
+      },
     });
   } catch (error) {
     console.error("Error updating worker profile:", error);

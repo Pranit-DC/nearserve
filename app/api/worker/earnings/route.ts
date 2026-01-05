@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
+import { adminDb } from "@/lib/firebase-admin";
+import { COLLECTIONS } from "@/lib/firestore";
 import { protectWorkerApi } from "@/lib/api-auth";
-import type { User } from "@prisma/client";
+import { serializeFirestoreData } from "@/lib/firestore-serialization";
 
 export const dynamic = "force-dynamic";
 
@@ -10,19 +11,32 @@ export async function GET(request: NextRequest) {
     const { user, response } = await protectWorkerApi(request);
     if (response) return response;
 
-    const worker = user as User;
+    const worker = user;
 
-    const completedJobs = await prisma.job.findMany({
-      where: { workerId: worker.id, status: "COMPLETED" },
-      select: {
-        id: true,
-        description: true,
-        charge: true,
-        createdAt: true,
-        customer: { select: { name: true } },
-      },
-      orderBy: { createdAt: "desc" },
-    });
+    // Get completed jobs for this worker
+    const jobsRef = adminDb.collection(COLLECTIONS.JOBS);
+    const completedJobsQuery = await jobsRef
+      .where('workerId', '==', worker.id)
+      .where('status', '==', 'COMPLETED')
+      .get();
+
+    // Get customer names
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const completedJobs = await Promise.all(completedJobsQuery.docs.map(async (jobDoc) => {
+      const jobData = serializeFirestoreData(jobDoc.data());
+      let customerName = null;
+      if (jobData.customerId) {
+        const customerDoc = await usersRef.doc(jobData.customerId).get();
+        customerName = customerDoc.data()?.name || null;
+      }
+      return {
+        id: jobDoc.id,
+        description: jobData.description,
+        charge: jobData.charge,
+        createdAt: new Date(jobData.createdAt),
+        customer: { name: customerName },
+      };
+    }));
 
     const total = completedJobs.reduce((sum, j) => sum + j.charge, 0);
     const now = new Date();

@@ -157,10 +157,61 @@ export default function CustomerBookingsPage() {
     }
   };
 
+  // Handle test mode payment (dummy payment)
+  const handleTestPayment = async (job: Job) => {
+    setPaymentProcessing(true);
+    
+    toast.info("TEST MODE: Simulating payment...");
+    
+    // Simulate payment delay
+    await new Promise(resolve => setTimeout(resolve, 2000));
+    
+    try {
+      // Generate dummy payment credentials
+      const dummyPaymentId = `test_pay_${Date.now()}`;
+      const dummySignature = `test_sig_${Date.now()}`;
+      
+      const verifyRes = await fetch(`/api/jobs/${job.id}`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          razorpayPaymentId: dummyPaymentId,
+          razorpaySignature: dummySignature,
+        }),
+      });
+
+      if (verifyRes.ok) {
+        toast.success("✅ TEST PAYMENT SUCCESSFUL! Job completed.");
+        setPaymentJobId(null);
+        setRazorpayOrder(null);
+        await load();
+      } else {
+        const data = await verifyRes.json();
+        toast.error(data.error || "Payment verification failed");
+      }
+    } catch (error) {
+      console.error("Test payment error:", error);
+      toast.error("Failed to process test payment");
+    } finally {
+      setPaymentProcessing(false);
+    }
+  };
+
   // Process payment with Razorpay
   const processPayment = (job: Job) => {
-    if (!razorpayOrder || !razorpayLoaded) {
+    if (!razorpayOrder) {
       toast.error("Payment system not ready. Please try again.");
+      return;
+    }
+
+    // Check if this is a test mode payment
+    if (razorpayOrder.orderId.startsWith("test_order_")) {
+      handleTestPayment(job);
+      return;
+    }
+
+    if (!razorpayLoaded) {
+      toast.error("Payment gateway not loaded. Please refresh the page.");
       return;
     }
 
@@ -341,6 +392,25 @@ export default function CustomerBookingsPage() {
 
       <main className="min-h-screen bg-white dark:bg-black">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          {/* Test Mode Banner */}
+          {razorpayOrder?.orderId?.startsWith("test_order_") && (
+            <motion.div
+              initial={{ opacity: 0, y: -10 }}
+              animate={{ opacity: 1, y: 0 }}
+              className="mb-6 p-4 bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-800 rounded-lg flex items-center gap-3"
+            >
+              <FiAlertCircle className="h-5 w-5 text-amber-600 dark:text-amber-400 flex-shrink-0" />
+              <div className="flex-1">
+                <p className="text-sm font-medium text-amber-900 dark:text-amber-200">
+                  Test Payment Mode Active
+                </p>
+                <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
+                  You're using dummy payments. No real money will be charged. Perfect for testing!
+                </p>
+              </div>
+            </motion.div>
+          )}
+          
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">

@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { adminDb, COLLECTIONS } from "@/lib/firebase-admin";
+import { checkUser } from "@/lib/checkUser";
+import { serializeFirestoreData } from "@/lib/firestore-serialization";
 import {
   Briefcase,
   Clock,
@@ -22,22 +23,7 @@ import {
 } from "lucide-react";
 
 export default async function WorkerDashboardPage() {
-  const { userId } = await auth();
-  if (!userId) {
-    return (
-      <main className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
-        <div className="text-gray-500 dark:text-gray-400">
-          Please sign in to access your dashboard.
-        </div>
-      </main>
-    );
-  }
-
-  const worker = await prisma.user.findUnique({
-    where: { clerkUserId: userId },
-    include: { workerProfile: true },
-  });
-
+  const worker = await checkUser();
   if (!worker || worker.role !== "WORKER") {
     return (
       <main className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
@@ -48,34 +34,56 @@ export default async function WorkerDashboardPage() {
     );
   }
 
-  // Fetch job statistics
-  const [totalJobs, pendingJobs, completedJobs, recentJobs] = await Promise.all(
-    [
-      prisma.job.count({ where: { workerId: worker.id } }),
-      prisma.job.count({ where: { workerId: worker.id, status: "PENDING" } }),
-      prisma.job.count({ where: { workerId: worker.id, status: "COMPLETED" } }),
-      prisma.job.findMany({
-        where: { workerId: worker.id },
-        include: { customer: { select: { name: true } } },
-        orderBy: { createdAt: "desc" },
-        take: 5,
-      }),
-    ]
+  // Fetch all jobs for this worker from Firestore
+  const jobsSnapshot = await adminDb
+    .collection(COLLECTIONS.JOBS)
+    .where("workerId", "==", worker.id)
+    .get();
+
+  const allJobs = serializeFirestoreData(
+    jobsSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }))
   );
+
+  // Calculate statistics
+  const totalJobs = allJobs.length;
+  const pendingJobs = allJobs.filter((job) => job.status === "PENDING").length;
+  const completedJobs = allJobs.filter((job) => job.status === "COMPLETED").length;
+  const acceptedJobs = allJobs.filter((job) => job.status === "ACCEPTED").length;
 
   // Calculate total earnings from completed jobs
-  const completedJobsWithEarnings = await prisma.job.findMany({
-    where: { workerId: worker.id, status: "COMPLETED" },
-    select: { charge: true },
-  });
-  const totalEarnings = completedJobsWithEarnings.reduce(
-    (sum, job) => sum + job.charge,
-    0
-  );
+  const totalEarnings = allJobs
+    .filter((job) => job.status === "COMPLETED")
+    .reduce((sum, job) => sum + (job.charge || 0), 0);
 
-  const acceptedJobs = await prisma.job.count({
-    where: { workerId: worker.id, status: "ACCEPTED" },
-  });
+  // Get recent jobs (last 5)
+  const recentJobs = allJobs
+    .sort((a, b) => {
+      // Since dates are now ISO strings after serialization
+      const aDate = a.createdAt ? new Date(a.createdAt) : new Date(0);
+      const bDate = b.createdAt ? new Date(b.createdAt) : new Date(0);
+      return bDate.getTime() - aDate.getTime();
+    })
+    .slice(0, 5);
+
+  // Fetch customer names for recent jobs
+  const recentJobsWithCustomers = serializeFirestoreData(
+    await Promise.all(
+      recentJobs.map(async (job) => {
+        const customerDoc = await adminDb
+          .collection(COLLECTIONS.USERS)
+          .doc(job.customerId)
+          .get();
+        const customerData = customerDoc.data();
+        return {
+          ...job,
+          customer: { name: customerData?.name || "Unknown Customer" },
+        };
+      })
+    )
+  );
 
   return (
     <div className="space-y-8">
@@ -275,7 +283,7 @@ export default async function WorkerDashboardPage() {
           </Link>
         </div>
 
-        {recentJobs.length === 0 ? (
+        {recentJobsWithCustomers.length === 0 ? (
           <Card className="p-8 text-center border border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
             <div className="text-gray-500 dark:text-gray-400">
               <p className="text-lg font-medium">No jobs yet</p>
@@ -284,7 +292,7 @@ export default async function WorkerDashboardPage() {
           </Card>
         ) : (
           <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-            {recentJobs.map((job) => (
+            {recentJobsWithCustomers.map((job) => (
               <Card
                 key={job.id}
                 className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200"

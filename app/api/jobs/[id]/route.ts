@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
-import prisma from "@/lib/prisma";
-import { auth } from "@clerk/nextjs/server";
+import { adminAuth, adminDb } from "@/lib/firebase-admin";
+import { COLLECTIONS, JobLog, Transaction } from "@/lib/firestore";
+import { cookies } from "next/headers";
+import { FieldValue } from "firebase-admin/firestore";
 import {
   createRazorpayOrder,
   verifyPaymentSignature,
@@ -11,9 +13,20 @@ export async function PATCH(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId)
+    // Get session cookie
+    const sessionCookie = (await cookies()).get("__session")?.value;
+    if (!sessionCookie)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Verify session
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const firebaseUid = decodedToken.uid;
 
     const body = await _req.json();
     const { action } = body || {};
@@ -23,22 +36,33 @@ export async function PATCH(
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
-    const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-    if (!user)
+    // Get user
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+    if (userQuery.empty)
       return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+    const userDoc = userQuery.docs[0];
+    const user = { id: userDoc.id, ...userDoc.data() };
+
+    // Get job
     const resolvedParams = await params;
-    const job = await prisma.job.findUnique({
-      where: { id: resolvedParams.id },
-      include: {
-        customer: true,
-        worker: true,
-      },
-    });
-    if (!job)
+    const jobsRef = adminDb.collection(COLLECTIONS.JOBS);
+    const jobDoc = await jobsRef.doc(resolvedParams.id).get();
+    if (!jobDoc.exists)
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
+
+    const job = { id: jobDoc.id, ...jobDoc.data() };
+
+    // Fetch customer and worker info
+    const customerDoc = job.customerId ? await usersRef.doc(job.customerId).get() : null;
+    const workerDoc = job.workerId ? await usersRef.doc(job.workerId).get() : null;
+
+    const jobWithRelations = {
+      ...job,
+      customer: customerDoc?.exists ? customerDoc.data() : null,
+      worker: workerDoc?.exists ? workerDoc.data() : null,
+    };
 
     // ===========================
     // ACTION: ACCEPT (Worker only)
@@ -62,22 +86,23 @@ export async function PATCH(
       }
 
       // Update job status
-      const updated = await prisma.job.update({
-        where: { id: job.id },
-        data: { status: "ACCEPTED" },
+      await jobDoc.ref.update({ 
+        status: "ACCEPTED",
+        updatedAt: FieldValue.serverTimestamp()
       });
 
       // Log state transition
-      await prisma.jobLog.create({
-        data: {
-          jobId: job.id,
-          fromStatus: "PENDING",
-          toStatus: "ACCEPTED",
-          action: "WORKER_ACCEPTED",
-          performedBy: user.id,
-        },
+      const jobLogsRef = adminDb.collection(COLLECTIONS.JOB_LOGS);
+      await jobLogsRef.add({
+        jobId: job.id,
+        fromStatus: "PENDING",
+        toStatus: "ACCEPTED",
+        action: "WORKER_ACCEPTED",
+        performedBy: user.id,
+        createdAt: FieldValue.serverTimestamp(),
       });
 
+      const updated = { ...job, status: "ACCEPTED" };
       return NextResponse.json({ success: true, job: updated });
     }
 
@@ -132,32 +157,38 @@ export async function PATCH(
       }
 
       // Update job with proof and transition to IN_PROGRESS
-      const updated = await prisma.job.update({
-        where: { id: job.id },
-        data: {
-          status: "IN_PROGRESS",
-          startProofPhoto,
-          startProofGpsLat,
-          startProofGpsLng,
-          startedAt: new Date(),
-        },
+      await jobDoc.ref.update({
+        status: "IN_PROGRESS",
+        startProofPhoto,
+        startProofGpsLat,
+        startProofGpsLng,
+        startedAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
       });
 
       // Log state transition
-      await prisma.jobLog.create({
-        data: {
-          jobId: job.id,
-          fromStatus: "ACCEPTED",
-          toStatus: "IN_PROGRESS",
-          action: "WORK_STARTED",
-          performedBy: user.id,
-          metadata: {
-            startProofPhoto,
-            gpsLocation: { lat: startProofGpsLat, lng: startProofGpsLng },
-          },
+      const jobLogsRef = adminDb.collection(COLLECTIONS.JOB_LOGS);
+      await jobLogsRef.add({
+        jobId: job.id,
+        fromStatus: "ACCEPTED",
+        toStatus: "IN_PROGRESS",
+        action: "WORK_STARTED",
+        performedBy: user.id,
+        metadata: {
+          startProofPhoto,
+          gpsLocation: { lat: startProofGpsLat, lng: startProofGpsLng },
         },
+        createdAt: FieldValue.serverTimestamp(),
       });
 
+      const updated = { 
+        ...job, 
+        status: "IN_PROGRESS",
+        startProofPhoto,
+        startProofGpsLat,
+        startProofGpsLng,
+        startedAt: new Date()
+      };
       return NextResponse.json({ success: true, job: updated });
     }
 
@@ -204,32 +235,30 @@ export async function PATCH(
       const razorpayOrder = await createRazorpayOrder(
         job.id,
         job.charge,
-        job.customer.email,
-        job.customer.phone
+        jobWithRelations.customer?.email,
+        jobWithRelations.customer?.phone
       );
 
       // Update job with Razorpay order details
-      const updated = await prisma.job.update({
-        where: { id: job.id },
-        data: {
-          razorpayOrderId: razorpayOrder.id,
-          paymentStatus: "PROCESSING",
-        },
+      await jobDoc.ref.update({
+        razorpayOrderId: razorpayOrder.id,
+        paymentStatus: "PROCESSING",
+        updatedAt: FieldValue.serverTimestamp(),
       });
 
       // Log payment initiation
-      await prisma.jobLog.create({
-        data: {
-          jobId: job.id,
-          fromStatus: "IN_PROGRESS",
-          toStatus: "IN_PROGRESS", // Status doesn't change yet
-          action: "PAYMENT_INITIATED",
-          performedBy: user.id,
-          metadata: {
-            razorpayOrderId: razorpayOrder.id,
-            amount: job.charge,
-          },
+      const jobLogsRef = adminDb.collection(COLLECTIONS.JOB_LOGS);
+      await jobLogsRef.add({
+        jobId: job.id,
+        fromStatus: "IN_PROGRESS",
+        toStatus: "IN_PROGRESS", // Status doesn't change yet
+        action: "PAYMENT_INITIATED",
+        performedBy: user.id,
+        metadata: {
+          razorpayOrderId: razorpayOrder.id,
+          amount: job.charge,
         },
+        createdAt: FieldValue.serverTimestamp(),
       });
 
       // Return Razorpay order for frontend payment modal
@@ -242,7 +271,7 @@ export async function PATCH(
           currency: razorpayOrder.currency,
           keyId: process.env.RAZORPAY_KEY_ID,
         },
-        job: updated,
+        job: { ...job, razorpayOrderId: razorpayOrder.id, paymentStatus: "PROCESSING" },
       });
     }
 
@@ -287,26 +316,27 @@ export async function PATCH(
       const { reason } = body;
 
       // Update job status
-      const updated = await prisma.job.update({
-        where: { id: job.id },
-        data: { status: "CANCELLED" },
+      await jobDoc.ref.update({ 
+        status: "CANCELLED",
+        updatedAt: FieldValue.serverTimestamp()
       });
 
       // Log cancellation
-      await prisma.jobLog.create({
-        data: {
-          jobId: job.id,
-          fromStatus: job.status,
-          toStatus: "CANCELLED",
-          action: "JOB_CANCELLED",
-          performedBy: user.id,
-          metadata: {
-            cancelledBy: user.role,
-            reason: reason || "No reason provided",
-          },
+      const jobLogsRef = adminDb.collection(COLLECTIONS.JOB_LOGS);
+      await jobLogsRef.add({
+        jobId: job.id,
+        fromStatus: job.status,
+        toStatus: "CANCELLED",
+        action: "JOB_CANCELLED",
+        performedBy: user.id,
+        metadata: {
+          cancelledBy: user.role,
+          reason: reason || "No reason provided",
         },
+        createdAt: FieldValue.serverTimestamp(),
       });
 
+      const updated = { ...job, status: "CANCELLED" };
       return NextResponse.json({ success: true, job: updated });
     }
 
@@ -329,9 +359,20 @@ export async function POST(
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const { userId } = await auth();
-    if (!userId)
+    // Get session cookie
+    const sessionCookie = (await cookies()).get("__session")?.value;
+    if (!sessionCookie)
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+
+    // Verify session
+    let decodedToken;
+    try {
+      decodedToken = await adminAuth.verifySessionCookie(sessionCookie);
+    } catch {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    const firebaseUid = decodedToken.uid;
 
     const body = await _req.json();
     const { razorpayPaymentId, razorpaySignature } = body;
@@ -343,18 +384,23 @@ export async function POST(
       );
     }
 
-    const user = await prisma.user.findUnique({
-      where: { clerkUserId: userId },
-    });
-    if (!user)
+    // Get user
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+    if (userQuery.empty)
       return NextResponse.json({ error: "User not found" }, { status: 404 });
 
+    const userDoc = userQuery.docs[0];
+    const user = { id: userDoc.id, ...userDoc.data() };
+
+    // Get job
     const resolvedParams = await params;
-    const job = await prisma.job.findUnique({
-      where: { id: resolvedParams.id },
-    });
-    if (!job)
+    const jobsRef = adminDb.collection(COLLECTIONS.JOBS);
+    const jobDoc = await jobsRef.doc(resolvedParams.id).get();
+    if (!jobDoc.exists)
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
+
+    const job = { id: jobDoc.id, ...jobDoc.data() };
 
     // Authorization: Only customer can verify payment
     if (user.role !== "CUSTOMER" || job.customerId !== user.id) {
@@ -394,43 +440,52 @@ export async function POST(
     }
 
     // Update job: Mark as COMPLETED with payment details
-    const updated = await prisma.job.update({
-      where: { id: job.id },
-      data: {
-        status: "COMPLETED",
-        paymentStatus: "SUCCESS",
-        razorpayPaymentId,
-        razorpaySignature,
-        completedAt: new Date(),
-      },
+    await jobDoc.ref.update({
+      status: "COMPLETED",
+      paymentStatus: "SUCCESS",
+      razorpayPaymentId,
+      razorpaySignature,
+      completedAt: FieldValue.serverTimestamp(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
 
     // Create transaction record
-    await prisma.transaction.create({
-      data: {
-        userId: job.customerId,
-        jobId: job.id,
-        amount: job.charge,
-        type: "PAYMENT",
-      },
-    });
+    const transactionsRef = adminDb.collection(COLLECTIONS.TRANSACTIONS);
+    const transactionData: Partial<Transaction> = {
+      userId: job.customerId,
+      jobId: job.id,
+      amount: job.charge,
+      type: "PAYMENT",
+      createdAt: FieldValue.serverTimestamp() as any,
+      updatedAt: FieldValue.serverTimestamp() as any,
+    };
+    await transactionsRef.add(transactionData);
 
     // Log job completion
-    await prisma.jobLog.create({
-      data: {
-        jobId: job.id,
-        fromStatus: "IN_PROGRESS",
-        toStatus: "COMPLETED",
-        action: "PAYMENT_VERIFIED_JOB_COMPLETED",
-        performedBy: user.id,
-        metadata: {
-          razorpayPaymentId,
-          amount: job.charge,
-          platformFee: job.platformFee,
-          workerEarnings: job.workerEarnings,
-        },
+    const jobLogsRef = adminDb.collection(COLLECTIONS.JOB_LOGS);
+    await jobLogsRef.add({
+      jobId: job.id,
+      fromStatus: "IN_PROGRESS",
+      toStatus: "COMPLETED",
+      action: "PAYMENT_VERIFIED_JOB_COMPLETED",
+      performedBy: user.id,
+      metadata: {
+        razorpayPaymentId,
+        amount: job.charge,
+        platformFee: job.platformFee,
+        workerEarnings: job.workerEarnings,
       },
+      createdAt: FieldValue.serverTimestamp(),
     });
+
+    const updated = {
+      ...job,
+      status: "COMPLETED",
+      paymentStatus: "SUCCESS",
+      razorpayPaymentId,
+      razorpaySignature,
+      completedAt: new Date()
+    };
 
     return NextResponse.json({
       success: true,

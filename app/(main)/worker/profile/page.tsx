@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { Card } from "@/components/ui/card";
@@ -98,7 +98,7 @@ type UserData = {
 };
 
 export default function WorkerProfilePage() {
-  const { user } = useUser();
+  const { user } = useAuth();
   const router = useRouter();
   const [data, setData] = useState<UserData | null>(null);
   const [loading, setLoading] = useState(true);
@@ -525,7 +525,7 @@ export default function WorkerProfilePage() {
                     </span>
                   </div>
 
-                  {data.phone && !data.phone.startsWith('no-phone-') && (
+                  {data.phone && !String(data.phone).startsWith('no-phone-') && (
                     <div className="flex items-center gap-3 text-sm">
                       <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
                         <FiPhone className="h-4 w-4 text-gray-600 dark:text-gray-400" />

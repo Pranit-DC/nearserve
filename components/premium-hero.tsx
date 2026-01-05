@@ -38,10 +38,6 @@ interface HeroProps {
 function HoverableMockups({ mockup }: { mockup: ReactNode }) {
   const [isHovered, setIsHovered] = useState(false);
 
-  useEffect(() => {
-    console.log('HoverableMockups: isHovered ->', isHovered);
-  }, [isHovered]);
-
   // ---- Editable values: tweak these to change how far/fast layers move/rotate on hover ----
   // ANIM_DURATION: animation duration in seconds (change to speed up/slow down)
   // BACK_X: horizontal translation for the back mockup (px)
@@ -66,10 +62,10 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
       <div
         className="relative cursor-pointer min-h-[360px] sm:min-h-[420px] lg:min-h-[520px] pointer-events-auto"
         style={{ perspective: "1500px", perspectiveOrigin: "50% 50%" }}
-        onMouseEnter={(e) => { console.log('HoverableMockups: mouseenter', e.type); setIsHovered(true); }}
-        onMouseLeave={(e) => { console.log('HoverableMockups: mouseleave', e.type); setIsHovered(false); }}
-        onPointerEnter={(e) => { console.log('HoverableMockups: pointerenter', e.type); setIsHovered(true); }}
-        onPointerLeave={(e) => { console.log('HoverableMockups: pointerleave', e.type); setIsHovered(false); }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onPointerEnter={() => setIsHovered(true)}
+        onPointerLeave={() => setIsHovered(false)}
       >
         <div
           className="relative mx-auto"

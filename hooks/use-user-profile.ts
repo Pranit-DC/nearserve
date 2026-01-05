@@ -1,22 +1,26 @@
-import { useUser } from "@clerk/nextjs";
+import { useAuth } from "@/contexts/AuthContext";
 import { useEffect, useState } from "react";
 
 export interface UserProfile {
   id: string;
   name: string;
   role: "CUSTOMER" | "WORKER" | "UNASSIGNED";
-  clerkUserId: string;
+  firebaseUid: string;
+  email: string;
+  phone: string;
+  workerProfile?: any;
+  customerProfile?: any;
 }
 
 export function useUserProfile() {
-  const { user, isLoaded } = useUser();
+  const { user, loading: authLoading } = useAuth();
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     async function fetchUserProfile() {
-      if (!isLoaded) {
+      if (authLoading) {
         setLoading(true);
         return;
       }
@@ -31,10 +35,14 @@ export function useUserProfile() {
         setLoading(true);
         setError(null);
         
+        // Get the Firebase ID token
+        const token = await user.getIdToken();
+        
         const response = await fetch('/api/user/profile', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
+            'Authorization': `Bearer ${token}`,
           },
         });
         
@@ -59,11 +67,11 @@ export function useUserProfile() {
     }
 
     fetchUserProfile();
-  }, [user, isLoaded]);
+  }, [user, authLoading]);
 
   return {
     userProfile,
-    loading: loading || !isLoaded,
+    loading: loading || authLoading,
     error,
     isAuthenticated: !!user && !!userProfile,
   };
