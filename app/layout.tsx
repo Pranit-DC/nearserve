@@ -47,6 +47,7 @@ export default function RootLayout({
             <Toaster richColors />
             {/* Conditional footer - hidden on customer/worker dashboards */}
             <ConditionalFooter />
+            <ProjectChatbot />
           </AuthProvider>
         </ThemeProvider>
       </body>
