@@ -27,6 +27,12 @@ const CLOSE_DELAY = 0.08;
 const FEEDBACK_WIDTH = 500;
 const FEEDBACK_HEIGHT = 600;
 
+// Classname groups for readability and maintainability
+const CHATBOT_BASE = "relative z-3 flex flex-col items-center overflow-hidden border bg-background";
+const CHATBOT_SHADOWS = "shadow-[0_12px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.6)]";
+const CHATBOT_HOVER = "hover:shadow-[0_20px_80px_rgba(0,0,0,0.28)] hover:dark:shadow-[0_22px_90px_rgba(0,0,0,0.7)] hover:-translate-y-1 hover:ring-4 hover:ring-primary/12";
+const CHATBOT_TRANSITION = "ring-0 transition-shadow transition-transform duration-200 ease-out";
+
 // Get responsive dimensions
 const getResponsiveDimensions = () => {
   if (typeof window === 'undefined') {
@@ -61,13 +67,22 @@ export default function ProjectChatbot() {
   useEffect(() => {
     // Set initial dimensions after mount
     setDimensions(getResponsiveDimensions());
-    
+    // Throttle resize updates using requestAnimationFrame to avoid
+    // excessive state updates during continuous resize/orientation changes.
+    let rafId: number | null = null;
     const handleResize = () => {
-      setDimensions(getResponsiveDimensions());
+      if (rafId !== null) return;
+      rafId = requestAnimationFrame(() => {
+        setDimensions(getResponsiveDimensions());
+        rafId = null;
+      });
     };
-    
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+
+    window.addEventListener("resize", handleResize);
+    return () => {
+      if (rafId !== null) cancelAnimationFrame(rafId);
+      window.removeEventListener("resize", handleResize);
+    };
   }, []);
 
   const scrollToBottom = () => {
@@ -148,7 +163,10 @@ export default function ProjectChatbot() {
             : DOCK_BORDER_RADIUS,
         }}
         className={cx(
-          "relative z-3 flex flex-col items-center overflow-hidden border bg-background shadow-[0_12px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.6)] ring-0 hover:shadow-[0_20px_80px_rgba(0,0,0,0.28)] hover:dark:shadow-[0_22px_90px_rgba(0,0,0,0.7)] hover:-translate-y-1 hover:ring-4 hover:ring-primary/12 transition-shadow transition-transform duration-200 ease-out"
+          CHATBOT_BASE,
+          CHATBOT_SHADOWS,
+          CHATBOT_HOVER,
+          CHATBOT_TRANSITION
         )}
         initial={false}
         ref={rootRef}
