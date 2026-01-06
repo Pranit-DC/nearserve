@@ -26,6 +26,16 @@ import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/contexts/AuthContext"
 import { FirebaseUserButton } from "@/components/firebase-user-button"
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
 
 const navigation = [
   {
@@ -153,9 +163,10 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
   const pathname = usePathname()
   const { theme, setTheme, systemTheme } = useTheme()
   const [mounted, setMounted] = useState(false)
-  
+  const { signOut } = useAuth();
+
   useEffect(() => setMounted(true), [])
-  
+
   const currentTheme = theme === "system" ? systemTheme : theme
   
   // Use internal state only if no external state is provided (for mobile)
@@ -177,30 +188,32 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
         width: isOpen ? "256px" : "fit-content",
       }}
     >
-      {/* Brand Header */}
+      {/* Brand Header - Clickable to go home */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        {isOpen ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center space-x-3"
-          >
-            <img 
-              src="/hard-hat_11270170.svg" 
-              alt="NearServe Logo" 
-              className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
-            />
-            <span className="font-semibold text-gray-900 dark:text-white tracking-tight">NearServe</span>
-          </motion.div>
-        ) : (
-          <div className="flex justify-center">
-            <img 
-              src="/hard-hat_11270170.svg" 
-              alt="NearServe Logo" 
-              className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
-            />
-          </div>
-        )}
+        <Link href="/" aria-label="Go to Home">
+          {isOpen ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center space-x-3 cursor-pointer"
+            >
+              <img 
+                src="/hard-hat_11270170.svg" 
+                alt="NearServe Logo" 
+                className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+              />
+              <span className="font-semibold text-gray-900 dark:text-white tracking-tight">NearServe</span>
+            </motion.div>
+          ) : (
+            <div className="flex justify-center cursor-pointer">
+              <img 
+                src="/hard-hat_11270170.svg" 
+                alt="NearServe Logo" 
+                className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+              />
+            </div>
+          )}
+        </Link>
       </div>
       
       {/* Mobile close button */}
@@ -272,9 +285,40 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
         )}
       </div>
 
-      {/* User Profile Section */}
+      {/* User Profile Section & Sign Out */}
       <div className="px-2 py-3 border-t border-gray-200 dark:border-gray-700 mb-2">
         <FirebaseUserButton />
+        {/* Sidebar Sign Out Button with Confirmation Dialog */}
+        <Dialog>
+          <DialogTrigger asChild>
+            <button
+              className="mt-3 w-full flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors font-medium"
+              aria-label="Sign out"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a2 2 0 01-2 2H7a2 2 0 01-2-2V7a2 2 0 012-2h6a2 2 0 012 2v1"/></svg>
+              <span>Sign Out</span>
+            </button>
+          </DialogTrigger>
+          <DialogContent>
+            <DialogHeader>
+              <DialogTitle>Sign Out</DialogTitle>
+              <DialogDescription>
+                Are you sure you want to sign out?
+              </DialogDescription>
+            </DialogHeader>
+            <DialogFooter>
+              <DialogClose asChild>
+                <button className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
+              </DialogClose>
+              <button
+                className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                onClick={async () => {
+                  await signOut();
+                }}
+              >Sign Out</button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
 
       {/* Collapse Button - Now at bottom but visible */}

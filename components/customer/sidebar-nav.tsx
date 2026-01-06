@@ -22,10 +22,21 @@ import {
   FiSun,
   FiMoon,
 } from "react-icons/fi";
+import { FiLogOut } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { FirebaseUserButton } from "@/components/firebase-user-button";
+import {
+  Dialog,
+  DialogTrigger,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+  DialogClose
+} from "@/components/ui/dialog";
 
 const navigation = [
   {
@@ -165,6 +176,8 @@ export function CustomerSidebar({
 
   const currentTheme = theme === "system" ? systemTheme : theme;
 
+  const { signOut } = useAuth();
+
   // Use internal state only if no external state is provided (for mobile)
   const [internalOpen, setInternalOpen] = useState(true);
   const isOpen = setOpen ? open : internalOpen;
@@ -285,9 +298,42 @@ export function CustomerSidebar({
         )}
       </div>
 
-      {/* User Profile Section */}
+      {/* User Profile Section & Sign Out with Confirmation Dialog */}
       <div className="px-2 py-3 border-t border-gray-200 dark:border-gray-700 mb-2">
-        <FirebaseUserButton />
+        <div className="flex items-center justify-between gap-2">
+          <FirebaseUserButton />
+          <Dialog>
+            <DialogTrigger asChild>
+              <motion.button
+                layout
+                className="flex items-center gap-2 px-3 py-2 rounded-md text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                aria-label="Sign out"
+              >
+                <FiLogOut className="w-4 h-4" />
+                {isOpen && <span className="text-sm font-medium">Sign Out</span>}
+              </motion.button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Sign Out</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to sign out?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <button className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
+                </DialogClose>
+                <button
+                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                  onClick={async () => {
+                    await signOut();
+                  }}
+                >Sign Out</button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </div>
       </div>
 
       {/* Collapse Button - Now at bottom but visible */}
