@@ -48,7 +48,7 @@ export function FirebaseUserButton() {
   const initials = displayName.split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
 
   return (
-    <div className="relative" ref={dropdownRef}>
+    <div className="relative px-3" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
         ref={buttonRef}
@@ -79,7 +79,25 @@ export function FirebaseUserButton() {
       {isOpen && (
         <div
           data-menu
-          className={`absolute right-0 w-64 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50 ${openUp ? 'bottom-full mb-2' : 'mt-2 top-full'}`}
+          ref={menu => {
+            if (menu) {
+              const rect = menu.getBoundingClientRect();
+              if (rect.right > window.innerWidth) {
+                menu.style.left = 'auto';
+                menu.style.right = '0px';
+                if (rect.width > window.innerWidth) {
+                  menu.style.left = '0px';
+                  menu.style.right = 'auto';
+                  menu.style.width = '100vw';
+                  menu.style.maxWidth = '100vw';
+                }
+              } else if (rect.left < 0) {
+                menu.style.left = '0px';
+                menu.style.right = 'auto';
+              }
+            }
+          }}
+          className={`absolute w-64 max-w-[90vw] bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50 ${openUp ? 'bottom-full mb-2' : 'mt-2 top-full'} right-0`}
         >
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-3">

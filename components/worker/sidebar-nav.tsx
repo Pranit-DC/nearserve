@@ -177,30 +177,32 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
         width: isOpen ? "256px" : "fit-content",
       }}
     >
-      {/* Brand Header */}
+      {/* Brand Header - Clickable to go home */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        {isOpen ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center space-x-3"
-          >
-            <img 
-              src="/hard-hat_11270170.svg" 
-              alt="NearServe Logo" 
-              className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
-            />
-            <span className="font-semibold text-gray-900 dark:text-white tracking-tight">NearServe</span>
-          </motion.div>
-        ) : (
-          <div className="flex justify-center">
-            <img 
-              src="/hard-hat_11270170.svg" 
-              alt="NearServe Logo" 
-              className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
-            />
-          </div>
-        )}
+        <Link href="/" aria-label="Go to Home">
+          {isOpen ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center space-x-3 cursor-pointer"
+            >
+              <img 
+                src="/hard-hat_11270170.svg" 
+                alt="NearServe Logo" 
+                className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+              />
+              <span className="font-semibold text-gray-900 dark:text-white tracking-tight">NearServe</span>
+            </motion.div>
+          ) : (
+            <div className="flex justify-center cursor-pointer">
+              <img 
+                src="/hard-hat_11270170.svg" 
+                alt="NearServe Logo" 
+                className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+              />
+            </div>
+          )}
+        </Link>
       </div>
       
       {/* Mobile close button */}
