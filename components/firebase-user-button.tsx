@@ -11,6 +11,8 @@ export function FirebaseUserButton() {
   const { userProfile } = useUserProfile();
   const [isOpen, setIsOpen] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
+  const buttonRef = useRef<HTMLButtonElement>(null);
+  const [openUp, setOpenUp] = useState(false);
 
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -21,6 +23,17 @@ export function FirebaseUserButton() {
 
     if (isOpen) {
       document.addEventListener("mousedown", handleClickOutside);
+
+      // decide whether to open upward if there's not enough space below
+      requestAnimationFrame(() => {
+        const btn = buttonRef.current;
+        const menu = dropdownRef.current?.querySelector('[data-menu]') as HTMLElement | null;
+        if (!btn || !menu) return;
+        const btnRect = btn.getBoundingClientRect();
+        const menuHeight = menu.offsetHeight;
+        const spaceBelow = window.innerHeight - btnRect.bottom;
+        setOpenUp(spaceBelow < menuHeight + 8); // 8px buffer
+      });
     }
 
     return () => {
@@ -38,6 +51,7 @@ export function FirebaseUserButton() {
     <div className="relative" ref={dropdownRef}>
       <button
         onClick={() => setIsOpen(!isOpen)}
+        ref={buttonRef}
         className="flex items-center gap-2 rounded-full hover:opacity-80 transition-opacity"
       >
         <div className="w-9 h-9 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-medium ring-1 ring-gray-200 dark:ring-gray-700 hover:ring-gray-300 dark:hover:ring-gray-600 transition-all duration-200">
@@ -49,8 +63,24 @@ export function FirebaseUserButton() {
         </div>
       </button>
 
+      {/* Inline logout for quick access on small screens */}
+      <button
+        onClick={async () => {
+          setIsOpen(false);
+          await signOut();
+        }}
+        className="ml-2 md:hidden flex items-center gap-2 text-sm text-red-600 hover:opacity-80"
+        aria-label="Sign out"
+      >
+        <FiLogOut className="w-5 h-5" />
+        <span className="ml-1">Sign Out</span>
+      </button>
+
       {isOpen && (
-        <div className="absolute right-0 mt-2 w-64 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50">
+        <div
+          data-menu
+          className={`absolute right-0 w-64 bg-white dark:bg-gray-900 rounded-xl shadow-xl border border-gray-200 dark:border-gray-800 z-50 ${openUp ? 'bottom-full mb-2' : 'mt-2 top-full'}`}
+        >
           <div className="p-4 border-b border-gray-200 dark:border-gray-800">
             <div className="flex items-center gap-3">
               <div className="w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-indigo-500 flex items-center justify-center text-white font-medium">
@@ -72,17 +102,6 @@ export function FirebaseUserButton() {
           </div>
 
           <div className="py-2">
-            {userProfile?.role && userProfile.role !== 'UNASSIGNED' && (
-              <Link
-                href={userProfile.role === 'WORKER' ? '/worker/profile' : '/customer/profile'}
-                className="flex items-center gap-3 px-4 py-2 text-sm text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                onClick={() => setIsOpen(false)}
-              >
-                <FiUser className="w-4 h-4" />
-                <span>Profile</span>
-              </Link>
-            )}
-
             <button
               onClick={async () => {
                 setIsOpen(false);

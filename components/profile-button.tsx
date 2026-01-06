@@ -50,21 +50,12 @@ const ProfileButton = () => {
 
   // Handle error state - still show onboarding button as fallback
   if (error) {
-    return (
-      <Link href="/onboarding">
-        <Button
-          variant="outline"
-          className="hidden md:inline-flex items-center gap-2 rounded-xl px-4 py-2 shadow-sm hover:shadow-md transition"
-        >
-          <User className="h-5 w-5 text-amber-500" />
-          <span className="font-medium">Complete Profile</span>
-        </Button>
-      </Link>
-    );
+    // If there's an error fetching user, don't show the Complete Profile CTA.
+    return null;
   }
 
-  // If user doesn't have a role or has UNASSIGNED role, show Complete Profile button
-  if (!user?.role || user.role === "UNASSIGNED") {
+  // If a signed-in user exists but doesn't have a role (or is UNASSIGNED), show Complete Profile
+  if (user && (!user.role || user.role === "UNASSIGNED")) {
     return (
       <Link href="/onboarding">
         <Button
