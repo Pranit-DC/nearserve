@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { FiUser, FiLogOut, FiSettings } from "react-icons/fi";
 import Link from "next/link";
@@ -10,6 +11,7 @@ export function FirebaseUserButton() {
   const { user, signOut } = useAuth();
   const { userProfile } = useUserProfile();
   const [isOpen, setIsOpen] = useState(false);
+  const [showSignOutConfirm, setShowSignOutConfirm] = useState(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const buttonRef = useRef<HTMLButtonElement>(null);
   const [openUp, setOpenUp] = useState(false);
@@ -65,10 +67,7 @@ export function FirebaseUserButton() {
 
       {/* Inline logout for quick access on small screens */}
       <button
-        onClick={async () => {
-          setIsOpen(false);
-          await signOut();
-        }}
+        onClick={() => setShowSignOutConfirm(true)}
         className="ml-2 md:hidden flex items-center gap-2 text-sm text-red-600 hover:opacity-80"
         aria-label="Sign out"
       >
@@ -121,15 +120,39 @@ export function FirebaseUserButton() {
 
           <div className="py-2">
             <button
-              onClick={async () => {
-                setIsOpen(false);
-                await signOut();
-              }}
+              onClick={() => setShowSignOutConfirm(true)}
               className="w-full flex items-center gap-3 px-4 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
             >
               <FiLogOut className="w-4 h-4" />
               <span>Sign Out</span>
             </button>
+                {/* Sign Out Confirmation Dialog */}
+                <Dialog open={showSignOutConfirm} onOpenChange={setShowSignOutConfirm}>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Sign Out</DialogTitle>
+                    </DialogHeader>
+                    <div className="py-2">Are you sure you want to sign out?</div>
+                    <DialogFooter>
+                      <button
+                        className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+                        onClick={() => setShowSignOutConfirm(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                        onClick={async () => {
+                          setShowSignOutConfirm(false);
+                          setIsOpen(false);
+                          await signOut();
+                        }}
+                      >
+                        Sign Out
+                      </button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
           </div>
         </div>
       )}
