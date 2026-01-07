@@ -4,8 +4,7 @@ import { COLLECTIONS, Job, JobLog, WorkerProfile } from "@/lib/firestore";
 import { protectCustomerApi } from "@/lib/api-auth";
 import { calculateFees } from "@/lib/razorpay-service";
 import { FieldValue } from "firebase-admin/firestore";
-import { notifyWorkerBooked } from "@/lib/sendNotification";
-
+import { notifyWorkerBooked } from "@/lib/sendNotification";import { notifyWorkerJobCreated } from '@/lib/notification-service';
 export async function POST(req: NextRequest) {
   try {
     const { user, response } = await protectCustomerApi(req);
@@ -137,6 +136,16 @@ export async function POST(req: NextRequest) {
           } else {
             console.error(`❌ Failed to send notification:`, result.error);
           }
+          
+          // Create in-app notification
+          await notifyWorkerJobCreated(workerId, {
+            customerName: customer.name,
+            serviceName: description,
+            date: date.toLocaleDateString(),
+            time: time.toLocaleTimeString(),
+            jobId: jobId,
+          });
+          console.log(`[Notification] Created in-app notification for worker ${workerId}`);
         } else {
           console.log(`[NOTIFICATION] Worker ${workerId} has not enabled notifications`);
         }

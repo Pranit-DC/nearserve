@@ -38,6 +38,7 @@ export const COLLECTIONS = {
   REVIEWS: 'reviews',
   TRANSACTIONS: 'transactions',
   TRANSLATION_CACHE: 'translation_cache',
+  NOTIFICATIONS: 'notifications',
 } as const;
 
 // Enums (from Prisma schema)

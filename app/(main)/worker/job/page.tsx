@@ -30,6 +30,8 @@ import {
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeJobs } from "@/hooks/use-realtime-jobs";
 
 type Job = {
   id: string;
@@ -47,8 +49,7 @@ type Job = {
 type Tab = "NEW" | "PREVIOUS";
 
 export default function WorkerJobsPage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("NEW");
   const [acting, setActing] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,31 +65,49 @@ export default function WorkerJobsPage() {
     lng: number;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  const load = async (silent = false) => {
-    if (!silent) setLoading(true);
+  // Real-time Firestore listener - instant updates when jobs change!
+  const { jobs, loading, error } = useRealtimeJobs({
+    userId: user?.uid || null,
+    role: 'worker',
+    enabled: !!user?.uid
+  });
+
+  // Fallback to API if Firestore fails
+  const [apiJobs, setApiJobs] = useState<Job[]>([]);
+  const [fallbackActive, setFallbackActive] = useState(false);
+
+  const loadFromAPI = async () => {
     try {
-      const res = await fetch("/api/worker/jobs", { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to load jobs");
+      const res = await fetch("/api/worker/jobs", { 
+        cache: "no-store",
+        credentials: "include"
+      });
+      
+      if (!res.ok) throw new Error(`Failed to load jobs: ${res.status}`);
+      
       const data = await res.json();
-      setJobs(data.jobs || []);
-      setLastRefresh(new Date());
-      console.log(`[Jobs] Loaded ${data.jobs?.length || 0} jobs at ${new Date().toLocaleTimeString()}`);
+      setApiJobs(data.jobs || []);
+      console.log(`[Jobs API] Loaded ${data.jobs?.length || 0} jobs`);
     } catch (e) {
-      console.error(e);
-      if (!silent) setJobs([]);
-    } finally {
-      if (!silent) setLoading(false);
+      console.error('[Jobs API] Load error:', e);
     }
   };
 
+  // If Firestore has an error, activate API fallback
   useEffect(() => {
-    load();
-  }, []);
+    if (error && !fallbackActive) {
+      console.warn('[Jobs] Firestore error, falling back to API polling');
+      setFallbackActive(true);
+      loadFromAPI();
+    }
+  }, [error, fallbackActive]);
 
-  // Auto-refresh jobs data every 30 seconds in the background (silent)
-  useAutoRefresh(() => load(true), { interval: 30000, enabled: true });
+  // Use API polling as fallback only if Firestore fails
+  useAutoRefresh(loadFromAPI, { interval: 30000, enabled: fallbackActive });
+
+  // Use either realtime jobs or API jobs
+  const displayJobs = fallbackActive ? apiJobs : jobs;
 
   const act = async (id: string, action: "ACCEPT" | "CANCEL") => {
     setActing(id);
@@ -102,7 +121,7 @@ export default function WorkerJobsPage() {
         toast.success(
           action === "ACCEPT" ? "Job accepted successfully!" : "Job cancelled"
         );
-        await load();
+        // No need to reload - realtime listener auto-updates!
       } else {
         const data = await res.json();
         toast.error(data.error || "Action failed");
@@ -244,7 +263,7 @@ export default function WorkerJobsPage() {
         setPhotoFile(null);
         setPhotoPreview(null);
         setGpsCoords(null);
-        await load();
+        // No need to reload - realtime listener auto-updates!
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to start work");
@@ -258,13 +277,13 @@ export default function WorkerJobsPage() {
   };
 
   // Filter and search logic
-  const newJobs = jobs.filter(
+  const newJobs = displayJobs.filter(
     (j) =>
       j.status === "PENDING" ||
       j.status === "ACCEPTED" ||
       j.status === "IN_PROGRESS"
   );
-  const previousJobs = jobs.filter(
+  const previousJobs = displayJobs.filter(
     (j) => j.status === "COMPLETED" || j.status === "CANCELLED"
   );
 

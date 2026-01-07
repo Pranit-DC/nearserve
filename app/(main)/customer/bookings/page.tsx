@@ -31,6 +31,8 @@ import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import Script from "next/script";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeJobs } from "@/hooks/use-realtime-jobs";
 
 // Extend Window interface for Razorpay
 declare global {
@@ -64,8 +66,7 @@ type RazorpayOrder = {
 };
 
 export default function CustomerBookingsPage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("ONGOING");
   const [acting, setActing] = useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -80,45 +81,63 @@ export default function CustomerBookingsPage() {
   );
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
-  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
+
+  // Real-time Firestore listener - instant updates when bookings change!
+  const { jobs, loading, error } = useRealtimeJobs({
+    userId: user?.uid || null,
+    role: 'customer',
+    enabled: !!user?.uid
+  });
+
+  // Fallback to API if Firestore fails
+  const [apiJobs, setApiJobs] = useState<Job[]>([]);
+  const [fallbackActive, setFallbackActive] = useState(false);
 
   const openReview = (jobId: string) => {
     setReviewJobId(jobId);
     setReviewOpen(true);
   };
 
-  const load = async (silent = false) => {
-    if (!silent) setLoading(true);
+  const loadFromAPI = async () => {
     try {
-      const res = await fetch("/api/customer/jobs", { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to load jobs");
+      const res = await fetch("/api/customer/jobs", { 
+        cache: "no-store",
+        credentials: "include"
+      });
+      
+      if (!res.ok) throw new Error(`Failed to load jobs: ${res.status}`);
+      
       const data = await res.json();
-      setJobs(data.jobs || []);
-      setLastRefresh(new Date());
-      console.log(`[Bookings] Loaded ${data.jobs?.length || 0} jobs at ${new Date().toLocaleTimeString()}`);
+      setApiJobs(data.jobs || []);
+      console.log(`[Bookings API] Loaded ${data.jobs?.length || 0} jobs`);
     } catch (e) {
-      console.error(e);
-      if (!silent) setJobs([]);
-    } finally {
-      if (!silent) setLoading(false);
+      console.error('[Bookings API] Load error:', e);
     }
   };
 
+  // If Firestore has an error, activate API fallback
   useEffect(() => {
-    load();
-  }, []);
+    if (error && !fallbackActive) {
+      console.warn('[Bookings] Firestore error, falling back to API polling');
+      setFallbackActive(true);
+      loadFromAPI();
+    }
+  }, [error, fallbackActive]);
 
-  // Auto-refresh bookings data every 30 seconds in the background (silent)
-  useAutoRefresh(() => load(true), { interval: 30000, enabled: true });
+  // Use API polling as fallback only if Firestore fails
+  useAutoRefresh(loadFromAPI, { interval: 30000, enabled: fallbackActive });
+
+  // Use either realtime jobs or API jobs
+  const displayJobs = fallbackActive ? apiJobs : jobs;
 
   // Filter and search logic
-  const ongoing = jobs.filter(
+  const ongoing = displayJobs.filter(
     (j) =>
       j.status === "PENDING" ||
       j.status === "ACCEPTED" ||
       j.status === "IN_PROGRESS"
   );
-  const previous = jobs.filter(
+  const previous = displayJobs.filter(
     (j) => j.status === "COMPLETED" || j.status === "CANCELLED"
   );
 
@@ -154,7 +173,7 @@ export default function CustomerBookingsPage() {
         toast.info("Opening payment gateway...");
       } else {
         toast.success("Job completed successfully!");
-        await load();
+        // Real-time listener will update automatically
       }
     } catch (error) {
       console.error("Complete job error:", error);
@@ -191,7 +210,7 @@ export default function CustomerBookingsPage() {
         toast.success("✅ TEST PAYMENT SUCCESSFUL! Job completed.");
         setPaymentJobId(null);
         setRazorpayOrder(null);
-        await load();
+        // Real-time listener will update automatically
       } else {
         const data = await verifyRes.json();
         toast.error(data.error || "Payment verification failed");
@@ -247,7 +266,7 @@ export default function CustomerBookingsPage() {
             toast.success("Payment successful! Job completed.");
             setPaymentJobId(null);
             setRazorpayOrder(null);
-            await load();
+            // Real-time listener will update automatically
           } else {
             const data = await verifyRes.json();
             toast.error(data.error || "Payment verification failed");
@@ -987,7 +1006,10 @@ export default function CustomerBookingsPage() {
           open={reviewOpen}
           onOpenChange={setReviewOpen}
           jobId={reviewJobId}
-          onSubmitted={load}
+          onSubmitted={() => {
+            // Real-time listener will update automatically
+            toast.success("Review submitted successfully!");
+          }}
         />
       </main>
     </>

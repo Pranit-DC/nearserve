@@ -27,6 +27,7 @@ import { useTheme } from "next-themes"
 import { useAuth } from "@/contexts/AuthContext"
 import { FirebaseUserButton } from "@/components/firebase-user-button"
 import { LanguageSwitcher } from "@/components/language-switcher"
+import { NotificationBell } from "@/components/notification-bell"
 import {
   Dialog,
   DialogTrigger,
@@ -191,30 +192,34 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
     >
       {/* Brand Header - Clickable to go home */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        <Link href="/" aria-label="Go to Home">
-          {isOpen ? (
-            <motion.div
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="flex items-center space-x-3 cursor-pointer"
-            >
-              <img 
-                src="/hard-hat_11270170.svg" 
-                alt="NearServe Logo" 
-                className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
-              />
-              <span className="font-semibold text-gray-900 dark:text-white tracking-tight">NearServe</span>
-            </motion.div>
-          ) : (
-            <div className="flex justify-center cursor-pointer">
-              <img 
-                src="/hard-hat_11270170.svg" 
-                alt="NearServe Logo" 
-                className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
-              />
-            </div>
-          )}
-        </Link>
+        <div className="flex items-center justify-between">
+          <Link href="/" aria-label="Go to Home">
+            {isOpen ? (
+              <motion.div
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                className="flex items-center space-x-3 cursor-pointer"
+              >
+                <img 
+                  src="/hard-hat_11270170.svg" 
+                  alt="NearServe Logo" 
+                  className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+                />
+                <span className="font-semibold text-gray-900 dark:text-white tracking-tight">NearServe</span>
+              </motion.div>
+            ) : (
+              <div className="flex justify-center cursor-pointer">
+                <img 
+                  src="/hard-hat_11270170.svg" 
+                  alt="NearServe Logo" 
+                  className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+                />
+              </div>
+            )}
+          </Link>
+          {/* Notification Bell */}
+          <NotificationBell />
+        </div>
       </div>
       
       {/* Mobile close button */}

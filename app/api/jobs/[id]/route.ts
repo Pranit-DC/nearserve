@@ -7,8 +7,12 @@ import {
   createRazorpayOrder,
   verifyPaymentSignature,
 } from "@/lib/razorpay-service";
-import { notifyCustomerJobAccepted } from "@/lib/sendNotification";
-
+import { notifyCustomerJobAccepted } from "@/lib/sendNotification";import { 
+  notifyCustomerJobAcceptedInApp, 
+  notifyCustomerJobStarted, 
+  notifyCustomerJobCompleted,
+  notifyWorkerPaymentReceived 
+} from '@/lib/notification-service';
 export async function PATCH(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -130,8 +134,15 @@ export async function PATCH(
               console.log(`\u2705 Notification sent to customer ${job.customerId}`);
             } else {
               console.error(`\u274c Failed to send notification:`, result.error);
-            }
-          } else {
+            }            
+            // Create in-app notification
+            await notifyCustomerJobAcceptedInApp(job.customerId, {
+              workerName: workerDoc?.data()?.name || 'Worker',
+              serviceName: job.description,
+              date: job.date?.toDate?.()?.toLocaleDateString() || 'Soon',
+              jobId: id,
+            });
+            console.log(`[Notification] Created in-app notification for customer ${job.customerId}`);          } else {
             console.log(`[NOTIFICATION] Customer ${job.customerId} has not enabled notifications`);
           }
         } else {
@@ -220,6 +231,18 @@ export async function PATCH(
         createdAt: FieldValue.serverTimestamp(),
       });
 
+      // Create in-app notification for customer
+      try {
+        await notifyCustomerJobStarted(job.customerId, {
+          workerName: workerDoc?.data()?.name || 'Worker',
+          serviceName: job.description,
+          jobId: id,
+        });
+        console.log(`[Notification] Created in-app notification for customer ${job.customerId} - job started`);
+      } catch (notifError) {
+        console.error('Failed to create in-app notification:', notifError);
+      }
+
       const updated = { 
         ...job, 
         status: "IN_PROGRESS",
@@ -299,6 +322,18 @@ export async function PATCH(
         },
         createdAt: FieldValue.serverTimestamp(),
       });
+
+      // Notify customer that work is complete and ready for payment
+      try {
+        await notifyCustomerJobCompleted(job.customerId, {
+          workerName: workerDoc?.data()?.name || 'Worker',
+          serviceName: job.description,
+          jobId: job.id,
+        });
+        console.log(`[Notification] Created in-app notification for customer ${job.customerId} - work completed, payment required`);
+      } catch (notifError) {
+        console.error('Failed to create completion notification:', notifError);
+      }
 
       // Return Razorpay order for frontend payment modal
       return NextResponse.json({
@@ -516,6 +551,20 @@ export async function POST(
       },
       createdAt: FieldValue.serverTimestamp(),
     });
+
+    // Create in-app notification for worker about payment
+    try {
+      const customerDoc = await usersRef.doc(job.customerId).get();
+      await notifyWorkerPaymentReceived(job.workerId, {
+        customerName: customerDoc?.data()?.name || 'Customer',
+        amount: job.workerEarnings,
+        serviceName: job.description,
+        jobId: job.id,
+      });
+      console.log(`[Notification] Created in-app notification for worker ${job.workerId} - payment received`);
+    } catch (notifError) {
+      console.error('Failed to create payment notification:', notifError);
+    }
 
     const updated = {
       ...job,
