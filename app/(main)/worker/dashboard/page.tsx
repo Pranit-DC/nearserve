@@ -22,11 +22,14 @@ import {
   Target,
 } from "lucide-react";
 
+
+import DashboardBgEffect from "@/components/DashboardBgEffect";
+
 export default async function WorkerDashboardPage() {
   const worker = await checkUser();
   if (!worker || worker.role !== "WORKER") {
     return (
-      <main className="min-h-screen bg-gray-50 dark:bg-black flex items-center justify-center">
+      <main className="min-h-screen bg-gray-50 dark:bg-[#181818] flex items-center justify-center">
         <div className="text-gray-500 dark:text-gray-400">
           Worker access required.
         </div>
@@ -49,21 +52,21 @@ export default async function WorkerDashboardPage() {
 
   // Calculate statistics
   const totalJobs = allJobs.length;
-  const pendingJobs = allJobs.filter((job) => job.status === "PENDING").length;
-  const completedJobs = allJobs.filter((job) => job.status === "COMPLETED").length;
-  const acceptedJobs = allJobs.filter((job) => job.status === "ACCEPTED").length;
+  const pendingJobs = allJobs.filter((job: import("@/lib/firestore").Job) => job.status === "PENDING").length;
+  const completedJobs = allJobs.filter((job: import("@/lib/firestore").Job) => job.status === "COMPLETED").length;
+  const acceptedJobs = allJobs.filter((job: import("@/lib/firestore").Job) => job.status === "ACCEPTED").length;
 
   // Calculate total earnings from completed jobs
   const totalEarnings = allJobs
-    .filter((job) => job.status === "COMPLETED")
-    .reduce((sum, job) => sum + (job.charge || 0), 0);
+    .filter((job: import("@/lib/firestore").Job) => job.status === "COMPLETED")
+    .reduce((sum: number, job: import("@/lib/firestore").Job) => sum + (job.charge || 0), 0);
 
   // Get recent jobs (last 5)
   const recentJobs = allJobs
-    .sort((a, b) => {
+    .sort((a: import("@/lib/firestore").Job, b: import("@/lib/firestore").Job) => {
       // Since dates are now ISO strings after serialization
-      const aDate = a.createdAt ? new Date(a.createdAt) : new Date(0);
-      const bDate = b.createdAt ? new Date(b.createdAt) : new Date(0);
+      const aDate = a.createdAt ? new Date(a.createdAt as any) : new Date(0);
+      const bDate = b.createdAt ? new Date(b.createdAt as any) : new Date(0);
       return bDate.getTime() - aDate.getTime();
     })
     .slice(0, 5);
@@ -71,7 +74,7 @@ export default async function WorkerDashboardPage() {
   // Fetch customer names for recent jobs
   const recentJobsWithCustomers = serializeFirestoreData(
     await Promise.all(
-      recentJobs.map(async (job) => {
+      recentJobs.map(async (job: import("@/lib/firestore").Job) => {
         const customerDoc = await adminDb
           .collection(COLLECTIONS.USERS)
           .doc(job.customerId)
@@ -86,7 +89,8 @@ export default async function WorkerDashboardPage() {
   );
 
   return (
-    <div className="space-y-8">
+    <div className="min-h-screen space-y-8 dark:bg-dashboard-dark">
+      <DashboardBgEffect />
       {/* Welcome Section */}
       <div className="space-y-4">
         <div className="flex items-center justify-between">
@@ -108,7 +112,7 @@ export default async function WorkerDashboardPage() {
 
         {/* Quick Stats and Usage Tracker */}
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
@@ -124,7 +128,7 @@ export default async function WorkerDashboardPage() {
             </div>
           </Card>
 
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -140,7 +144,7 @@ export default async function WorkerDashboardPage() {
             </div>
           </Card>
 
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
             <div className="flex items-center">
               <div className="flex-shrink-0">
                 <DollarSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -179,7 +183,7 @@ export default async function WorkerDashboardPage() {
             aria-label="View Job Requests"
             className="group block"
           >
-            <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
+            <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
                 <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center">
                   <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
@@ -201,7 +205,7 @@ export default async function WorkerDashboardPage() {
             aria-label="View Public Profile"
             className="group block"
           >
-            <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
+            <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
                 <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950 flex items-center justify-center">
                   <Eye className="h-6 w-6 text-purple-600 dark:text-purple-400" />
@@ -223,7 +227,7 @@ export default async function WorkerDashboardPage() {
             aria-label="Profile Settings"
             className="group block"
           >
-            <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
+            <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
                 <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center">
                   <Settings className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
@@ -245,7 +249,7 @@ export default async function WorkerDashboardPage() {
             aria-label="View Earnings"
             className="group block"
           >
-            <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
+            <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
                 <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950 flex items-center justify-center">
                   <DollarSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
@@ -284,7 +288,7 @@ export default async function WorkerDashboardPage() {
         </div>
 
         {recentJobsWithCustomers.length === 0 ? (
-          <Card className="p-8 text-center border border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+          <Card className="p-8 text-center border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
             <div className="text-gray-500 dark:text-gray-400">
               <p className="text-lg font-medium">No jobs yet</p>
               <p className="text-sm mt-1">Job requests will appear here</p>
@@ -292,10 +296,10 @@ export default async function WorkerDashboardPage() {
           </Card>
         ) : (
           <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-            {recentJobsWithCustomers.map((job) => (
+            {recentJobsWithCustomers.map((job: import("@/lib/firestore").Job & { customer?: { name: string } }) => (
               <Card
                 key={job.id}
-                className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200"
+                className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200"
               >
                 <div className="flex items-start justify-between mb-4">
                   <div className="flex-1">
@@ -329,11 +333,19 @@ export default async function WorkerDashboardPage() {
                   <div className="flex items-center">
                     <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
                     <span>
-                      {new Date(job.time).toLocaleDateString()} at{" "}
-                      {new Date(job.time).toLocaleTimeString([], {
-                        hour: "2-digit",
-                        minute: "2-digit",
-                      })}
+                      {(() => {
+                        let dateObj: Date;
+                        if (typeof job.time === 'string' || job.time instanceof Date) {
+                          dateObj = new Date(job.time);
+                        } else if (job.time && typeof job.time.toDate === 'function') {
+                          dateObj = job.time.toDate();
+                        } else if (job.time && job.time.seconds !== undefined && job.time.nanoseconds !== undefined) {
+                          dateObj = new Date(job.time.seconds * 1000 + job.time.nanoseconds / 1e6);
+                        } else {
+                          dateObj = new Date(0);
+                        }
+                        return `${dateObj.toLocaleDateString()} at ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
+                      })()}
                     </span>
                   </div>
                 </div>
@@ -356,3 +368,4 @@ export default async function WorkerDashboardPage() {
     </div>
   );
 }
+

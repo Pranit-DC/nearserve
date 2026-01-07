@@ -137,6 +137,10 @@
   body {
     @apply bg-background text-foreground;
   }
+  /* Dashboard-specific dark background */
+  .bg-dashboard-dark {
+    background-color: #212121 !important;
+  }
 }
 
 /* Custom Animations */
