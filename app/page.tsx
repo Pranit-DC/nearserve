@@ -84,10 +84,10 @@ export default function Home() {
   <section id="feature-section" className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center mb-16">
             <h2 className="text-5xl font-light text-gray-900 dark:text-white mb-4">
-              Why Choose RozgaarSetu?
+              Platform Features
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-              Empowering connections between skilled workers and opportunities
+              Discover how NearServe empowers skilled workers and customers with technology, trust, and support.
             </p>
           </div>
 
@@ -187,7 +187,7 @@ export default function Home() {
               <div className={cn("p-2 rounded-lg", "md:col-span-3")}>
                 <MainMenusGradientCard
                   title="Get Paid"
-                  description="Secure payments delivered instantly with multiple payment options and transparent pricing."
+                  description="Fast, reliable payments through trusted gateways. Transparent pricing for every job."
                   withArrow={false}
                   circleSize={300}
                 >
@@ -198,7 +198,7 @@ export default function Home() {
                       </svg>
                     </div>
                     <div className="text-lg font-semibold text-black dark:text-white">
-                      Instant Payments
+                      Fast & Reliable Payments
                     </div>
                   </div>
                 </MainMenusGradientCard>
@@ -207,7 +207,7 @@ export default function Home() {
               {/* Card 3 - Nearby Connections */}
               <div className={cn("p-2 rounded-lg", "md:col-span-4")}>
                 <MainMenusGradientCard
-                  title="Nearby Connections"
+                  title="Location-Based Matching"
                   description="Connect with workers in your area for quick and efficient hiring with location-based matching."
                   withArrow={false}
                   circleSize={300}
@@ -219,28 +219,26 @@ export default function Home() {
                       </svg>
                     </div>
                     <div className="text-lg font-semibold text-black dark:text-white">
-                      Local Network
+                      Local Opportunities
                     </div>
                   </div>
                 </MainMenusGradientCard>
               </div>
 
-              {/* Card 4 - Smart Search */}
+              {/* Card 4 - Ratings & Reviews */}
               <div className={cn("p-2 rounded-lg", "md:col-span-2")}>
                 <MainMenusGradientCard
-                  title="Smart Search"
-                  description="Advanced location-based matching with AI-powered recommendations for perfect job matches."
+                  title="Ratings & Reviews"
+                  description="Build your reputation and choose trusted partners with transparent feedback."
                   withArrow={false}
                   circleSize={300}
                 >
                   <div className="flex flex-col items-center justify-center h-full gap-4">
                     <div className="text-4xl">
-                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 8 8" className="w-8 h-8" fill="currentColor">
-                        <path d="M3.5 0C1.57 0 0 1.57 0 3.5S1.57 7 3.5 7c.59 0 1.17-.14 1.66-.41a1 1 0 0 0 .13.13l1 1a1.02 1.02 0 1 0 1.44-1.44l-1-1a1 1 0 0 0-.16-.13c.27-.49.44-1.06.44-1.66c0-1.93-1.57-3.5-3.5-3.5zm0 1C4.89 1 6 2.11 6 3.5c0 .66-.24 1.27-.66 1.72l-.03.03a1 1 0 0 0-.13.13c-.44.4-1.04.63-1.69.63c-1.39 0-2.5-1.11-2.5-2.5s1.11-2.5 2.5-2.5z"/>
-                      </svg>
+                      <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" className="w-8 h-8" fill="currentColor"><path d="M12 17.27L18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></svg>
                     </div>
                     <div className="text-base font-semibold text-black dark:text-white">
-                      AI-Powered
+                      Reputation Matters
                     </div>
                   </div>
                 </MainMenusGradientCard>
