@@ -27,13 +27,17 @@ export function useAutoRefresh(
 
     const tick = async () => {
       try {
+        console.log(`[Auto-refresh] Refreshing data at ${new Date().toLocaleTimeString()}`);
         await savedCallback.current();
       } catch (error) {
         console.error('Auto-refresh error:', error);
       }
     };
 
-    // Set up interval
+    // Run immediately on mount, then set up interval
+    tick();
+    
+    // Set up interval for subsequent refreshes
     const id = setInterval(tick, interval);
 
     // Clean up

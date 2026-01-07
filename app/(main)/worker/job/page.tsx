@@ -64,19 +64,22 @@ export default function WorkerJobsPage() {
     lng: number;
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [lastRefresh, setLastRefresh] = useState<Date>(new Date());
 
-  const load = async () => {
-    setLoading(true);
+  const load = async (silent = false) => {
+    if (!silent) setLoading(true);
     try {
       const res = await fetch("/api/worker/jobs", { cache: "no-store" });
       if (!res.ok) throw new Error("Failed to load jobs");
       const data = await res.json();
       setJobs(data.jobs || []);
+      setLastRefresh(new Date());
+      console.log(`[Jobs] Loaded ${data.jobs?.length || 0} jobs at ${new Date().toLocaleTimeString()}`);
     } catch (e) {
       console.error(e);
-      setJobs([]);
+      if (!silent) setJobs([]);
     } finally {
-      setLoading(false);
+      if (!silent) setLoading(false);
     }
   };
 
@@ -84,8 +87,8 @@ export default function WorkerJobsPage() {
     load();
   }, []);
 
-  // Auto-refresh jobs data every 30 seconds in the background
-  useAutoRefresh(load, { interval: 30000, enabled: true });
+  // Auto-refresh jobs data every 30 seconds in the background (silent)
+  useAutoRefresh(() => load(true), { interval: 30000, enabled: true });
 
   const act = async (id: string, action: "ACCEPT" | "CANCEL") => {
     setActing(id);
