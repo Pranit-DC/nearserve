@@ -29,6 +29,7 @@ import {
 } from "react-icons/fi";
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
+import { useAutoRefresh } from "@/hooks/use-auto-refresh";
 
 type Job = {
   id: string;
@@ -82,6 +83,9 @@ export default function WorkerJobsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  // Auto-refresh jobs data every 30 seconds in the background
+  useAutoRefresh(load, { interval: 30000, enabled: true });
 
   const act = async (id: string, action: "ACCEPT" | "CANCEL") => {
     setActing(id);
@@ -158,33 +162,46 @@ export default function WorkerJobsPage() {
 
     console.log("Uploading file:", { name: file.name, type: file.type, size: file.size });
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include", // Include cookies for authentication
+      });
 
-    if (!res.ok) {
-      const responseText = await res.text();
-      console.error("Upload failed - Status:", res.status);
-      console.error("Upload failed - Status Text:", res.statusText);
-      console.error("Upload failed - Response:", responseText);
-      
-      let errorMessage = `Failed to upload photo: ${res.status}`;
-      try {
-        const errorData = JSON.parse(responseText);
-        console.error("Upload failed - Parsed error:", errorData);
-        errorMessage = errorData.error || errorData.details || errorMessage;
-      } catch (e) {
-        console.error("Upload failed - Could not parse response as JSON");
-        errorMessage = responseText || errorMessage;
+      if (!res.ok) {
+        const responseText = await res.text();
+        console.error("Upload failed - Status:", res.status);
+        console.error("Upload failed - Status Text:", res.statusText);
+        console.error("Upload failed - Response:", responseText);
+        
+        let errorMessage = `Failed to upload photo: ${res.status}`;
+        try {
+          const errorData = JSON.parse(responseText);
+          console.error("Upload failed - Parsed error:", errorData);
+          errorMessage = errorData.error || errorData.details || errorMessage;
+        } catch (e) {
+          console.error("Upload failed - Could not parse response as JSON");
+          errorMessage = responseText || errorMessage;
+        }
+        
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
-      
-      toast.error(errorMessage);
-      throw new Error(errorMessage);
-    }
 
-    const data = await res.json();
-    return data.url;
+      const data = await res.json();
+      return data.url;
+    } catch (error) {
+      // Handle network errors
+      if (error instanceof TypeError && error.message === "Failed to fetch") {
+        const errorMessage = "Network error: Unable to upload photo. Please check your connection and try again.";
+        console.error("Network error during upload:", error);
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+      // Re-throw other errors
+      throw error;
+    }
   };
 
   // Start work with proof

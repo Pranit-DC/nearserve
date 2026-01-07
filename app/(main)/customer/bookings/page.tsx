@@ -30,6 +30,7 @@ import {
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import Script from "next/script";
+import { useAutoRefresh } from "@/hooks/use-auto-refresh";
 
 // Extend Window interface for Razorpay
 declare global {
@@ -103,6 +104,9 @@ export default function CustomerBookingsPage() {
   useEffect(() => {
     load();
   }, []);
+
+  // Auto-refresh bookings data every 30 seconds in the background
+  useAutoRefresh(load, { interval: 30000, enabled: true });
 
   // Filter and search logic
   const ongoing = jobs.filter(

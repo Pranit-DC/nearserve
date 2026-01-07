@@ -1,12 +1,13 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
-import { COLLECTIONS, JobLog, Transaction } from "@/lib/firestore";
+import { COLLECTIONS, JobLog, Transaction, CustomerProfile } from "@/lib/firestore";
 import { cookies } from "next/headers";
 import { FieldValue } from "firebase-admin/firestore";
 import {
   createRazorpayOrder,
   verifyPaymentSignature,
 } from "@/lib/razorpay-service";
+import { notifyCustomerJobAccepted } from "@/lib/sendNotification";
 
 export async function PATCH(
   _req: NextRequest,
@@ -101,6 +102,44 @@ export async function PATCH(
         performedBy: user.id,
         createdAt: FieldValue.serverTimestamp(),
       });
+
+      // Send notification to customer
+      try {
+        console.log(`[NOTIFICATION] Worker accepted job, notifying customer ${job.customerId}`);
+        
+        const customerProfilesRef = adminDb.collection(COLLECTIONS.CUSTOMER_PROFILES);
+        const customerProfileQuery = await customerProfilesRef
+          .where('userId', '==', job.customerId)
+          .limit(1)
+          .get();
+        
+        if (!customerProfileQuery.empty) {
+          const customerProfile = customerProfileQuery.docs[0].data() as CustomerProfile;
+          console.log(`[NOTIFICATION] Found customer profile, has FCM token: ${!!customerProfile.fcmToken}`);
+          
+          if (customerProfile.fcmToken) {
+            console.log('[NOTIFICATION] Sending job accepted notification to customer...');
+            const result = await notifyCustomerJobAccepted(customerProfile.fcmToken, {
+              workerName: workerDoc?.data()?.name || 'Worker',
+              serviceName: job.description,
+              date: job.date?.toDate?.()?.toLocaleDateString() || 'Soon',
+            });
+            console.log(`[NOTIFICATION] Result:`, result);
+            
+            if (result.success) {
+              console.log(`\u2705 Notification sent to customer ${job.customerId}`);
+            } else {
+              console.error(`\u274c Failed to send notification:`, result.error);
+            }
+          } else {
+            console.log(`[NOTIFICATION] Customer ${job.customerId} has not enabled notifications`);
+          }
+        } else {
+          console.log(`[NOTIFICATION] No customer profile found for userId: ${job.customerId}`);
+        }
+      } catch (notifError) {
+        console.error('Failed to send notification to customer:', notifError);
+      }
 
       const updated = { ...job, status: "ACCEPTED" };
       return NextResponse.json({ success: true, job: updated });

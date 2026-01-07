@@ -26,6 +26,7 @@ import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/contexts/AuthContext"
 import { FirebaseUserButton } from "@/components/firebase-user-button"
+import { LanguageSwitcher } from "@/components/language-switcher"
 import {
   Dialog,
   DialogTrigger,
@@ -282,6 +283,18 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
               </motion.span>
             )}
           </motion.button>
+        )}
+        
+        {/* Language Switcher */}
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.125 }}
+            className="pt-2 border-t border-gray-200 dark:border-gray-700"
+          >
+            <LanguageSwitcher />
+          </motion.div>
         )}
       </div>
 

@@ -8,6 +8,7 @@ import ConditionalHeader from "@/components/conditional-header";
 import { Toaster } from "sonner";
 import ConditionalFooter from "@/components/conditional-footer";
 import ProjectChatbot from "@/components/ProjectChatbot";
+import Script from "next/script";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -41,6 +42,9 @@ export default function RootLayout({
           disableTransitionOnChange
         >
           <AuthProvider>
+            {/* Hidden Google Translate Element for programmatic control */}
+            <div id="google_translate_element" style={{ display: 'none' }}></div>
+            
             {/* Header on all pages for UI consistency */}
             <ConditionalHeader />
             <main className="min-h-screen">{children}</main>
@@ -50,6 +54,30 @@ export default function RootLayout({
             <ProjectChatbot />
           </AuthProvider>
         </ThemeProvider>
+        
+        {/* Google Translate Scripts */}
+        <Script
+          id="google-translate-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+              function googleTranslateElementInit() {
+                new google.translate.TranslateElement(
+                  {
+                    pageLanguage: 'en',
+                    includedLanguages: 'en,hi,mr',
+                    autoDisplay: false
+                  },
+                  'google_translate_element'
+                );
+              }
+            `,
+          }}
+        />
+        <Script
+          src="https://translate.google.com/translate_a/element.js?cb=googleTranslateElementInit"
+          strategy="afterInteractive"
+        />
       </body>
     </html>
   );
