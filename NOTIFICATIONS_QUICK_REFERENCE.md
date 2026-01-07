@@ -123,10 +123,10 @@ NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
 FIREBASE_CLIENT_EMAIL=...
 FIREBASE_PRIVATE_KEY=...
 ```
-
-**VAPID Key (Hardcoded in [`lib/fcm.ts`](lib/fcm.ts)):**
+Key
+**VAPID  (Hardcoded in [`lib/fcm.ts`](lib/fcm.ts)):**
 ```
-BAL5WnQvwQkt-h9UKBl3EhSWPwhnC_8Mo92_jPwozpkiN7WyaPKJl7h2-Qv-e2hNqKCBDgkNFUU_WZiv_0s-aGg
+
 ```
 
 ---

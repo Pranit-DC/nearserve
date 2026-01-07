@@ -30,7 +30,7 @@ Push notifications using **Firebase Cloud Messaging (FCM)** have been successful
    - Request notification permission
    - Get FCM token
    - Listen for foreground messages
-   - VAPID key: `BAL5WnQvwQkt-h9UKBl3EhSWPwhnC_8Mo92_jPwozpkiN7WyaPKJl7h2-Qv-e2hNqKCBDgkNFUU_WZiv_0s-aGg`
+   - VAPID key: 
 
 2. **[`lib/sendNotification.ts`](lib/sendNotification.ts)**
    - `sendPushNotification()` - Send to single device

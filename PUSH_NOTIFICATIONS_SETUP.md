@@ -22,7 +22,7 @@ Workers now receive **push notifications** when:
 
 ## 🔑 VAPID Key Already Added
 
-Your VAPID key is: `BAL5WnQvwQkt-h9UKBl3EhSWPwhnC_8Mo92_jPwozpkiN7WyaPKJl7h2-Qv-e2hNqKCBDgkNFUU_WZiv_0s-aGg`
+Your VAPID key is: `
 
 ## 🚀 How It Works
 
