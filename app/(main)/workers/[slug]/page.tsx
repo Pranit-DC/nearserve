@@ -61,7 +61,7 @@ export default async function WorkerOrSpecialityPage({
       .collection(COLLECTIONS.USERS)
       .doc(slug)
       .get();
-    
+
     if (!workerDoc.exists) {
       return (
         <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-black dark:to-gray-800">
@@ -125,7 +125,11 @@ export default async function WorkerOrSpecialityPage({
             </div>
             {current?.role === "CUSTOMER" && (
               <div className="flex flex-col sm:flex-row gap-2 w-full sm:w-auto">
-                <BookWorkerButton workerId={worker.id} />
+                <BookWorkerButton
+                  workerId={worker.id}
+                  minimumFee={wp.minimumFee}
+                  workerName={worker.name}
+                />
                 <OpenBookFromQuery workerId={worker.id} />
               </div>
             )}
@@ -172,16 +176,17 @@ export default async function WorkerOrSpecialityPage({
                       </span>
                     </div>
 
-                    {worker.phone && !String(worker.phone).startsWith("no-phone-") && (
-                      <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                          <FiPhone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
+                    {worker.phone &&
+                      !String(worker.phone).startsWith("no-phone-") && (
+                        <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                            <FiPhone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
+                          </div>
+                          <span className="text-gray-700 dark:text-gray-300">
+                            {worker.phone}
+                          </span>
                         </div>
-                        <span className="text-gray-700 dark:text-gray-300">
-                          {worker.phone}
-                        </span>
-                      </div>
-                    )}
+                      )}
 
                     <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
                       <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
@@ -353,7 +358,7 @@ export default async function WorkerOrSpecialityPage({
   }
 
   const normalized = slug.replace(/-/g, " ").toLowerCase().trim();
-  
+
   // Fetch workers from Firestore
   const workersSnapshot = await adminDb
     .collection(COLLECTIONS.USERS)
@@ -455,7 +460,11 @@ export default async function WorkerOrSpecialityPage({
                         >
                           <Link href={`/workers/${w.id}`}>View Profile</Link>
                         </Button>
-                        <BookWorkerButton workerId={w.id} />
+                        <BookWorkerButton
+                          workerId={w.id}
+                          minimumFee={w.workerProfile?.minimumFee}
+                          workerName={w.name}
+                        />
                       </div>
                     )}
                   </div>

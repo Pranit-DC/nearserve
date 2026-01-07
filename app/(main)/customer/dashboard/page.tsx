@@ -323,7 +323,11 @@ export default async function CustomerDashboardPage() {
                           View Profile
                         </Button>
                       </Link>
-                      <BookWorkerButton workerId={worker.id} />
+                      <BookWorkerButton
+                        workerId={worker.id}
+                        minimumFee={worker.workerProfile?.minimumFee}
+                        workerName={worker.name}
+                      />
                     </div>
                   </div>
                 </div>

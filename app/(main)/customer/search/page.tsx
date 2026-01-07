@@ -49,6 +49,7 @@ type Worker = {
     bio: string | null;
     category?: string | null;
     jobCategory?: string | null;
+    minimumFee?: number | null;
   } | null;
 };
 
@@ -681,6 +682,10 @@ function SearchPageContent() {
                                         <BookWorkerButton
                                           workerId={w.id}
                                           className="px-2 sm:px-3 py-1 text-xs sm:text-sm"
+                                          minimumFee={
+                                            w.workerProfile?.minimumFee
+                                          }
+                                          workerName={w.name}
                                         />
                                       ) : (
                                         <span className="text-xs text-red-500 px-2 py-1">
@@ -810,6 +815,10 @@ function SearchPageContent() {
                                           <BookWorkerButton
                                             workerId={worker.id}
                                             className="px-2 sm:px-3 py-1 text-xs sm:text-sm"
+                                            minimumFee={
+                                              worker.workerProfile?.minimumFee
+                                            }
+                                            workerName={worker.name}
                                           />
                                         ) : (
                                           <span className="text-xs text-red-500 px-2 py-1">
