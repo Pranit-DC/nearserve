@@ -16,6 +16,7 @@ type WorkerLite = {
     yearsExperience?: number | null;
     profilePic?: string | null;
     bio?: string | null;
+    minimumFee?: number | null;
   } | null;
   distanceKm?: number | null;
 };
@@ -116,6 +117,8 @@ export default function ExpandableCardsWorkers({
                         <BookWorkerButton
                           workerId={w.id}
                           className="px-3 py-1"
+                          minimumFee={w.workerProfile?.minimumFee}
+                          workerName={w.name}
                         />
                       ) : (
                         <span className="text-xs text-red-500 px-3 py-1">

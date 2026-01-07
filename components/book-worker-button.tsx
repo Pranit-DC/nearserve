@@ -28,6 +28,8 @@ import { useRouter } from "next/navigation";
 type Props = {
   workerId: string;
   className?: string;
+  minimumFee?: number | null;
+  workerName?: string | null;
 };
 
 // Step configuration inspired by Worker Profile Setup
@@ -48,7 +50,12 @@ const STEPS = [
   },
 ];
 
-export default function BookWorkerButton({ workerId, className }: Props) {
+export default function BookWorkerButton({
+  workerId,
+  className,
+  minimumFee,
+  workerName,
+}: Props) {
   const { user } = useAuth();
   const router = useRouter();
   const [open, setOpen] = useState(false);
@@ -176,6 +183,16 @@ export default function BookWorkerButton({ workerId, className }: Props) {
         const charge = Number(booking.charge);
         if (!booking.charge || charge <= 0) {
           setError("Please enter a valid price greater than 0");
+          return false;
+        }
+        // Check if charge is less than worker's minimum fee
+        if (minimumFee && charge < minimumFee) {
+          const workerDisplayName = workerName || "This worker";
+          toast.error(`Budget too low!`, {
+            description: `${workerDisplayName} has a minimum job fee of ₹${minimumFee}. Please enter at least ₹${minimumFee}.`,
+            duration: 5000,
+          });
+          setError(`Minimum job fee: ₹${minimumFee}`);
           return false;
         }
         break;
