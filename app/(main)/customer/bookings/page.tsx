@@ -72,9 +72,7 @@ export default function CustomerBookingsPage() {
   const [reviewOpen, setReviewOpen] = useState(false);
   const [reviewJobId, setReviewJobId] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list" | "scroll">(
-    "scroll"
-  );
+  const [viewMode, setViewMode] = useState<"list">("list");
   const [paymentJobId, setPaymentJobId] = useState<string | null>(null);
   const [razorpayOrder, setRazorpayOrder] = useState<RazorpayOrder | null>(
     null
@@ -317,40 +315,40 @@ export default function CustomerBookingsPage() {
         return {
           label: "Pending",
           color: "bg-orange-500",
-          bgColor: "bg-orange-50 dark:bg-orange-900/20",
-          textColor: "text-orange-700 dark:text-orange-300",
+          bgColor: "bg-orange-50 dark:bg-[#171717]",
+          textColor: "text-orange-700 dark:text-slate-200",
           icon: FiAlertCircle,
         };
       case "ACCEPTED":
         return {
           label: "Accepted",
           color: "bg-blue-500",
-          bgColor: "bg-blue-50 dark:bg-blue-900/20",
-          textColor: "text-blue-700 dark:text-blue-300",
+          bgColor: "bg-blue-50 dark:bg-[#171717]",
+          textColor: "text-blue-700 dark:text-slate-200",
           icon: FiCheck,
         };
       case "IN_PROGRESS":
         return {
           label: "In Progress",
           color: "bg-purple-500",
-          bgColor: "bg-purple-50 dark:bg-purple-900/20",
-          textColor: "text-purple-700 dark:text-purple-300",
+          bgColor: "bg-purple-50 dark:bg-[#171717]",
+          textColor: "text-purple-700 dark:text-slate-200",
           icon: FiPlay,
         };
       case "COMPLETED":
         return {
           label: "Completed",
           color: "bg-green-500",
-          bgColor: "bg-green-50 dark:bg-green-900/20",
-          textColor: "text-green-700 dark:text-green-300",
+          bgColor: "bg-green-50 dark:bg-[#171717]",
+          textColor: "text-green-700 dark:text-slate-200",
           icon: FiCheck,
         };
       case "CANCELLED":
         return {
           label: "Cancelled",
           color: "bg-red-500",
-          bgColor: "bg-red-50 dark:bg-red-900/20",
-          textColor: "text-red-700 dark:text-red-300",
+          bgColor: "bg-red-50 dark:bg-[#171717]",
+          textColor: "text-red-700 dark:text-slate-200",
           icon: FiX,
         };
     }
@@ -361,15 +359,15 @@ export default function CustomerBookingsPage() {
     <Card className="p-6 animate-pulse">
       <div className="flex items-start justify-between mb-4">
         <div className="space-y-2">
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-40"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+          <div className="h-5 bg-gray-200 dark:bg-[#222] rounded w-40"></div>
+          <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-24"></div>
         </div>
-        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-20"></div>
+        <div className="h-6 bg-gray-200 dark:bg-[#222] rounded-full w-20"></div>
       </div>
       <div className="space-y-3">
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-32"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-28"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-24"></div>
       </div>
     </Card>
   );
@@ -381,7 +379,7 @@ export default function CustomerBookingsPage() {
       animate={{ opacity: 1, y: 0 }}
       className="text-center py-16"
     >
-      <div className="h-32 w-32 mx-auto bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+      <div className="h-32 w-32 mx-auto bg-gray-100 dark:bg-[#181818] rounded-full flex items-center justify-center mb-6">
         <FiCalendar className="h-16 w-16 text-gray-400" />
       </div>
       <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
@@ -416,7 +414,7 @@ export default function CustomerBookingsPage() {
         onError={() => toast.error("Failed to load payment system")}
       />
 
-      <main className="min-h-screen bg-white dark:bg-black">
+      <main className="min-h-screen bg-white dark:bg-[#212121]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           {/* Test Mode Banner */}
           {razorpayOrder?.orderId?.startsWith("test_order_") && (
@@ -450,19 +448,19 @@ export default function CustomerBookingsPage() {
           {/* Controls */}
           <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
             {/* Segmented Control Tabs */}
-            <div className="bg-gray-100 dark:bg-gray-900 rounded-xl p-1 flex border border-gray-200 dark:border-gray-800">
+            <div className="bg-gray-100 dark:bg-[#171717] rounded-xl p-1 flex border border-gray-200 dark:border-[#303030]">
               {(["ONGOING", "PREVIOUS"] as Tab[]).map((tabOption) => (
                 <button
                   key={tabOption}
                   onClick={() => setTab(tabOption)}
                   className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                     tab === tabOption
-                      ? "bg-white dark:bg-gray-800 text-gray-900 dark:text-white shadow-sm"
+                      ? "bg-white dark:bg-[#181818] text-gray-900 dark:text-white shadow-sm"
                       : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
                   {tabOption === "ONGOING" ? "Ongoing" : "Previous"}
-                  <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-700 px-2 py-1 rounded-full">
+                  <span className="ml-2 text-xs bg-gray-200 dark:bg-[#252525] px-2 py-1 rounded-full">
                     {tabOption === "ONGOING" ? ongoing.length : previous.length}
                   </span>
                 </button>
@@ -470,55 +468,18 @@ export default function CustomerBookingsPage() {
             </div>
 
             {/* Search */}
-            <div className="relative w-full sm:w-80">
+              <div className="relative w-full sm:w-80">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search bookings..."
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="pl-10 bg-white dark:bg-gray-900 border-gray-300 dark:border-gray-800"
+                className="pl-10 bg-white dark:bg-[#303030] border-gray-300 dark:border-[#303030]"
               />
             </div>
           </div>
 
-          {/* View Mode Toggle */}
-          <div className="flex justify-end mb-6">
-            <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-              <button
-                onClick={() => setViewMode("grid")}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === "grid"
-                    ? "bg-white dark:bg-gray-700 shadow-sm"
-                    : "hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
-                title="Grid View"
-              >
-                <FiGrid className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("list")}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === "list"
-                    ? "bg-white dark:bg-gray-700 shadow-sm"
-                    : "hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
-                title="List View"
-              >
-                <FiList className="h-4 w-4" />
-              </button>
-              <button
-                onClick={() => setViewMode("scroll")}
-                className={`p-2 rounded-md transition-colors ${
-                  viewMode === "scroll"
-                    ? "bg-white dark:bg-gray-700 shadow-sm"
-                    : "hover:bg-gray-200 dark:hover:bg-gray-700"
-                }`}
-                title="Scroll View"
-              >
-                <FiTrendingUp className="h-4 w-4" />
-              </button>
-            </div>
-          </div>
+          {/* View mode removed (only list supported) */}
           {/* Content */}
           <AnimatePresence mode="wait">
             {loading ? (
@@ -563,7 +524,7 @@ export default function CustomerBookingsPage() {
                 renderItem={(j, index) => (
                   <Card
                     key={j.id}
-                    className="p-4 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 w-full max-w-4xl mx-auto flex flex-col overflow-hidden"
+                    className="p-4 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] w-full max-w-4xl mx-auto flex flex-col overflow-hidden"
                   >
                     {/* Header Section */}
                     <div className="flex items-start justify-between gap-3 mb-3">
@@ -578,14 +539,14 @@ export default function CustomerBookingsPage() {
                       <span
                         className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${
                           j.status === "ACCEPTED"
-                            ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
+                            ? "bg-blue-50 text-blue-700 dark:bg-[#171717] dark:text-slate-200"
                             : j.status === "PENDING"
-                            ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
+                            ? "bg-orange-50 text-orange-700 dark:bg-[#171717] dark:text-slate-200"
                             : j.status === "COMPLETED"
-                            ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
+                            ? "bg-green-50 text-green-700 dark:bg-[#171717] dark:text-slate-200"
                             : j.status === "CANCELLED"
-                            ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
-                            : "bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                            ? "bg-red-50 text-red-700 dark:bg-[#171717] dark:text-slate-200"
+                            : "bg-gray-50 text-gray-700 dark:bg-[#171717] dark:text-slate-200"
                         }`}
                       >
                         {j.status}
@@ -597,9 +558,9 @@ export default function CustomerBookingsPage() {
                       {/* Time and Location Row */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0">
+                          <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                             <svg
-                              className="w-4 h-4 text-blue-600 dark:text-blue-400"
+                              className="w-4 h-4 text-blue-600 dark:text-slate-300"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -654,7 +615,7 @@ export default function CustomerBookingsPage() {
                       </div>
 
                       {/* Charge Section */}
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-[#181818] rounded-lg">
                         <div className="w-7 h-7 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center flex-shrink-0">
                           <svg
                             className="w-4 h-4 text-yellow-600 dark:text-yellow-400"
@@ -682,11 +643,11 @@ export default function CustomerBookingsPage() {
 
                       {/* Details Description */}
                       {j.details && (
-                        <div className="p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                          <p className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">
+                        <div className="p-2 bg-blue-50 dark:bg-[#171717] rounded-lg">
+                          <p className="text-xs font-medium text-blue-600 dark:text-slate-300 mb-1">
                             Additional Details
                           </p>
-                          <p className="text-xs text-gray-700 dark:text-gray-200 line-clamp-2">
+                          <p className="text-xs text-gray-700 dark:text-slate-200 line-clamp-2">
                             {j.details}
                           </p>
                         </div>
@@ -715,7 +676,7 @@ export default function CustomerBookingsPage() {
                             )}
                           </Button>
                           {j.platformFee && j.workerEarnings && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 p-2 bg-gray-50 dark:bg-[#181818] rounded">
                               <div className="flex justify-between">
                                 <span>Worker Earnings:</span>
                                 <span className="font-medium">
@@ -734,8 +695,8 @@ export default function CustomerBookingsPage() {
                       )}
                       {tab === "ONGOING" &&
                         (j.status === "PENDING" || j.status === "ACCEPTED") && (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                          <div className="bg-blue-50 dark:bg-[#171717] border border-blue-200 dark:border-[#303030] rounded-lg p-3">
+                            <div className="flex items-center gap-2 text-blue-700 dark:text-slate-200">
                               <FiClock className="h-5 w-5" />
                               <span className="text-sm font-medium">
                                 {j.status === "PENDING"
@@ -786,7 +747,7 @@ export default function CustomerBookingsPage() {
                 {list.map((j) => (
                   <Card
                     key={j.id}
-                    className="p-5 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col h-full min-h-[300px]"
+                    className="p-5 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] flex flex-col h-full min-h-[300px]"
                   >
                     {/* Header Section */}
                     <div className="flex items-start justify-between gap-3 mb-4">
@@ -801,14 +762,14 @@ export default function CustomerBookingsPage() {
                       <span
                         className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${
                           j.status === "ACCEPTED"
-                            ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
+                            ? "bg-blue-50 text-blue-700 dark:bg-[#171717] dark:text-slate-200"
                             : j.status === "PENDING"
-                            ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
+                            ? "bg-orange-50 text-orange-700 dark:bg-[#171717] dark:text-slate-200"
                             : j.status === "COMPLETED"
-                            ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
+                            ? "bg-green-50 text-green-700 dark:bg-[#171717] dark:text-slate-200"
                             : j.status === "CANCELLED"
-                            ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
-                            : "bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                            ? "bg-red-50 text-red-700 dark:bg-[#171717] dark:text-slate-200"
+                            : "bg-gray-50 text-gray-700 dark:bg-[#171717] dark:text-slate-200"
                         }`}
                       >
                         {j.status}
@@ -820,9 +781,9 @@ export default function CustomerBookingsPage() {
                       {/* Time and Location Row */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-[#252525] flex items-center justify-center">
                             <svg
-                              className="w-4 h-4 text-blue-600 dark:text-blue-400"
+                              className="w-4 h-4 text-blue-600 dark:text-slate-300"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -846,9 +807,9 @@ export default function CustomerBookingsPage() {
                         </div>
 
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                          <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-[#252525] flex items-center justify-center">
                             <svg
-                              className="w-4 h-4 text-green-600 dark:text-green-400"
+                              className="w-4 h-4 text-green-600 dark:text-slate-300"
                               fill="none"
                               stroke="currentColor"
                               viewBox="0 0 24 24"
@@ -877,7 +838,7 @@ export default function CustomerBookingsPage() {
                       </div>
 
                       {/* Charge Section */}
-                      <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
+                      <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-[#181818] rounded-lg">
                         <div className="w-8 h-8 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
                           <svg
                             className="w-4 h-4 text-yellow-600 dark:text-yellow-400"
@@ -905,11 +866,11 @@ export default function CustomerBookingsPage() {
 
                       {/* Details Description */}
                       {j.details && (
-                        <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                          <p className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">
+                        <div className="p-3 bg-blue-50 dark:bg-[#171717] rounded-lg">
+                          <p className="text-xs font-medium text-blue-600 dark:text-slate-300 mb-1">
                             Additional Details
                           </p>
-                          <p className="text-sm text-gray-700 dark:text-gray-200 line-clamp-2">
+                          <p className="text-sm text-gray-700 dark:text-slate-200 line-clamp-2">
                             {j.details}
                           </p>
                         </div>
@@ -938,7 +899,7 @@ export default function CustomerBookingsPage() {
                             )}
                           </Button>
                           {j.platformFee && j.workerEarnings && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 p-2 bg-gray-50 dark:bg-gray-800 rounded">
+                            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 p-2 bg-gray-50 dark:bg-[#181818] rounded">
                               <div className="flex justify-between">
                                 <span>Worker Earnings:</span>
                                 <span className="font-medium">
@@ -957,8 +918,8 @@ export default function CustomerBookingsPage() {
                       )}
                       {tab === "ONGOING" &&
                         (j.status === "PENDING" || j.status === "ACCEPTED") && (
-                          <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-lg p-3">
-                            <div className="flex items-center gap-2 text-blue-700 dark:text-blue-300">
+                          <div className="bg-blue-50 dark:bg-[#171717] border border-blue-200 dark:border-[#303030] rounded-lg p-3">
+                            <div className="flex items-center gap-2 text-blue-700 dark:text-slate-200">
                               <FiClock className="h-5 w-5" />
                               <span className="text-sm font-medium">
                                 {j.status === "PENDING"

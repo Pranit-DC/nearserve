@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useRef, useEffect } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle } from "@/components/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogFooter, DialogTitle, DialogClose } from "@/components/ui/dialog";
 import { useAuth } from "@/contexts/AuthContext";
 import { FiUser, FiLogOut, FiSettings } from "react-icons/fi";
 import Link from "next/link";
@@ -126,36 +126,36 @@ export function FirebaseUserButton() {
               <FiLogOut className="w-4 h-4" />
               <span>Sign Out</span>
             </button>
-                {/* Sign Out Confirmation Dialog */}
-                <Dialog open={showSignOutConfirm} onOpenChange={setShowSignOutConfirm}>
-                  <DialogContent>
-                    <DialogHeader>
-                      <DialogTitle>Sign Out</DialogTitle>
-                    </DialogHeader>
-                    <div className="py-2">Are you sure you want to sign out?</div>
-                    <DialogFooter>
-                      <button
-                        className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
-                        onClick={() => setShowSignOutConfirm(false)}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-                        onClick={async () => {
-                          setShowSignOutConfirm(false);
-                          setIsOpen(false);
-                          await signOut();
-                        }}
-                      >
-                        Sign Out
-                      </button>
-                    </DialogFooter>
-                  </DialogContent>
-                </Dialog>
           </div>
         </div>
       )}
+
+      {/* Sign Out Confirmation Dialog is now outside the popup menu for robust async handling */}
+      <Dialog open={showSignOutConfirm} onOpenChange={setShowSignOutConfirm}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Sign Out</DialogTitle>
+          </DialogHeader>
+          <div className="py-2">Are you sure you want to sign out?</div>
+          <DialogFooter>
+            <button
+              className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+              onClick={() => setShowSignOutConfirm(false)}
+            >
+              Cancel
+            </button>
+            <button
+              className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              onClick={async () => {
+                await signOut();
+                setShowSignOutConfirm(false);
+              }}
+            >
+              Sign Out
+            </button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

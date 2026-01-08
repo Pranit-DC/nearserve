@@ -196,7 +196,7 @@ export function CustomerSidebar({
   return (
     <motion.nav
       layout
-      className="fixed left-0 top-0 h-full shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-black flex flex-col overflow-hidden z-40"
+      className="fixed left-0 top-0 h-full shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#181818] flex flex-col overflow-hidden z-40"
       style={{
         width: isOpen ? "256px" : "fit-content",
       }}
@@ -320,37 +320,39 @@ export function CustomerSidebar({
       <div className="px-2 py-3 border-t border-gray-200 dark:border-gray-700 mb-2">
         <div className="flex items-center justify-between gap-2">
           <FirebaseUserButton />
-          <Dialog>
-            <DialogTrigger asChild>
-              <motion.button
-                layout
-                className="flex items-center gap-2 px-3 py-2 rounded-md text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                aria-label="Sign out"
-              >
-                <FiLogOut className="w-4 h-4" />
-                {isOpen && <span className="text-sm font-medium">Sign Out</span>}
-              </motion.button>
-            </DialogTrigger>
-            <DialogContent>
-              <DialogHeader>
-                <DialogTitle>Sign Out</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to sign out?
-                </DialogDescription>
-              </DialogHeader>
-              <DialogFooter>
-                <DialogClose asChild>
-                  <button className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
-                </DialogClose>
-                <button
-                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-                  onClick={async () => {
-                    await signOut();
-                  }}
-                >Sign Out</button>
-              </DialogFooter>
-            </DialogContent>
-          </Dialog>
+          {isOpen && (
+            <Dialog>
+              <DialogTrigger asChild>
+                <motion.button
+                  layout
+                  className="flex items-center gap-2 px-3 py-2 rounded-md text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                  aria-label="Sign out"
+                >
+                  <FiLogOut className="w-4 h-4" />
+                  <span className="text-sm font-medium">Sign Out</span>
+                </motion.button>
+              </DialogTrigger>
+              <DialogContent>
+                <DialogHeader>
+                  <DialogTitle>Sign Out</DialogTitle>
+                  <DialogDescription>
+                    Are you sure you want to sign out?
+                  </DialogDescription>
+                </DialogHeader>
+                <DialogFooter>
+                  <DialogClose asChild>
+                    <button className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
+                  </DialogClose>
+                  <button
+                    className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                    onClick={async () => {
+                      await signOut();
+                    }}
+                  >Sign Out</button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          )}
         </div>
       </div>
 
