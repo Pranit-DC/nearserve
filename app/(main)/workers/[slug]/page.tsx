@@ -20,10 +20,18 @@ export const dynamic = "force-dynamic";
 
 type Params = { slug: string };
 
-function isUuidLike(val: string): boolean {
-  return /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
-    val
-  );
+function isWorkerId(val: string): boolean {
+  // Match standard UUIDs (with hyphens)
+  const isUuid =
+    /^[0-9a-f]{8}-[0-9a-f]{4}-[1-5][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i.test(
+      val
+    );
+
+  // Match Firestore document IDs (typically 20 alphanumeric characters without hyphens)
+  const isFirestoreId =
+    /^[a-zA-Z0-9]{16,28}$/.test(val) && !/^[0-9]+$/.test(val);
+
+  return isUuid || isFirestoreId;
 }
 
 function flattenStrings(values: string[] | null | undefined): string[] {
@@ -56,7 +64,7 @@ export default async function WorkerOrSpecialityPage({
   const { slug } = await params;
   const current = await checkUser().catch(() => null);
 
-  if (isUuidLike(slug)) {
+  if (isWorkerId(slug)) {
     const workerDoc = await adminDb
       .collection(COLLECTIONS.USERS)
       .doc(slug)
@@ -82,12 +90,25 @@ export default async function WorkerOrSpecialityPage({
     }
 
     const workerData = workerDoc.data();
+
+    // Fetch worker profile from separate collection
+    let workerProfile = null;
+    const workerProfileQuery = await adminDb
+      .collection(COLLECTIONS.WORKER_PROFILES)
+      .where("userId", "==", slug)
+      .limit(1)
+      .get();
+
+    if (!workerProfileQuery.empty) {
+      workerProfile = workerProfileQuery.docs[0].data();
+    }
+
     const worker = serializeFirestoreData({
       id: workerDoc.id,
       name: workerData?.name || "Unknown",
       email: workerData?.email || "",
       phone: workerData?.phone || "",
-      workerProfile: workerData?.workerProfile || null,
+      workerProfile,
     });
 
     if (!worker.workerProfile) {
@@ -97,11 +118,14 @@ export default async function WorkerOrSpecialityPage({
             <Card className="bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/20 shadow-xl p-8 text-center max-w-md w-full">
               <FiUser className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
               <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-2">
-                Worker Not Found
+                Profile Incomplete
               </h2>
-              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-                The worker profile you&apos;re looking for doesn&apos;t exist or
-                has been removed.
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mb-4">
+                This worker ({worker.name}) hasn&apos;t completed their profile
+                setup yet.
+              </p>
+              <p className="text-xs text-gray-500 dark:text-gray-500">
+                Worker ID: {worker.id}
               </p>
             </Card>
           </div>
@@ -366,12 +390,36 @@ export default async function WorkerOrSpecialityPage({
     .limit(200)
     .get();
 
+  const workerIds = workersSnapshot.docs.map((doc) => doc.id);
+
+  // Fetch all worker profiles
+  const workerProfilesMap = new Map();
+  if (workerIds.length > 0) {
+    // Firestore 'in' queries support max 10 items, so batch them
+    const batches = [];
+    for (let i = 0; i < workerIds.length; i += 10) {
+      batches.push(workerIds.slice(i, i + 10));
+    }
+
+    for (const batch of batches) {
+      const profilesQuery = await adminDb
+        .collection(COLLECTIONS.WORKER_PROFILES)
+        .where("userId", "in", batch)
+        .get();
+
+      profilesQuery.docs.forEach((doc) => {
+        const data = doc.data();
+        workerProfilesMap.set(data.userId, data);
+      });
+    }
+  }
+
   const workersRaw = workersSnapshot.docs.map((doc) => {
     const data = doc.data();
     return {
       id: doc.id,
       name: data.name || "",
-      workerProfile: data.workerProfile || null,
+      workerProfile: workerProfilesMap.get(doc.id) || null,
     };
   });
 
