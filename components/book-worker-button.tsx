@@ -347,10 +347,10 @@ export default function BookWorkerButton({
       <Dialog open={open} onOpenChange={setOpen}>
         <DialogContent
           backdrop="blur"
-          className="max-w-5xl lg:max-w-6xl xl:max-w-7xl w-[96vw] max-h-[92vh] overflow-y-auto p-0 bg-white dark:bg-gray-900"
+          className="max-w-5xl lg:max-w-6xl xl:max-w-7xl w-[96vw] max-h-[92vh] overflow-y-auto p-0 bg-white dark:bg-[#212121]"
         >
           {/* Header */}
-          <div className="px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 bg-gradient-to-br from-blue-50 to-white dark:from-gray-800 dark:to-gray-900 border-b dark:border-gray-700 sticky top-0 z-10 bg-white/95 dark:bg-gray-900/95 backdrop-blur-sm">
+          <div className="px-4 sm:px-6 md:px-8 pt-6 sm:pt-8 pb-4 sm:pb-6 bg-gradient-to-br from-blue-50 to-white dark:from-[#171717] dark:to-[#212121] border-b border-gray-200 dark:border-gray-800 sticky top-0 z-10 bg-white/95 dark:bg-[#212121]/95 backdrop-blur-sm">
             <div className="flex items-start justify-between gap-2">
               <div className="flex-1 min-w-0">
                 <DialogTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
@@ -364,7 +364,7 @@ export default function BookWorkerButton({
               <button
                 type="button"
                 onClick={() => setOpen(false)}
-                className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+                className="rounded-full p-2 hover:bg-gray-100 dark:hover:bg-[#303030] transition-colors"
               >
                 <XIcon className="h-5 w-5 text-gray-500 dark:text-gray-400" />
               </button>
@@ -387,10 +387,10 @@ export default function BookWorkerButton({
                     disabled={!isClickable}
                     className={`group relative flex flex-col items-center text-center p-3 sm:p-4 rounded-xl transition-all duration-200 ${
                       isActive
-                        ? "bg-white dark:bg-gray-800 shadow-lg ring-2 ring-blue-500 ring-offset-2"
+                        ? "bg-white dark:bg-[#181818] shadow-lg ring-2 ring-blue-500 ring-offset-2 dark:ring-offset-[#212121]"
                         : isCompleted
-                        ? "bg-white dark:bg-gray-800 shadow-sm hover:shadow-md cursor-pointer border border-gray-200"
-                        : "bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 border-gray-200 cursor-not-allowed opacity-60"
+                        ? "bg-white dark:bg-[#181818] shadow-sm hover:shadow-md cursor-pointer border border-gray-200 dark:border-gray-800"
+                        : "bg-gray-50 dark:bg-[#171717] border border-gray-200 dark:border-gray-800 cursor-not-allowed opacity-60"
                     }`}
                   >
                     {/* Connector Line */}
@@ -620,7 +620,7 @@ export default function BookWorkerButton({
                   </div>
 
                   {/* Review Summary */}
-                  <div className="mt-4 sm:mt-6 md:mt-8 p-4 sm:p-6 bg-gray-50 dark:bg-gray-700 border dark:border-gray-600 border-gray-200 rounded-lg">
+                  <div className="mt-4 sm:mt-6 md:mt-8 p-4 sm:p-6 bg-gray-50 dark:bg-[#171717] border border-gray-200 dark:border-gray-800 rounded-lg">
                     <h4 className="text-xs sm:text-sm font-bold text-gray-700 dark:text-gray-200 mb-3 sm:mb-4">
                       Booking Summary
                     </h4>
@@ -661,7 +661,7 @@ export default function BookWorkerButton({
           </div>
 
           {/* Footer Actions */}
-          <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 bg-gray-50/95 dark:bg-gray-900/95 backdrop-blur-sm border-t dark:border-gray-700 flex items-center justify-between sticky bottom-0">
+          <div className="px-4 sm:px-6 md:px-8 py-4 sm:py-6 bg-gray-50/95 dark:bg-[#171717]/95 backdrop-blur-sm border-t border-gray-200 dark:border-gray-800 flex items-center justify-between sticky bottom-0">
             <div>
               {currentStep > 0 && (
                 <Button
