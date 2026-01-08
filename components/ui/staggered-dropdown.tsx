@@ -52,16 +52,18 @@ const actionIconVariants = {
 export default function StaggeredDropDown({
   items,
   selected,
-  onSelect,
   onSelectAction,
+  onSelect,
   label,
+  isCollapsed = false,
 }: {
   items: { value: string; label: string }[];
   selected: string;
   // Accept either a client callback (`onSelect`) or a Server Action (`onSelectAction`).
-  onSelect?: (value: string) => void;
   onSelectAction?: (value: string) => void;
+  onSelect?: (value: string) => void;
   label?: string;
+  isCollapsed?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const handleSelect = (v: string) => {
@@ -85,7 +87,9 @@ export default function StaggeredDropDown({
           initial={wrapperVariants.closed}
           variants={wrapperVariants}
           style={{ originY: "top" }}
-          className="flex flex-col gap-1 p-2 rounded-lg bg-white dark:bg-[#303030] shadow-xl absolute top-[120%] left-1/2 -translate-x-1/2 w-48 overflow-hidden z-50"
+          className={`flex flex-col gap-1 p-2 rounded-lg bg-white dark:bg-[#303030] shadow-xl absolute top-[120%] w-48 overflow-hidden z-50 ${
+            isCollapsed ? 'left-full ml-2' : 'left-1/2 -translate-x-1/2'
+          }`}
         >
           {items.map((it) => (
             <Option key={it.value} text={it.label} value={it.value} setOpen={setOpen} onSelect={handleSelect} selected={selected} />

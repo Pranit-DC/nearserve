@@ -53,9 +53,7 @@ export default function WorkerJobsPage() {
   const [tab, setTab] = useState<Tab>("NEW");
   const [acting, setActing] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useState<"grid" | "list" | "scroll">(
-    "scroll"
-  );
+  const [viewMode, setViewMode] = useState<"list">("list");
   const [startWorkJobId, setStartWorkJobId] = useState<string | null>(null);
   const [photoFile, setPhotoFile] = useState<File | null>(null);
   const [photoPreview, setPhotoPreview] = useState<string | null>(null);
@@ -346,15 +344,15 @@ export default function WorkerJobsPage() {
     <Card className="p-6 animate-pulse">
       <div className="flex items-start justify-between mb-4">
         <div className="space-y-2">
-          <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-40"></div>
-          <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+          <div className="h-5 bg-gray-200 dark:bg-[#222] rounded w-40"></div>
+          <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-24"></div>
         </div>
-        <div className="h-6 bg-gray-200 dark:bg-gray-700 rounded-full w-20"></div>
+        <div className="h-6 bg-gray-200 dark:bg-[#222] rounded-full w-20"></div>
       </div>
       <div className="space-y-3">
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-32"></div>
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-28"></div>
-        <div className="h-4 bg-gray-200 dark:bg-gray-700 rounded w-24"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-32"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-28"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-24"></div>
       </div>
     </Card>
   );
@@ -366,7 +364,7 @@ export default function WorkerJobsPage() {
       animate={{ opacity: 1, y: 0 }}
       className="text-center py-16"
     >
-      <div className="h-32 w-32 mx-auto bg-gray-100 dark:bg-gray-800 rounded-full flex items-center justify-center mb-6">
+      <div className="h-32 w-32 mx-auto bg-gray-100 dark:bg-[#1a1a1a] rounded-full flex items-center justify-center mb-6">
         <FiBriefcase className="h-16 w-16 text-gray-400" />
       </div>
       <h3 className="text-xl font-medium text-gray-900 dark:text-white mb-2">
@@ -392,7 +390,7 @@ export default function WorkerJobsPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-white dark:bg-gray-800 rounded-2xl shadow-2xl max-w-lg w-full p-6"
+          className="bg-white dark:bg-[#181818] rounded-2xl shadow-2xl max-w-lg w-full p-6"
         >
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -417,7 +415,7 @@ export default function WorkerJobsPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Upload Work Start Photo *
               </label>
-              <div className="border-2 border-dashed border-gray-300 dark:border-gray-600 rounded-lg p-6 text-center hover:border-blue-500 transition-colors">
+              <div className="border-2 border-dashed border-gray-300 dark:border-[#303030] rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-[#404040] transition-colors">
                 {photoPreview ? (
                   <div className="space-y-3">
                     <img
@@ -472,7 +470,7 @@ export default function WorkerJobsPage() {
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 GPS Location *
               </label>
-              <div className="bg-gray-50 dark:bg-gray-700 rounded-lg p-4">
+              <div className="bg-gray-50 dark:bg-[#1a1a1a] rounded-lg p-4 border border-transparent dark:border-[#2a2a2a]">
                 {gpsCoords ? (
                   <div className="space-y-2">
                     <div className="flex items-center gap-2 text-green-600 dark:text-green-400">
@@ -526,7 +524,7 @@ export default function WorkerJobsPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-gray-600">
+            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-[#2a2a2a]">
               <Button
                 onClick={() => {
                   setStartWorkJobId(null);
@@ -565,7 +563,7 @@ export default function WorkerJobsPage() {
   };
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-black">
+    <main className="min-h-screen bg-gray-50 dark:bg-[#212121]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -580,19 +578,19 @@ export default function WorkerJobsPage() {
         {/* Controls */}
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
           {/* Segmented Control Tabs */}
-          <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-1 flex">
+          <div className="bg-gray-100 dark:bg-[#171717] rounded-xl p-1 flex">
             {(["NEW", "PREVIOUS"] as Tab[]).map((tabOption) => (
               <button
                 key={tabOption}
                 onClick={() => setTab(tabOption)}
                 className={`px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 ${
                   tab === tabOption
-                    ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                    ? "bg-white dark:bg-[#181818] text-gray-900 dark:text-white shadow-sm"
                     : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                 }`}
               >
                 {tabOption === "NEW" ? "New" : "Previous"}
-                <span className="ml-2 text-xs bg-gray-200 dark:bg-gray-600 px-2 py-1 rounded-full">
+                <span className="ml-2 text-xs bg-gray-200 dark:bg-[#252525] px-2 py-1 rounded-full">
                   {tabOption === "NEW" ? newJobs.length : previousJobs.length}
                 </span>
               </button>
@@ -606,49 +604,12 @@ export default function WorkerJobsPage() {
               placeholder="Search jobs..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="pl-10 bg-white dark:bg-gray-800 border-gray-300 dark:border-gray-600"
+              className="pl-10 bg-white dark:bg-[#303030] border-gray-300 dark:border-[#303030]"
             />
           </div>
         </div>
 
-        {/* View Mode Toggle */}
-        <div className="flex justify-end mb-6">
-          <div className="flex items-center gap-1 bg-gray-100 dark:bg-gray-800 rounded-lg p-1">
-            <button
-              onClick={() => setViewMode("grid")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "grid"
-                  ? "bg-white dark:bg-gray-700 shadow-sm"
-                  : "hover:bg-gray-200 dark:hover:bg-gray-700"
-              }`}
-              title="Grid View"
-            >
-              <FiGrid className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("list")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "list"
-                  ? "bg-white dark:bg-gray-700 shadow-sm"
-                  : "hover:bg-gray-200 dark:hover:bg-gray-700"
-              }`}
-              title="List View"
-            >
-              <FiList className="h-4 w-4" />
-            </button>
-            <button
-              onClick={() => setViewMode("scroll")}
-              className={`p-2 rounded-md transition-colors ${
-                viewMode === "scroll"
-                  ? "bg-white dark:bg-gray-700 shadow-sm"
-                  : "hover:bg-gray-200 dark:hover:bg-gray-700"
-              }`}
-              title="Scroll View"
-            >
-              <FiTrendingUp className="h-4 w-4" />
-            </button>
-          </div>
-        </div>
+        {/* View mode removed — list-only */}
 
         {/* Content */}
         <AnimatePresence mode="wait">
@@ -685,14 +646,14 @@ export default function WorkerJobsPage() {
                 <EmptyState type={tab === "NEW" ? "new" : "previous"} />
               )}
             </motion.div>
-          ) : viewMode === "scroll" ? (
+          ) : false ? (
             <ScrollList
               data={list || []}
               itemHeight={320}
               renderItem={(j, index) => (
                 <Card
                   key={j.id}
-                  className="p-4 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 w-full max-w-4xl mx-auto flex flex-col overflow-hidden"
+                  className="p-5 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] w-full max-w-4xl mx-auto flex flex-col overflow-hidden"
                 >
                   {/* Header Section */}
                   <div className="flex items-start justify-between gap-3 mb-3">
@@ -716,7 +677,7 @@ export default function WorkerJobsPage() {
                           ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
                           : j.status === "CANCELLED"
                           ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
-                          : "bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                          : "bg-gray-50 text-gray-700 dark:bg-[#252525] dark:text-gray-300"
                       }`}
                     >
                       {j.status}
@@ -728,7 +689,7 @@ export default function WorkerJobsPage() {
                     {/* Time and Location Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                           <svg
                             className="w-4 h-4 text-blue-600 dark:text-blue-400"
                             fill="none"
@@ -754,7 +715,7 @@ export default function WorkerJobsPage() {
                       </div>
 
                       <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <div className="w-7 h-7 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
+                        <div className="w-7 h-7 rounded-lg bg-green-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                           <svg
                             className="w-4 h-4 text-green-600 dark:text-green-400"
                             fill="none"
@@ -785,8 +746,8 @@ export default function WorkerJobsPage() {
                     </div>
 
                     {/* Charge Section */}
-                    <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="w-7 h-7 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center flex-shrink-0">
+                    <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-[#1a1a1a] rounded-lg border border-transparent dark:border-[#2a2a2a]">
+                      <div className="w-7 h-7 rounded-lg bg-yellow-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                         <svg
                           className="w-4 h-4 text-yellow-600 dark:text-yellow-400"
                           fill="none"
@@ -813,8 +774,8 @@ export default function WorkerJobsPage() {
 
                     {/* Details Description */}
                     {j.details && (
-                      <div className="p-2 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                        <p className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">
+                      <div className="p-2 bg-gray-50 dark:bg-[#1a1a1a] rounded-lg border border-transparent dark:border-[#2a2a2a]">
+                        <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
                           Additional Details
                         </p>
                         <p className="text-xs text-gray-700 dark:text-gray-200 line-clamp-2">
@@ -827,8 +788,9 @@ export default function WorkerJobsPage() {
                     {tab === "PREVIOUS" &&
                       j.status === "COMPLETED" &&
                       j.review && (
-                        <div className="p-2 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-                          <p className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-1">
+                        <div className="p-2 bg-gray-50 dark:bg-[#1a1a1a] rounded-lg border border-transparent dark:border-[#2a2a2a]">
+                          <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 flex items-center gap-1.5">
+                            <FiStar className="h-3 w-3" />
                             Customer Review
                           </p>
                           <div className="flex items-center gap-1 mb-1">
@@ -857,7 +819,7 @@ export default function WorkerJobsPage() {
 
                   {/* Action Buttons Section */}
                   {tab === "NEW" && j.status === "PENDING" && (
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600 flex gap-2">
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-[#2a2a2a] flex gap-2">
                       <ClickSpark
                         sparkColor="#22c55e"
                         sparkCount={10}
@@ -881,7 +843,7 @@ export default function WorkerJobsPage() {
                     </div>
                   )}
                   {tab === "NEW" && j.status === "ACCEPTED" && (
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-[#2a2a2a]">
                       <Button
                         onClick={() => setStartWorkJobId(j.id)}
                         className="w-full bg-purple-600 hover:bg-purple-500 text-white"
@@ -892,8 +854,8 @@ export default function WorkerJobsPage() {
                     </div>
                   )}
                   {tab === "NEW" && j.status === "IN_PROGRESS" && (
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
-                      <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-[#2a2a2a]">
+                      <div className="bg-purple-50 dark:bg-[#1a1a1a] border border-purple-200 dark:border-purple-800/30 rounded-lg p-3">
                         <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
                           <FiPlay className="h-5 w-5 animate-pulse" />
                           <span className="text-sm font-medium">
@@ -910,17 +872,11 @@ export default function WorkerJobsPage() {
               )}
             />
           ) : (
-            <div
-              className={
-                viewMode === "grid"
-                  ? "grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
-                  : "space-y-4"
-              }
-            >
+            <div className="space-y-4">
               {list.map((j) => (
                 <Card
                   key={j.id}
-                  className="p-5 hover:shadow-lg transition-all duration-200 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 flex flex-col h-full min-h-[300px]"
+                  className="p-6 hover:shadow-xl transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] flex flex-col h-full min-h-[300px] hover:border-gray-300 dark:hover:border-[#303030]"
                 >
                   {/* Header Section */}
                   <div className="flex items-start justify-between gap-3 mb-4">
@@ -943,8 +899,8 @@ export default function WorkerJobsPage() {
                           : j.status === "COMPLETED"
                           ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
                           : j.status === "CANCELLED"
-                          ? "bg-red-50 text-red-700 dark:text-red-300"
-                          : "bg-gray-50 text-gray-700 dark:bg-gray-700 dark:text-gray-300"
+                          ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
+                          : "bg-gray-50 text-gray-700 dark:bg-[#252525] dark:text-gray-300"
                       }`}
                     >
                       {j.status}
@@ -955,8 +911,8 @@ export default function WorkerJobsPage() {
                   <div className="flex-1 space-y-3">
                     {/* Time and Location Row */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
+                      <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                           <svg
                             className="w-4 h-4 text-blue-600 dark:text-blue-400"
                             fill="none"
@@ -981,8 +937,8 @@ export default function WorkerJobsPage() {
                         </div>
                       </div>
 
-                      <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                        <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center">
+                      <div className="flex items-center gap-3 text-sm text-gray-600 dark:text-gray-300">
+                        <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                           <svg
                             className="w-4 h-4 text-green-600 dark:text-green-400"
                             fill="none"
@@ -1013,8 +969,8 @@ export default function WorkerJobsPage() {
                     </div>
 
                     {/* Charge Section */}
-                    <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-gray-700 rounded-lg">
-                      <div className="w-8 h-8 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
+                    <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
+                      <div className="w-9 h-9 rounded-xl bg-yellow-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                         <svg
                           className="w-4 h-4 text-yellow-600 dark:text-yellow-400"
                           fill="none"
@@ -1041,8 +997,8 @@ export default function WorkerJobsPage() {
 
                     {/* Details Description */}
                     {j.details && (
-                      <div className="p-3 bg-blue-50 dark:bg-blue-900/10 rounded-lg">
-                        <p className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1">
+                      <div className="p-3 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
+                        <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
                           Additional Details
                         </p>
                         <p className="text-sm text-gray-700 dark:text-gray-200 line-clamp-2">
@@ -1055,8 +1011,9 @@ export default function WorkerJobsPage() {
                     {tab === "PREVIOUS" &&
                       j.status === "COMPLETED" &&
                       j.review && (
-                        <div className="p-3 bg-purple-50 dark:bg-purple-900/10 rounded-lg">
-                          <p className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-1">
+                        <div className="p-3 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
+                          <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1 flex items-center gap-1.5">
+                            <FiStar className="h-3 w-3" />
                             Customer Review
                           </p>
                           <div className="flex items-center gap-1 mb-1">
@@ -1085,7 +1042,7 @@ export default function WorkerJobsPage() {
 
                   {/* Action Buttons Section */}
                   {tab === "NEW" && j.status === "PENDING" && (
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600 flex gap-2">
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-[#2a2a2a] flex gap-3">
                       <Button
                         disabled={acting === j.id}
                         onClick={() => act(j.id, "ACCEPT")}
@@ -1103,7 +1060,7 @@ export default function WorkerJobsPage() {
                     </div>
                   )}
                   {tab === "NEW" && j.status === "ACCEPTED" && (
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-[#2a2a2a]">
                       <Button
                         onClick={() => setStartWorkJobId(j.id)}
                         className="w-full bg-purple-600 hover:bg-purple-500 text-white"
@@ -1114,8 +1071,8 @@ export default function WorkerJobsPage() {
                     </div>
                   )}
                   {tab === "NEW" && j.status === "IN_PROGRESS" && (
-                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
-                      <div className="bg-purple-50 dark:bg-purple-900/20 border border-purple-200 dark:border-purple-800 rounded-lg p-3">
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-[#2a2a2a]">
+                      <div className="bg-purple-50 dark:bg-[#1a1a1a] border border-purple-200 dark:border-purple-800/30 rounded-xl p-3">
                         <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
                           <FiPlay className="h-5 w-5 animate-pulse" />
                           <span className="text-sm font-medium">

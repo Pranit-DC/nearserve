@@ -302,7 +302,7 @@ export default function CustomerBookingsPage() {
     if (razorpayOrder && razorpayLoaded && paymentJobId) {
       const job = jobs.find((j) => j.id === paymentJobId);
       if (job) {
-        processPayment(job);
+        processPayment(job as unknown as Job);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -517,14 +517,14 @@ export default function CustomerBookingsPage() {
                   />
                 )}
               </motion.div>
-            ) : viewMode === "scroll" ? (
+            ) : false ? (
               <ScrollList
                 data={list || []}
                 itemHeight={320}
                 renderItem={(j, index) => (
                   <Card
                     key={j.id}
-                    className="p-4 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] w-full max-w-4xl mx-auto flex flex-col overflow-hidden"
+                    className="p-6 hover:shadow-xl transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] w-full max-w-4xl mx-auto flex flex-col overflow-hidden"
                   >
                     {/* Header Section */}
                     <div className="flex items-start justify-between gap-3 mb-3">
@@ -558,7 +558,7 @@ export default function CustomerBookingsPage() {
                       {/* Time and Location Row */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-7 h-7 rounded-lg bg-blue-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
+                          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                             <svg
                               className="w-4 h-4 text-blue-600 dark:text-slate-300"
                               fill="none"
@@ -584,7 +584,7 @@ export default function CustomerBookingsPage() {
                         </div>
 
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-7 h-7 rounded-lg bg-green-50 dark:bg-green-900/20 flex items-center justify-center flex-shrink-0">
+                          <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                             <svg
                               className="w-4 h-4 text-green-600 dark:text-green-400"
                               fill="none"
@@ -615,8 +615,8 @@ export default function CustomerBookingsPage() {
                       </div>
 
                       {/* Charge Section */}
-                      <div className="flex items-center gap-2 p-2 bg-gray-50 dark:bg-[#181818] rounded-lg">
-                        <div className="w-7 h-7 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center flex-shrink-0">
+                      <div className="flex items-center gap-3 p-3 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
+                        <div className="w-9 h-9 rounded-xl bg-yellow-50 dark:bg-[#252525] flex items-center justify-center flex-shrink-0">
                           <svg
                             className="w-4 h-4 text-yellow-600 dark:text-yellow-400"
                             fill="none"
@@ -643,11 +643,11 @@ export default function CustomerBookingsPage() {
 
                       {/* Details Description */}
                       {j.details && (
-                        <div className="p-2 bg-blue-50 dark:bg-[#171717] rounded-lg">
-                          <p className="text-xs font-medium text-blue-600 dark:text-slate-300 mb-1">
+                        <div className="p-3 bg-gray-50 dark:bg-[#1a1a1a] rounded-xl border border-gray-200 dark:border-[#2a2a2a]">
+                          <p className="text-xs font-medium text-gray-600 dark:text-gray-300 mb-1">
                             Additional Details
                           </p>
-                          <p className="text-xs text-gray-700 dark:text-slate-200 line-clamp-2">
+                          <p className="text-xs text-gray-700 dark:text-gray-200 line-clamp-2">
                             {j.details}
                           </p>
                         </div>
@@ -655,7 +655,7 @@ export default function CustomerBookingsPage() {
                     </div>
 
                     {/* Action Buttons Section */}
-                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-gray-600">
+                    <div className="mt-3 pt-3 border-t border-gray-200 dark:border-[#2a2a2a]">
                       {tab === "ONGOING" && j.status === "IN_PROGRESS" && (
                         <div className="space-y-2">
                           <Button
@@ -695,7 +695,7 @@ export default function CustomerBookingsPage() {
                       )}
                       {tab === "ONGOING" &&
                         (j.status === "PENDING" || j.status === "ACCEPTED") && (
-                          <div className="bg-blue-50 dark:bg-[#171717] border border-blue-200 dark:border-[#303030] rounded-lg p-3">
+                          <div className="bg-gray-50 dark:bg-[#1a1a1a] border border-gray-200 dark:border-[#2a2a2a] rounded-xl p-3">
                             <div className="flex items-center gap-2 text-blue-700 dark:text-slate-200">
                               <FiClock className="h-5 w-5" />
                               <span className="text-sm font-medium">
@@ -737,13 +737,7 @@ export default function CustomerBookingsPage() {
                 )}
               />
             ) : (
-              <div
-                className={
-                  viewMode === "grid"
-                    ? "grid gap-6 md:grid-cols-2 lg:grid-cols-2 xl:grid-cols-3"
-                    : "space-y-4"
-                }
-              >
+              <div className="space-y-4">
                 {list.map((j) => (
                   <Card
                     key={j.id}
@@ -781,7 +775,7 @@ export default function CustomerBookingsPage() {
                       {/* Time and Location Row */}
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-8 h-8 rounded-lg bg-blue-50 dark:bg-[#252525] flex items-center justify-center">
+                          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-[#252525] flex items-center justify-center">
                             <svg
                               className="w-4 h-4 text-blue-600 dark:text-slate-300"
                               fill="none"
@@ -807,7 +801,7 @@ export default function CustomerBookingsPage() {
                         </div>
 
                         <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-8 h-8 rounded-lg bg-green-50 dark:bg-[#252525] flex items-center justify-center">
+                          <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-[#252525] flex items-center justify-center">
                             <svg
                               className="w-4 h-4 text-green-600 dark:text-slate-300"
                               fill="none"
@@ -839,7 +833,7 @@ export default function CustomerBookingsPage() {
 
                       {/* Charge Section */}
                       <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-[#181818] rounded-lg">
-                        <div className="w-8 h-8 rounded-lg bg-yellow-50 dark:bg-yellow-900/20 flex items-center justify-center">
+                        <div className="w-9 h-9 rounded-xl bg-yellow-50 dark:bg-[#252525] flex items-center justify-center">
                           <svg
                             className="w-4 h-4 text-yellow-600 dark:text-yellow-400"
                             fill="none"

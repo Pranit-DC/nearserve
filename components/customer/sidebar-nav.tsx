@@ -21,13 +21,14 @@ import {
   FiChevronDown,
   FiSun,
   FiMoon,
+  FiGlobe,
 } from "react-icons/fi";
 import { FiLogOut } from "react-icons/fi";
 import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { FirebaseUserButton } from "@/components/firebase-user-button";
-import { LanguageSwitcher } from "@/components/language-switcher";
+import StaggeredDropDown from "@/components/ui/staggered-dropdown";
 import { NotificationBell } from "@/components/notification-bell";
 import {
   Dialog,
@@ -96,6 +97,7 @@ const Option = ({
     <Link href={href}>
       <motion.button
         layout
+        title={!open ? title : undefined}
         className={`relative flex h-10 w-full items-center rounded-lg transition-all duration-200 ${
           isActive
             ? "bg-blue-50 dark:bg-gray-800/50 text-blue-600 dark:text-blue-400 shadow-sm"
@@ -173,8 +175,25 @@ export function CustomerSidebar({
   const [searchQuery, setSearchQuery] = useState("");
   const { theme, setTheme, systemTheme } = useTheme();
   const [mounted, setMounted] = useState(false);
+  const [currentLang, setCurrentLang] = useState('en');
 
   useEffect(() => setMounted(true), []);
+
+  const languages = [
+    { value: 'en', label: 'English' },
+    { value: 'hi', label: 'हिन्दी' },
+    { value: 'mr', label: 'मराठी' },
+  ];
+
+  const changeLanguage = (langCode: string) => {
+    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
+    if (select) {
+      select.value = langCode;
+      select.dispatchEvent(new Event('change'));
+      setCurrentLang(langCode);
+      localStorage.setItem('preferredLanguage', langCode);
+    }
+  };
 
   const currentTheme = theme === "system" ? systemTheme : theme;
 
@@ -196,9 +215,10 @@ export function CustomerSidebar({
   return (
     <motion.nav
       layout
-      className="fixed left-0 top-0 h-full shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#181818] flex flex-col overflow-hidden z-40"
+      className="fixed left-0 top-0 h-full shrink-0 border-r border-gray-200 dark:border-gray-700 bg-white dark:bg-[#181818] flex flex-col z-40"
       style={{
         width: isOpen ? "256px" : "fit-content",
+        overflow: isOpen ? "hidden" : "visible",
       }}
     >
       {/* Brand Header */}
@@ -223,16 +243,14 @@ export function CustomerSidebar({
               </span>
             </motion.div>
           ) : (
-            <div className="flex justify-center">
+            <Link href="/">
               <img
                 src="/hard-hat_11270170.svg"
                 alt="NearServe Logo"
-                className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+                className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert cursor-pointer"
               />
-            </div>
+            </Link>
           )}
-          {/* Notification Bell */}
-          <NotificationBell />
         </div>
       </div>
       {/* Mobile close button */}
@@ -264,24 +282,40 @@ export function CustomerSidebar({
       </div>
 
       {/* Secondary Navigation */}
-      <div className="space-y-2 px-3 border-t border-gray-200 dark:border-gray-700 pt-4 pb-4 overflow-hidden">
-        {secondaryNavigation.map((item) => (
-          <Option
-            key={item.name}
-            Icon={item.icon}
-            title={item.name}
-            href={item.href}
-            pathname={pathname}
-            open={isOpen}
-          />
-        ))}
+      <div className="space-y-2 px-3 border-t border-gray-200 dark:border-gray-700 pt-4 pb-4 overflow-visible">
+        {/* Notification Bell */}
+        <motion.div
+          layout
+          className="relative flex h-10 w-full items-center rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/30 hover:text-gray-900 dark:hover:text-gray-200"
+        >
+          <motion.div
+            layout
+            className="grid h-full w-10 place-content-center text-lg"
+          >
+            <div title={!isOpen ? "Notifications" : undefined}>
+              <NotificationBell />
+            </div>
+          </motion.div>
+          {isOpen && (
+            <motion.span
+              layout
+              initial={{ opacity: 0, y: 12 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.125 }}
+              className="text-sm font-medium"
+            >
+              Notifications
+            </motion.span>
+          )}
+        </motion.div>
 
         {/* Theme Toggle */}
         {mounted && (
           <motion.button
             layout
+            title={!isOpen ? (currentTheme === "dark" ? "Light Mode" : "Dark Mode") : undefined}
             onClick={() => setTheme(currentTheme === "dark" ? "light" : "dark")}
-            className="relative flex h-10 w-full items-center rounded-md transition-colors text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
+            className="relative flex h-10 w-full items-center rounded-lg transition-colors text-gray-500 dark:text-gray-400 hover:bg-gray-100 dark:hover:bg-gray-800"
           >
             <motion.div
               layout
@@ -295,7 +329,7 @@ export function CustomerSidebar({
                 initial={{ opacity: 0, y: 12 }}
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.125 }}
-                className="text-xs font-medium"
+                className="text-sm font-medium"
               >
                 {currentTheme === "dark" ? "Light Mode" : "Dark Mode"}
               </motion.span>
@@ -304,55 +338,91 @@ export function CustomerSidebar({
         )}
         
         {/* Language Switcher */}
-        {isOpen && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ delay: 0.125 }}
-            className="pt-2 border-t border-gray-200 dark:border-gray-700"
-          >
-            <LanguageSwitcher />
-          </motion.div>
-        )}
+        <motion.div
+          layout
+          className="relative"
+          style={{ overflow: 'visible' }}
+        >
+          {isOpen ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              transition={{ delay: 0.125 }}
+              className="flex items-center h-10 w-full"
+            >
+              <div className="grid h-full w-10 place-content-center text-lg text-gray-500 dark:text-gray-400">
+                <FiGlobe />
+              </div>
+              <div className="flex-1">
+                <StaggeredDropDown
+                  items={languages}
+                  selected={currentLang}
+                  onSelect={changeLanguage}
+                  label="Language"
+                />
+              </div>
+            </motion.div>
+          ) : (
+            <div className="relative flex h-10 w-full items-center justify-center">
+              <StaggeredDropDown
+                items={languages}
+                selected={currentLang}
+                onSelect={changeLanguage}
+                label=""
+                isCollapsed={true}
+              />
+            </div>
+          )}
+        </motion.div>
+
+        {secondaryNavigation.map((item) => (
+          <Option
+            key={item.name}
+            Icon={item.icon}
+            title={item.name}
+            href={item.href}
+            pathname={pathname}
+            open={isOpen}
+          />
+        ))}
       </div>
 
       {/* User Profile Section & Sign Out with Confirmation Dialog */}
       <div className="px-2 py-3 border-t border-gray-200 dark:border-gray-700 mb-2">
-        <div className="flex items-center justify-between gap-2">
+        <div className={`flex items-center ${isOpen ? 'justify-between' : 'justify-center flex-col'} gap-2`}>
           <FirebaseUserButton />
-          {isOpen && (
-            <Dialog>
-              <DialogTrigger asChild>
-                <motion.button
-                  layout
-                  className="flex items-center gap-2 px-3 py-2 rounded-md text-red-600 hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
-                  aria-label="Sign out"
-                >
-                  <FiLogOut className="w-4 h-4" />
-                  <span className="text-sm font-medium">Sign Out</span>
-                </motion.button>
-              </DialogTrigger>
-              <DialogContent>
-                <DialogHeader>
-                  <DialogTitle>Sign Out</DialogTitle>
-                  <DialogDescription>
-                    Are you sure you want to sign out?
-                  </DialogDescription>
-                </DialogHeader>
-                <DialogFooter>
-                  <DialogClose asChild>
-                    <button className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
-                  </DialogClose>
-                  <button
-                    className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
-                    onClick={async () => {
-                      await signOut();
-                    }}
-                  >Sign Out</button>
-                </DialogFooter>
-              </DialogContent>
-            </Dialog>
-          )}
+          <Dialog>
+            <DialogTrigger asChild>
+              <motion.button
+                layout
+                title={!isOpen ? "Sign Out" : undefined}
+                className={`flex items-center gap-2 ${isOpen ? 'px-3 py-2' : 'p-2'} rounded-lg text-red-600 hover:bg-red-50 dark:hover:bg-gray-800 transition-colors`}
+                aria-label="Sign out"
+              >
+                <FiLogOut className="w-4 h-4" />
+                {isOpen && <span className="text-sm font-medium">Sign Out</span>}
+              </motion.button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Sign Out</DialogTitle>
+                <DialogDescription>
+                  Are you sure you want to sign out?
+                </DialogDescription>
+              </DialogHeader>
+              <DialogFooter>
+                <DialogClose asChild>
+                  <button className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
+                </DialogClose>
+                <button
+                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                  onClick={async () => {
+                    await signOut();
+                  }}
+                >Sign Out</button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
         </div>
       </div>
 
