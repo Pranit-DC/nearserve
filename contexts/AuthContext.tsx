@@ -41,30 +41,33 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(user);
       setLoading(false);
 
-      // Set session cookie for middleware
-      if (user) {
-        const token = await user.getIdToken();
-        // Set the token as a cookie
-        document.cookie = `__session=${token}; path=/; max-age=3600; SameSite=Lax`;
-      } else {
-        // Clear the cookie
-        document.cookie = '__session=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      // Session cookie is managed by /api/auth/session endpoint
+      // Don't set ID token directly as cookie as it causes issuer mismatch
+      if (!user) {
+        // Clear the session cookie when user signs out
+        await fetch('/api/auth/session', { method: 'DELETE' });
       }
     });
 
     return () => unsubscribe();
   }, []);
 
-  // Refresh token every 55 minutes (tokens expire after 1 hour)
+  // Refresh session cookie every 55 minutes (tokens expire after 1 hour)
   useEffect(() => {
     if (!user) return;
 
     const interval = setInterval(async () => {
       try {
-        const token = await user.getIdToken(true); // Force refresh
-        document.cookie = `__session=${token}; path=/; max-age=3600; SameSite=Lax`;
+        const idToken = await user.getIdToken(true); // Force refresh
+        
+        // Refresh session cookie via API
+        await fetch('/api/auth/session', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ idToken }),
+        });
       } catch (error) {
-        console.error('Error refreshing token:', error);
+        console.error('Error refreshing session:', error);
       }
     }, 55 * 60 * 1000); // 55 minutes
 

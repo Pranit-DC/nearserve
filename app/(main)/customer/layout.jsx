@@ -1,6 +1,7 @@
 "use client"
 
 import { CustomerSidebar } from "@/components/customer/sidebar-nav";
+import { CustomerNotificationPermission } from "@/components/customer/notification-permission";
 import { useState } from "react";
 
 // Force dynamic rendering for this route group
@@ -50,6 +51,9 @@ export default function CustomerLayout({ children }) {
           {children}
         </div>
       </main>
+      
+      {/* Notification Permission Component */}
+      <CustomerNotificationPermission />
     </div>
   );
 }

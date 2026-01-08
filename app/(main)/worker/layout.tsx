@@ -3,6 +3,8 @@
 import { ReactNode, useState, useEffect } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { WorkerSidebar } from "@/components/worker/sidebar-nav";
+import { WorkerNotificationPermission } from "@/components/worker/notification-permission";
+import { NotificationDebug } from "@/components/worker/notification-debug";
 
 // Force dynamic rendering for this route group
 export const dynamic = "force-dynamic";
@@ -75,6 +77,12 @@ export default function WorkerLayout({
           {children}
         </div>
       </main>
+      
+      {/* Notification Permission Component */}
+      <WorkerNotificationPermission />
+      
+      {/* Debug Panel - Uncomment for debugging */}
+      {/* <NotificationDebug /> */}
     </div>
   );
 }

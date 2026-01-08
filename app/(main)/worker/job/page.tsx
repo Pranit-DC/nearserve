@@ -29,6 +29,9 @@ import {
 } from "react-icons/fi";
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
+import { useAutoRefresh } from "@/hooks/use-auto-refresh";
+import { useAuth } from "@/contexts/AuthContext";
+import { useRealtimeJobs } from "@/hooks/use-realtime-jobs";
 
 type Job = {
   id: string;
@@ -46,8 +49,7 @@ type Job = {
 type Tab = "NEW" | "PREVIOUS";
 
 export default function WorkerJobsPage() {
-  const [jobs, setJobs] = useState<Job[]>([]);
-  const [loading, setLoading] = useState(true);
+  const { user } = useAuth();
   const [tab, setTab] = useState<Tab>("NEW");
   const [acting, setActing] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -64,24 +66,48 @@ export default function WorkerJobsPage() {
   } | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  const load = async () => {
-    setLoading(true);
+  // Real-time Firestore listener - instant updates when jobs change!
+  const { jobs, loading, error } = useRealtimeJobs({
+    userId: user?.uid || null,
+    role: 'worker',
+    enabled: !!user?.uid
+  });
+
+  // Fallback to API if Firestore fails
+  const [apiJobs, setApiJobs] = useState<Job[]>([]);
+  const [fallbackActive, setFallbackActive] = useState(false);
+
+  const loadFromAPI = async () => {
     try {
-      const res = await fetch("/api/worker/jobs", { cache: "no-store" });
-      if (!res.ok) throw new Error("Failed to load jobs");
+      const res = await fetch("/api/worker/jobs", { 
+        cache: "no-store",
+        credentials: "include"
+      });
+      
+      if (!res.ok) throw new Error(`Failed to load jobs: ${res.status}`);
+      
       const data = await res.json();
-      setJobs(data.jobs || []);
+      setApiJobs(data.jobs || []);
+      console.log(`[Jobs API] Loaded ${data.jobs?.length || 0} jobs`);
     } catch (e) {
-      console.error(e);
-      setJobs([]);
-    } finally {
-      setLoading(false);
+      console.error('[Jobs API] Load error:', e);
     }
   };
 
+  // If Firestore has an error, activate API fallback
   useEffect(() => {
-    load();
-  }, []);
+    if (error && !fallbackActive) {
+      console.warn('[Jobs] Firestore error, falling back to API polling');
+      setFallbackActive(true);
+      loadFromAPI();
+    }
+  }, [error, fallbackActive]);
+
+  // Use API polling as fallback only if Firestore fails
+  useAutoRefresh(loadFromAPI, { interval: 30000, enabled: fallbackActive });
+
+  // Use either realtime jobs or API jobs
+  const displayJobs = fallbackActive ? apiJobs : jobs;
 
   const act = async (id: string, action: "ACCEPT" | "CANCEL") => {
     setActing(id);
@@ -95,7 +121,7 @@ export default function WorkerJobsPage() {
         toast.success(
           action === "ACCEPT" ? "Job accepted successfully!" : "Job cancelled"
         );
-        await load();
+        // No need to reload - realtime listener auto-updates!
       } else {
         const data = await res.json();
         toast.error(data.error || "Action failed");
@@ -158,33 +184,46 @@ export default function WorkerJobsPage() {
 
     console.log("Uploading file:", { name: file.name, type: file.type, size: file.size });
 
-    const res = await fetch("/api/upload", {
-      method: "POST",
-      body: formData,
-    });
+    try {
+      const res = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+        credentials: "include", // Include cookies for authentication
+      });
 
-    if (!res.ok) {
-      const responseText = await res.text();
-      console.error("Upload failed - Status:", res.status);
-      console.error("Upload failed - Status Text:", res.statusText);
-      console.error("Upload failed - Response:", responseText);
-      
-      let errorMessage = `Failed to upload photo: ${res.status}`;
-      try {
-        const errorData = JSON.parse(responseText);
-        console.error("Upload failed - Parsed error:", errorData);
-        errorMessage = errorData.error || errorData.details || errorMessage;
-      } catch (e) {
-        console.error("Upload failed - Could not parse response as JSON");
-        errorMessage = responseText || errorMessage;
+      if (!res.ok) {
+        const responseText = await res.text();
+        console.error("Upload failed - Status:", res.status);
+        console.error("Upload failed - Status Text:", res.statusText);
+        console.error("Upload failed - Response:", responseText);
+        
+        let errorMessage = `Failed to upload photo: ${res.status}`;
+        try {
+          const errorData = JSON.parse(responseText);
+          console.error("Upload failed - Parsed error:", errorData);
+          errorMessage = errorData.error || errorData.details || errorMessage;
+        } catch (e) {
+          console.error("Upload failed - Could not parse response as JSON");
+          errorMessage = responseText || errorMessage;
+        }
+        
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
       }
-      
-      toast.error(errorMessage);
-      throw new Error(errorMessage);
-    }
 
-    const data = await res.json();
-    return data.url;
+      const data = await res.json();
+      return data.url;
+    } catch (error) {
+      // Handle network errors
+      if (error instanceof TypeError && error.message === "Failed to fetch") {
+        const errorMessage = "Network error: Unable to upload photo. Please check your connection and try again.";
+        console.error("Network error during upload:", error);
+        toast.error(errorMessage);
+        throw new Error(errorMessage);
+      }
+      // Re-throw other errors
+      throw error;
+    }
   };
 
   // Start work with proof
@@ -224,7 +263,7 @@ export default function WorkerJobsPage() {
         setPhotoFile(null);
         setPhotoPreview(null);
         setGpsCoords(null);
-        await load();
+        // No need to reload - realtime listener auto-updates!
       } else {
         const data = await res.json();
         toast.error(data.error || "Failed to start work");
@@ -238,13 +277,13 @@ export default function WorkerJobsPage() {
   };
 
   // Filter and search logic
-  const newJobs = jobs.filter(
+  const newJobs = displayJobs.filter(
     (j) =>
       j.status === "PENDING" ||
       j.status === "ACCEPTED" ||
       j.status === "IN_PROGRESS"
   );
-  const previousJobs = jobs.filter(
+  const previousJobs = displayJobs.filter(
     (j) => j.status === "COMPLETED" || j.status === "CANCELLED"
   );
 
