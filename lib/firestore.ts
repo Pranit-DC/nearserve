@@ -38,6 +38,7 @@ export const COLLECTIONS = {
   REVIEWS: 'reviews',
   TRANSACTIONS: 'transactions',
   TRANSLATION_CACHE: 'translation_cache',
+  NOTIFICATIONS: 'notifications',
 } as const;
 
 // Enums (from Prisma schema)
@@ -121,6 +122,7 @@ export interface WorkerProfile {
   longitude: number | null;
   hourlyRate: number | null;
   minimumFee: number | null;
+  fcmToken: string | null; // Firebase Cloud Messaging token for push notifications
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }
@@ -133,6 +135,7 @@ export interface CustomerProfile {
   state: string;
   country: string;
   postalCode: string;
+  fcmToken: string | null; // Firebase Cloud Messaging token for push notifications
   createdAt: Timestamp;
   updatedAt: Timestamp;
 }

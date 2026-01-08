@@ -27,6 +27,8 @@ import { motion } from "framer-motion";
 import { useTheme } from "next-themes";
 import { useAuth } from "@/contexts/AuthContext";
 import { FirebaseUserButton } from "@/components/firebase-user-button";
+import { LanguageSwitcher } from "@/components/language-switcher";
+import { NotificationBell } from "@/components/notification-bell";
 import {
   Dialog,
   DialogTrigger,
@@ -201,33 +203,37 @@ export function CustomerSidebar({
     >
       {/* Brand Header */}
       <div className="p-4 border-b border-gray-200 dark:border-gray-700">
-        {isOpen ? (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="flex items-center space-x-3"
-          >
-            <Link href="/">
-              {" "}
+        <div className="flex items-center justify-between">
+          {isOpen ? (
+            <motion.div
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              className="flex items-center space-x-3"
+            >
+              <Link href="/">
+                {" "}
+                <img
+                  src="/hard-hat_11270170.svg"
+                  alt="NearServe Logo"
+                  className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+                />
+              </Link>
+              <span className="font-semibold text-gray-900 dark:text-white tracking-tight">
+                NearServe
+              </span>
+            </motion.div>
+          ) : (
+            <div className="flex justify-center">
               <img
                 src="/hard-hat_11270170.svg"
                 alt="NearServe Logo"
                 className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
               />
-            </Link>
-            <span className="font-semibold text-gray-900 dark:text-white tracking-tight">
-              NearServe
-            </span>
-          </motion.div>
-        ) : (
-          <div className="flex justify-center">
-            <img
-              src="/hard-hat_11270170.svg"
-              alt="NearServe Logo"
-              className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
-            />
-          </div>
-        )}
+            </div>
+          )}
+          {/* Notification Bell */}
+          <NotificationBell />
+        </div>
       </div>
       {/* Mobile close button */}
       {onMobileClose && (
@@ -295,6 +301,18 @@ export function CustomerSidebar({
               </motion.span>
             )}
           </motion.button>
+        )}
+        
+        {/* Language Switcher */}
+        {isOpen && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.125 }}
+            className="pt-2 border-t border-gray-200 dark:border-gray-700"
+          >
+            <LanguageSwitcher />
+          </motion.div>
         )}
       </div>
 
