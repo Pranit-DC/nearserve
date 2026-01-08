@@ -53,14 +53,22 @@ export default function StaggeredDropDown({
   items,
   selected,
   onSelect,
+  onSelectAction,
   label,
 }: {
   items: { value: string; label: string }[];
   selected: string;
-  onSelect: (value: string) => void;
+  // Accept either a client callback (`onSelect`) or a Server Action (`onSelectAction`).
+  onSelect?: (value: string) => void;
+  onSelectAction?: (value: string) => void;
   label?: string;
 }) {
   const [open, setOpen] = useState(false);
+  const handleSelect = (v: string) => {
+    if (onSelect) return onSelect(v);
+    if (onSelectAction) return onSelectAction(v);
+    return;
+  };
 
   return (
     <div className="relative inline-block">
@@ -80,7 +88,7 @@ export default function StaggeredDropDown({
           className="flex flex-col gap-1 p-2 rounded-lg bg-white dark:bg-[#303030] shadow-xl absolute top-[120%] left-1/2 -translate-x-1/2 w-48 overflow-hidden z-50"
         >
           {items.map((it) => (
-            <Option key={it.value} text={it.label} value={it.value} setOpen={setOpen} onSelect={onSelect} selected={selected} />
+            <Option key={it.value} text={it.label} value={it.value} setOpen={setOpen} onSelect={handleSelect} selected={selected} />
           ))}
         </motion.ul>
       </motion.div>
