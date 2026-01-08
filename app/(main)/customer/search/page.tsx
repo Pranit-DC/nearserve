@@ -297,16 +297,19 @@ function SearchPageContent() {
 
   // Mobile-Responsive Skeleton Loader Component
   const SkeletonCard = () => (
-    <Card className="border-gray-200 dark:border-gray-800 bg-white dark:bg-[#171717] p-3 sm:p-4 lg:p-6 animate-pulse">
-      <div className="flex flex-col sm:flex-row items-start gap-3 sm:gap-4">
-        <div className="h-10 w-10 sm:h-12 sm:w-12 lg:h-16 lg:w-16 rounded-xl sm:rounded-2xl bg-gray-200 dark:bg-[#222] flex-shrink-0" />
-        <div className="flex-1 w-full sm:w-auto">
-          <div className="h-4 sm:h-5 bg-gray-200 dark:bg-[#222] rounded-lg w-3/4 mb-2" />
-          <div className="h-3 sm:h-4 bg-gray-200 dark:bg-[#222] rounded w-1/2 mb-2 sm:mb-3" />
-          <div className="h-3 sm:h-4 bg-gray-200 dark:bg-[#222] rounded w-2/3 mb-3 sm:mb-4" />
-          <div className="flex gap-1 sm:gap-2">
-            <div className="h-6 sm:h-8 lg:h-9 bg-gray-200 dark:bg-[#222] rounded-lg w-12 sm:w-16" />
-            <div className="h-6 sm:h-8 lg:h-9 bg-gray-200 dark:bg-[#222] rounded-lg w-16 sm:w-20" />
+    <Card className="border border-[#232323] dark:border-[#232323] bg-[#181818] dark:bg-[#181818] p-4 sm:p-6 animate-pulse">
+      <div className="flex items-start gap-4">
+        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-[#222] dark:bg-[#222] flex-shrink-0" />
+        <div className="flex-1 space-y-3">
+          <div className="h-5 bg-[#222] dark:bg-[#222] rounded w-3/4" />
+          <div className="h-4 bg-[#222] dark:bg-[#222] rounded w-1/2" />
+          <div className="flex items-center gap-2">
+            <div className="h-4 w-4 bg-[#222] dark:bg-[#222] rounded" />
+            <div className="h-4 bg-[#222] dark:bg-[#222] rounded w-40" />
+          </div>
+          <div className="flex gap-2">
+            <div className="h-8 bg-[#222] dark:bg-[#222] rounded-lg w-16" />
+            <div className="h-8 bg-[#222] dark:bg-[#222] rounded-lg w-20" />
           </div>
         </div>
       </div>
@@ -549,7 +552,7 @@ function SearchPageContent() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="grid gap-3 sm:gap-4 lg:gap-6 grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4"
+                      className="grid gap-5 grid-cols-1 max-w-4xl mx-auto"
                     >
                       {Array.from({ length: 6 }).map((_, i) => (
                         <SkeletonCard key={i} />

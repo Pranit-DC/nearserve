@@ -14,7 +14,6 @@ import {
   Plus,
   X,
   Calendar,
-  DollarSign,
   Clock,
   Star,
   Camera,
@@ -25,6 +24,7 @@ import {
   Grid3X3,
   List,
 } from "lucide-react";
+import { FaRupeeSign } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import ClickSpark from "@/components/ClickSpark";
 
@@ -646,7 +646,7 @@ export default function PreviousWorkPage() {
                             )}
                             {work.costRange && (
                               <div className="flex items-center">
-                                <DollarSign className="h-3 w-3 mr-1" />
+                                <FaRupeeSign className="h-3 w-3 mr-1" />
                                 {work.costRange}
                               </div>
                             )}

@@ -241,16 +241,36 @@ export default function CustomerProfilePage() {
     setIsEditing(false);
   };
 
+  // Skeleton loader component
+  const SkeletonCard = () => (
+    <Card className="p-6 animate-pulse bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+      <div className="space-y-4">
+        <div className="h-6 bg-[#222] dark:bg-[#222] rounded w-32"></div>
+        <div className="h-4 bg-[#222] dark:bg-[#222] rounded w-full"></div>
+        <div className="h-4 bg-[#222] dark:bg-[#222] rounded w-3/4"></div>
+      </div>
+    </Card>
+  );
+
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-[#212121] flex items-center justify-center p-4">
-        <div className="text-center">
-          <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
-          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
-            Loading profile...
-          </p>
+      <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          <div className="mb-8">
+            <div className="h-10 bg-[#222] dark:bg-[#222] rounded w-48 mb-2 animate-pulse"></div>
+            <div className="h-5 bg-[#222] dark:bg-[#222] rounded w-64 animate-pulse"></div>
+          </div>
+          <div className="grid gap-6 lg:grid-cols-3">
+            <div className="lg:col-span-1">
+              <SkeletonCard />
+            </div>
+            <div className="lg:col-span-2 space-y-6">
+              <SkeletonCard />
+              <SkeletonCard />
+            </div>
+          </div>
         </div>
-      </div>
+      </main>
     );
   }
 

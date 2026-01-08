@@ -24,7 +24,6 @@ import {
   FiPhone,
   FiAward,
   FiClock,
-  FiDollarSign,
   FiFileText,
   FiImage,
   FiCamera,
@@ -33,6 +32,7 @@ import {
   FiPlus,
   FiNavigation,
 } from "react-icons/fi";
+import { FaRupeeSign } from "react-icons/fa";
 import { getCurrentUser } from "@/app/api/actions/onboarding";
 import ClickSpark from "@/components/ClickSpark";
 
@@ -368,7 +368,7 @@ export default function WorkerProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-gray-50 dark:bg-black">
+      <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
             <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-2 animate-pulse"></div>
@@ -390,7 +390,7 @@ export default function WorkerProfilePage() {
 
   if (!data || !data.workerProfile) {
     return (
-      <main className="min-h-screen bg-gray-50 dark:bg-black">
+      <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-16">
             <FiAlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
@@ -412,7 +412,7 @@ export default function WorkerProfilePage() {
   const profile = data.workerProfile;
 
   return (
-    <main className="min-h-screen bg-gray-50 dark:bg-black">
+    <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
@@ -460,7 +460,7 @@ export default function WorkerProfilePage() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Sidebar - Profile Card */}
           <div className="lg:col-span-1">
-            <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 sticky top-6">
+            <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323] sticky top-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -468,10 +468,10 @@ export default function WorkerProfilePage() {
               >
                 {/* Profile Picture */}
                 <div className="relative inline-block mb-4">
-                  <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-gray-900">
-                    {parseImageUrl(profile.profilePic) || user?.imageUrl ? (
+                  <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-[#171717]">
+                    {parseImageUrl(profile.profilePic) ? (
                       <Image
-                        src={parseImageUrl(profile.profilePic) || user?.imageUrl || ""}
+                        src={parseImageUrl(profile.profilePic) || ""}
                         alt={data.name}
                         width={128}
                         height={128}
@@ -527,7 +527,7 @@ export default function WorkerProfilePage() {
 
                   {data.phone && !String(data.phone).startsWith('no-phone-') && (
                     <div className="flex items-center gap-3 text-sm">
-                      <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                      <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-[#303030] flex items-center justify-center flex-shrink-0">
                         <FiPhone className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                       </div>
                       <span className="text-gray-700 dark:text-gray-300">
@@ -537,7 +537,7 @@ export default function WorkerProfilePage() {
                   )}
 
                   <div className="flex items-center gap-3 text-sm">
-                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                    <div className="w-8 h-8 rounded-lg bg-gray-100 dark:bg-[#303030] flex items-center justify-center flex-shrink-0">
                       <FiMapPin className="h-4 w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <span className="text-gray-700 dark:text-gray-300">
@@ -572,14 +572,14 @@ export default function WorkerProfilePage() {
           {/* Right Content - Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Tabs */}
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-1 flex">
+            <div className="bg-gray-100 dark:bg-[#171717] rounded-xl p-1 flex">
               {(["overview", "portfolio", "reviews"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`flex-1 px-6 py-2 rounded-lg text-sm font-medium transition-all duration-200 capitalize ${
                     activeTab === tab
-                      ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                      ? "bg-white dark:bg-[#181818] text-gray-900 dark:text-white shadow-sm"
                       : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
@@ -598,7 +598,7 @@ export default function WorkerProfilePage() {
                   className="space-y-6"
                 >
                   {/* Bio Section */}
-                  <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                     <div className="flex items-center gap-2 mb-4">
                       <FiFileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -612,7 +612,7 @@ export default function WorkerProfilePage() {
                           setEditedProfile({ ...editedProfile, bio: e.target.value })
                         }
                         placeholder="Tell customers about yourself and your work..."
-                        className="min-h-32 bg-gray-50 dark:bg-black"
+                        className="min-h-32 bg-[#303030] dark:bg-[#303030]"
                         rows={4}
                       />
                     ) : (
@@ -623,7 +623,7 @@ export default function WorkerProfilePage() {
                   </Card>
 
                   {/* Skills */}
-                  <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                     <div className="flex items-center gap-2 mb-4">
                       <FiBriefcase className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -664,7 +664,7 @@ export default function WorkerProfilePage() {
                             value={customSkill}
                             onChange={(e) => setCustomSkill(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && addCustomSkill()}
-                            className="bg-gray-50 dark:bg-black"
+                            className="bg-[#303030] dark:bg-[#303030]"
                           />
                           <Button
                             type="button"
@@ -717,9 +717,9 @@ export default function WorkerProfilePage() {
 
                   {/* Rates */}
                   <div className="grid md:grid-cols-2 gap-6">
-                    <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                       <div className="flex items-center gap-2 mb-4">
-                        <FiDollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <FaRupeeSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           Hourly Rate
                         </h3>
@@ -735,7 +735,7 @@ export default function WorkerProfilePage() {
                             })
                           }
                           placeholder="Enter hourly rate"
-                          className="bg-gray-50 dark:bg-black"
+                          className="bg-[#303030] dark:bg-[#303030]"
                         />
                       ) : (
                         <div className="text-3xl font-bold text-green-600 dark:text-green-400">
@@ -749,9 +749,9 @@ export default function WorkerProfilePage() {
                       )}
                     </Card>
 
-                    <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                       <div className="flex items-center gap-2 mb-4">
-                        <FiDollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <FaRupeeSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           Minimum Fee
                         </h3>
@@ -767,7 +767,7 @@ export default function WorkerProfilePage() {
                             })
                           }
                           placeholder="Enter minimum fee"
-                          className="bg-gray-50 dark:bg-black"
+                          className="bg-[#303030] dark:bg-[#303030]"
                         />
                       ) : (
                         <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
@@ -779,7 +779,7 @@ export default function WorkerProfilePage() {
 
                   {/* Qualification & Experience */}
                   <div className="grid md:grid-cols-2 gap-6">
-                    <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                       <div className="flex items-center gap-2 mb-4">
                         <FiAward className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -803,7 +803,7 @@ export default function WorkerProfilePage() {
                                 setEditedProfile({ ...editedProfile, qualification: e.target.value });
                               }}
                               placeholder="Enter your qualification"
-                              className="bg-gray-50 dark:bg-black"
+                              className="bg-[#303030] dark:bg-[#303030]"
                             />
                           )}
                         </div>
@@ -814,7 +814,7 @@ export default function WorkerProfilePage() {
                       )}
                     </Card>
 
-                    <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                    <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                       <div className="flex items-center gap-2 mb-4">
                         <FiClock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -832,7 +832,7 @@ export default function WorkerProfilePage() {
                             })
                           }
                           placeholder="Years of experience"
-                          className="bg-gray-50 dark:bg-black"
+                          className="bg-[#303030] dark:bg-[#303030]"
                         />
                       ) : (
                         <p className="text-gray-700 dark:text-gray-300">
@@ -845,7 +845,7 @@ export default function WorkerProfilePage() {
                   </div>
 
                   {/* Address */}
-                  <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         <FiMapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -881,7 +881,7 @@ export default function WorkerProfilePage() {
                               })
                             }
                             placeholder="Enter street address"
-                            className="bg-gray-50 dark:bg-black"
+                            className="bg-[#303030] dark:bg-[#303030]"
                             rows={2}
                           />
                         </div>
@@ -900,7 +900,7 @@ export default function WorkerProfilePage() {
                                 })
                               }
                               placeholder="City"
-                              className="bg-gray-50 dark:bg-black"
+                              className="bg-[#303030] dark:bg-[#303030]"
                             />
                           </div>
                           
@@ -917,7 +917,7 @@ export default function WorkerProfilePage() {
                                 })
                               }
                               placeholder="State"
-                              className="bg-gray-50 dark:bg-black"
+                              className="bg-[#303030] dark:bg-[#303030]"
                             />
                           </div>
                         </div>
@@ -936,7 +936,7 @@ export default function WorkerProfilePage() {
                                 })
                               }
                               placeholder="Postal Code"
-                              className="bg-gray-50 dark:bg-black"
+                              className="bg-[#303030] dark:bg-[#303030]"
                             />
                           </div>
                           
@@ -953,7 +953,7 @@ export default function WorkerProfilePage() {
                                 })
                               }
                               placeholder="Country"
-                              className="bg-gray-50 dark:bg-black"
+                              className="bg-[#303030] dark:bg-[#303030]"
                             />
                           </div>
                         </div>
@@ -1010,7 +1010,7 @@ export default function WorkerProfilePage() {
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                       >
-                        <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                        <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                           <div className="space-y-6">
                             <div className="flex justify-between items-center">
                               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -1043,7 +1043,7 @@ export default function WorkerProfilePage() {
                                   placeholder="e.g., Kitchen Renovation"
                                   value={newWork.title}
                                   onChange={(e) => setNewWork({ ...newWork, title: e.target.value })}
-                                  className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                                  className="bg-[#303030] dark:bg-[#303030] border-gray-200 dark:border-[#232323]"
                                 />
                               </div>
 
@@ -1056,7 +1056,7 @@ export default function WorkerProfilePage() {
                                   placeholder="e.g., Andheri, Mumbai"
                                   value={newWork.location}
                                   onChange={(e) => setNewWork({ ...newWork, location: e.target.value })}
-                                  className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
+                                  className="bg-[#303030] dark:bg-[#303030] border-gray-200 dark:border-[#232323]"
                                 />
                               </div>
 
@@ -1084,7 +1084,7 @@ export default function WorkerProfilePage() {
                                   placeholder="Describe the work you did, challenges faced, materials used..."
                                   value={newWork.description}
                                   onChange={(e) => setNewWork({ ...newWork, description: e.target.value })}
-                                  className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 min-h-24"
+                                  className="bg-[#303030] dark:bg-[#303030] border-gray-200 dark:border-[#232323] min-h-24"
                                   rows={4}
                                 />
                               </div>
@@ -1133,7 +1133,7 @@ export default function WorkerProfilePage() {
                   </AnimatePresence>
 
                   {/* Portfolio Grid */}
-                  <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                     {profile.previousWorks && profile.previousWorks.length > 0 ? (
                       <div className="grid md:grid-cols-2 gap-4">
                         {profile.previousWorks.map((work, index) => {
@@ -1217,7 +1217,7 @@ export default function WorkerProfilePage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                 >
-                  <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
                     <div className="flex items-center gap-2 mb-6">
                       <FiStar className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

@@ -77,14 +77,9 @@ export function WorkerNotificationPermission() {
     return null;
   }
 
-  // Notification status indicator
+  // Don't show any indicator when notifications are granted
   if (permission === 'granted') {
-    return (
-      <div className="flex items-center gap-2 px-3 py-2 bg-green-50 dark:bg-green-950 border border-green-200 dark:border-green-800 rounded-lg text-sm">
-        <Bell className="w-4 h-4 text-green-600 dark:text-green-400" />
-        <span className="text-green-700 dark:text-green-300">Notifications enabled</span>
-      </div>
-    );
+    return null;
   }
 
   if (permission === 'denied') {
