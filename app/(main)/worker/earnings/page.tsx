@@ -4,8 +4,8 @@ import { useEffect, useState } from "react";
 import { Card } from "@/components/ui/card";
 import { motion, AnimatePresence } from "framer-motion";
 import { AnimatedCircularProgressBar } from "@/components/ui/animated-circular-progress-bar";
+import { FaRupeeSign } from "react-icons/fa";
 import {
-  FiDollarSign,
   FiTrendingUp,
   FiTrendingDown,
   FiCalendar,
@@ -189,7 +189,7 @@ export default function WorkerEarningsPage() {
                         </h3>
                       </div>
                       <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center">
-                        <FiDollarSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+                        <FaRupeeSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                       </div>
                     </div>
                     <p className="text-xs text-gray-500 dark:text-gray-400">
@@ -309,7 +309,7 @@ export default function WorkerEarningsPage() {
                           <div className="flex items-center justify-between p-4 rounded-lg bg-gray-50 dark:bg-gray-700/50 border border-gray-200 dark:border-gray-600/50 hover:shadow-md hover:border-gray-300 dark:hover:border-gray-500 transition-all duration-200">
                             <div className="flex-1 flex items-start gap-3">
                               <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0">
-                                <FiDollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                                <FaRupeeSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                               </div>
                               <div className="flex-1">
                                 <h3 className="font-medium text-gray-900 dark:text-white mb-1 group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">

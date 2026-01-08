@@ -11,7 +11,6 @@ import { IconType } from "react-icons"
 import {
   FiHome,
   FiBriefcase,
-  FiDollarSign,
   FiUser,
   FiSettings,
   FiHelpCircle,
@@ -24,6 +23,7 @@ import {
   FiLogOut,
   FiGlobe
 } from "react-icons/fi"
+import { FaRupeeSign } from "react-icons/fa"
 import { motion } from "framer-motion"
 import { useTheme } from "next-themes"
 import { useAuth } from "@/contexts/AuthContext"
@@ -55,7 +55,7 @@ const navigation = [
   {
     name: "Earnings",
     href: "/worker/earnings",
-    icon: FiDollarSign,
+    icon: FaRupeeSign,
   },
   {
     name: "Profile",

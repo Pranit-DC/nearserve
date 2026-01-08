@@ -10,7 +10,6 @@ import {
   FiCalendar,
   FiMapPin,
   FiUser,
-  FiDollarSign,
   FiClock,
   FiStar,
   FiSearch,
@@ -27,6 +26,7 @@ import {
   FiNavigation,
   FiUpload,
 } from "react-icons/fi";
+import { FaRupeeSign } from "react-icons/fa";
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";

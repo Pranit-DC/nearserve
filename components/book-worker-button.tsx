@@ -8,9 +8,9 @@ import {
   FiCalendar,
   FiMapPin,
   FiFileText,
-  FiDollarSign,
   FiCheck,
 } from "react-icons/fi";
+import { FaRupeeSign } from "react-icons/fa";
 import SmartDateTimePicker from "@/components/ui/smart-date-time-picker";
 import OpenStreetMapInput from "@/components/ui/openstreetmap-input";
 import {
@@ -46,7 +46,7 @@ const STEPS = [
     id: 3,
     title: "Pricing",
     subtitle: "Your proposed budget",
-    icon: FiDollarSign,
+    icon: FaRupeeSign,
   },
 ];
 

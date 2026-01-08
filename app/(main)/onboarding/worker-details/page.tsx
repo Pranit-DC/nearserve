@@ -17,7 +17,7 @@ import {
   User,
   Wrench,
   MapPin,
-  DollarSign,
+  
   Camera,
   CheckCircle,
   Plus,
@@ -26,6 +26,7 @@ import {
   Sparkles,
   ChevronDown,
 } from "lucide-react";
+import { FaRupeeSign } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
 import OpenStreetMapInput from "@/components/ui/openstreetmap-input";
 import { useLocation } from "@/hooks/use-location";
@@ -78,7 +79,7 @@ const steps: Step[] = [
     id: 3,
     title: "Pricing",
     description: "Set your rates",
-    icon: DollarSign,
+    icon: FaRupeeSign,
   },
   {
     id: 4,

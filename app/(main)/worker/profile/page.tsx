@@ -24,7 +24,6 @@ import {
   FiPhone,
   FiAward,
   FiClock,
-  FiDollarSign,
   FiFileText,
   FiImage,
   FiCamera,
@@ -33,6 +32,7 @@ import {
   FiPlus,
   FiNavigation,
 } from "react-icons/fi";
+import { FaRupeeSign } from "react-icons/fa";
 import { getCurrentUser } from "@/app/api/actions/onboarding";
 import ClickSpark from "@/components/ClickSpark";
 
@@ -719,7 +719,7 @@ export default function WorkerProfilePage() {
                   <div className="grid md:grid-cols-2 gap-6">
                     <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                       <div className="flex items-center gap-2 mb-4">
-                        <FiDollarSign className="h-5 w-5 text-green-600 dark:text-green-400" />
+                        <FaRupeeSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           Hourly Rate
                         </h3>
@@ -751,7 +751,7 @@ export default function WorkerProfilePage() {
 
                     <Card className="p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
                       <div className="flex items-center gap-2 mb-4">
-                        <FiDollarSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        <FaRupeeSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
                           Minimum Fee
                         </h3>

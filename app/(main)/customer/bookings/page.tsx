@@ -12,7 +12,6 @@ import {
   FiCalendar,
   FiMapPin,
   FiUser,
-  FiDollarSign,
   FiClock,
   FiStar,
   FiSearch,
@@ -27,6 +26,7 @@ import {
   FiCreditCard,
   FiLock,
 } from "react-icons/fi";
+import { FaRupeeSign } from "react-icons/fa";
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import Script from "next/script";

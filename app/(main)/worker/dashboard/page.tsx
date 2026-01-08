@@ -10,7 +10,6 @@ import {
   CheckCircle,
   TrendingUp,
   Calendar,
-  DollarSign,
   Eye,
   Settings,
   ArrowRight,
@@ -21,6 +20,7 @@ import {
   Award,
   Target,
 } from "lucide-react";
+import { FaRupeeSign } from "react-icons/fa";
 
 
 import DashboardBgEffect from "@/components/DashboardBgEffect";
@@ -147,7 +147,7 @@ export default async function WorkerDashboardPage() {
           <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
             <div className="flex items-center">
               <div className="flex-shrink-0">
-                <DollarSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                <FaRupeeSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
               </div>
               <div className="ml-3">
                 <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
@@ -252,7 +252,7 @@ export default async function WorkerDashboardPage() {
             <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
                 <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950 flex items-center justify-center">
-                  <DollarSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                  <FaRupeeSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
