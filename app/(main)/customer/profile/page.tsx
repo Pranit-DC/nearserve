@@ -243,7 +243,7 @@ export default function CustomerProfilePage() {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-4">
+      <div className="min-h-screen bg-white dark:bg-[#212121] flex items-center justify-center p-4">
         <div className="text-center">
           <div className="animate-spin rounded-full h-10 w-10 sm:h-12 sm:w-12 border-b-2 border-blue-600 mx-auto mb-4"></div>
           <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
@@ -256,7 +256,7 @@ export default function CustomerProfilePage() {
 
   if (!data || !data.customerProfile) {
     return (
-      <main className="min-h-screen bg-white dark:bg-black flex items-center justify-center p-4">
+      <main className="min-h-screen bg-white dark:bg-[#212121] flex items-center justify-center p-4">
         <div className="text-center max-w-md w-full">
           <div className="mb-6">
             <FiAlertCircle className="h-12 w-12 sm:h-16 sm:w-16 text-gray-400 mx-auto mb-4" />
@@ -281,7 +281,7 @@ export default function CustomerProfilePage() {
   const profile = data.customerProfile;
 
   return (
-    <main className="min-h-screen bg-white dark:bg-black">
+    <main className="min-h-screen bg-white dark:bg-[#212121]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -329,7 +329,7 @@ export default function CustomerProfilePage() {
         <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
           {/* Left Sidebar - Profile Card */}
           <div className="lg:col-span-1">
-            <Card className="p-4 sm:p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 lg:sticky lg:top-6">
+            <Card className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] lg:sticky lg:top-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -337,7 +337,7 @@ export default function CustomerProfilePage() {
               >
                 {/* Profile Picture */}
                 <div className="relative inline-block mb-4">
-                  <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden flex items-center justify-center border-2 sm:border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-gray-900">
+                  <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden flex items-center justify-center border-2 sm:border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-[#171717]">
                     {user?.imageUrl ? (
                       <Image
                         src={user.imageUrl}
@@ -393,7 +393,7 @@ export default function CustomerProfilePage() {
                 {/* Contact Info */}
                 <div className="space-y-2 sm:space-y-3 mt-4 sm:mt-6 text-left">
                   <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-[#303030] flex items-center justify-center flex-shrink-0">
                       <FiMail className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
                     </div>
                     <span className="text-gray-700 dark:text-gray-300 truncate min-w-0">
@@ -453,14 +453,14 @@ export default function CustomerProfilePage() {
           {/* Right Content - Details */}
           <div className="lg:col-span-2 space-y-6">
             {/* Tabs */}
-            <div className="bg-gray-100 dark:bg-gray-800 rounded-xl p-1 flex">
+            <div className="bg-gray-100 dark:bg-[#171717] rounded-xl p-1 flex">
               {(["overview", "bookings"] as const).map((tab) => (
                 <button
                   key={tab}
                   onClick={() => setActiveTab(tab)}
                   className={`flex-1 px-3 sm:px-6 py-2 rounded-lg text-xs sm:text-sm font-medium transition-all duration-200 capitalize ${
                     activeTab === tab
-                      ? "bg-white dark:bg-gray-700 text-gray-900 dark:text-white shadow-sm"
+                      ? "bg-white dark:bg-[#181818] text-gray-900 dark:text-white shadow-sm"
                       : "text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white"
                   }`}
                 >
@@ -479,7 +479,7 @@ export default function CustomerProfilePage() {
                   className="space-y-6"
                 >
                   {/* Account Information */}
-                  <Card className="p-4 sm:p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <Card className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323]">
                     <div className="flex items-center gap-2 mb-4">
                       <FiUser className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
@@ -519,7 +519,7 @@ export default function CustomerProfilePage() {
                   </Card>
 
                   {/* Address */}
-                  <Card className="p-4 sm:p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <Card className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323]">
                     <div className="flex flex-col sm:flex-row sm:items-center justify-between mb-4 gap-3">
                       <div className="flex items-center gap-2">
                         <FiMapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
@@ -561,7 +561,7 @@ export default function CustomerProfilePage() {
                               })
                             }
                             placeholder="Enter street address"
-                            className="bg-white dark:bg-black text-sm sm:text-base"
+                            className="bg-white dark:bg-[#303030] text-sm sm:text-base"
                             rows={2}
                           />
                         </div>
@@ -580,7 +580,7 @@ export default function CustomerProfilePage() {
                                 })
                               }
                               placeholder="City"
-                              className="bg-white dark:bg-black text-sm sm:text-base"
+                              className="bg-white dark:bg-[#303030] text-sm sm:text-base"
                             />
                           </div>
 
@@ -597,7 +597,7 @@ export default function CustomerProfilePage() {
                                 })
                               }
                               placeholder="State"
-                              className="bg-white dark:bg-black text-sm sm:text-base"
+                              className="bg-white dark:bg-[#303030] text-sm sm:text-base"
                             />
                           </div>
                         </div>
@@ -616,7 +616,7 @@ export default function CustomerProfilePage() {
                                 })
                               }
                               placeholder="Postal Code"
-                              className="bg-white dark:bg-black text-sm sm:text-base"
+                              className="bg-white dark:bg-[#303030] text-sm sm:text-base"
                             />
                           </div>
 
@@ -650,7 +650,7 @@ export default function CustomerProfilePage() {
                   </Card>
 
                   {/* Preferences */}
-                  <Card className="p-4 sm:p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700">
+                  <Card className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323]">
                     <div className="flex items-center gap-2 mb-4">
                       <FiCheckCircle className="h-4 w-4 sm:h-5 sm:w-5 text-green-600 dark:text-green-400" />
                       <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
