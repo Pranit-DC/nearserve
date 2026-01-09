@@ -39,6 +39,7 @@ export const COLLECTIONS = {
   TRANSACTIONS: 'transactions',
   TRANSLATION_CACHE: 'translation_cache',
   NOTIFICATIONS: 'notifications',
+  REFRESH_DATA: 'refresh_data', // Real-time content updates collection
 } as const;
 
 // Enums (from Prisma schema)
