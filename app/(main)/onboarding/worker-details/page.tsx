@@ -28,6 +28,7 @@ import {
 } from "lucide-react";
 import { FaRupeeSign } from "react-icons/fa";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import OpenStreetMapInput from "@/components/ui/openstreetmap-input";
 import { useLocation } from "@/hooks/use-location";
 import { formatDisplayAddress } from "@/lib/location";
@@ -289,14 +290,25 @@ export default function WorkerDetailsPage() {
       const digitsOnly = aadhar?.replace(/\D/g, "") || "";
 
       if (digitsOnly.length !== 12) {
+        toast.error("Aadhar number must be 12 digits");
         return;
       }
 
       if (!selectedQualification) {
+        toast.error("Please select your education level");
         return;
       }
 
       if (selectedExperience === null) {
+        toast.error("Please select your experience level");
+        return;
+      }
+    }
+
+    // Custom validation for step 2
+    if (currentStep === 2) {
+      if (selectedSkills.length === 0) {
+        toast.error("Please select at least one skill");
         return;
       }
     }
@@ -304,7 +316,12 @@ export default function WorkerDetailsPage() {
     const fieldsToValidate = getFieldsForStep(currentStep);
     const isValid = await trigger(fieldsToValidate);
 
-    if (isValid && currentStep < steps.length) {
+    if (!isValid) {
+      toast.error("Please fill in all required fields");
+      return;
+    }
+
+    if (currentStep < steps.length) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -349,7 +366,7 @@ export default function WorkerDetailsPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#212121]">
       <div className="container mx-auto px-4 py-4">
         <div className="max-w-5xl mx-auto">
           {/* Header with ShimmerText */}
@@ -449,7 +466,7 @@ export default function WorkerDetailsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="border-2 border-gray-200/60 dark:border-gray-800/60 bg-white/80 dark:bg-black/80 backdrop-blur-sm shadow-xl">
+            <Card className="border-2 border-gray-200/60 dark:border-[#2c2c2c] bg-white/80 dark:bg-[#181818] backdrop-blur-sm shadow-xl">
               <CardContent className="p-6 md:p-8">
                 <AnimatePresence mode="wait">
                   <motion.div
@@ -461,9 +478,9 @@ export default function WorkerDetailsPage() {
                   >
                     {/* Step Badge */}
                     <div className="flex items-center justify-center mb-6">
-                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50/50 dark:bg-blue-950/30 border border-blue-200/50 dark:border-blue-400/20">
-                        <Sparkles className="h-4 w-4 text-blue-500 dark:text-blue-400" />
-                        <span className="text-sm font-medium text-blue-700 dark:text-blue-300">
+                      <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-600 text-white shadow-lg shadow-blue-500/30">
+                        <Sparkles className="h-4 w-4 text-white" />
+                        <span className="text-sm font-medium">
                           Step {currentStep} of {steps.length}
                         </span>
                       </div>
@@ -496,7 +513,7 @@ export default function WorkerDetailsPage() {
                               value={watch("aadharNumber") || ""}
                               onChange={handleAadharChange}
                               maxLength={14}
-                              className="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all font-mono tracking-wider"
+                              className="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all font-mono tracking-wider"
                             />
                             {errors.aadharNumber && (
                               <p className="text-red-500 text-xs md:text-sm mt-1">
@@ -563,7 +580,7 @@ export default function WorkerDetailsPage() {
                                     setCustomQualification(e.target.value);
                                     setValue("qualification", e.target.value);
                                   }}
-                                  className="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                                  className="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
                                 />
                               </motion.div>
                             )}
@@ -644,11 +661,11 @@ export default function WorkerDetailsPage() {
                           </label>
 
                           {/* Tips Box */}
-                          <div className="bg-blue-50/50 dark:bg-blue-950/20 p-3 rounded-lg border border-blue-200/50 dark:border-blue-400/20">
-                            <p className="text-xs font-semibold text-blue-900 dark:text-blue-100 mb-2">
-                              💡 What to write:
+                          <div className="bg-gray-100 dark:bg-[#303030] p-3 rounded-lg border border-gray-200 dark:border-[#2c2c2c]">
+                            <p className="text-sm font-semibold text-gray-800 dark:text-gray-300 mb-2">
+                              What to write:
                             </p>
-                            <ul className="text-xs text-blue-800 dark:text-blue-200 space-y-1">
+                            <ul className="text-sm text-gray-700 dark:text-gray-400 space-y-1">
                               <li>• Your work experience</li>
                               <li>• What services you provide</li>
                               <li>• Your special skills</li>
@@ -685,7 +702,7 @@ export default function WorkerDetailsPage() {
                                 message: "Please write at least 30 characters",
                               },
                             })}
-                            className="min-h-28 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all resize-none"
+                            className="min-h-28 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all resize-none"
                           />
                           <div className="flex justify-between items-center mt-1">
                             {errors.bio && (
@@ -770,7 +787,7 @@ export default function WorkerDetailsPage() {
                               onKeyPress={(e) =>
                                 e.key === "Enter" && addCustomSkill()
                               }
-                              className="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                              className="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
                             />
                             <Button
                               type="button"
@@ -813,9 +830,9 @@ export default function WorkerDetailsPage() {
                             <motion.p
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4 p-3 bg-gray-50 dark:bg-gray-800/50 rounded-lg"
+                              className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4 p-3 bg-[#303030] dark:bg-[#303030] rounded-lg"
                             >
-                              💡 Select at least one skill to continue
+                              Select at least one skill to continue
                             </motion.p>
                           )}
                         </motion.div>
@@ -852,7 +869,7 @@ export default function WorkerDetailsPage() {
                                 type="number"
                                 step="50"
                                 min="100"
-                                className="h-11 md:h-12 pl-8 pr-3 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                className="h-11 md:h-12 pl-8 pr-3 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 {...register("hourlyRate", {
                                   required: "Hourly rate is required",
                                   min: {
@@ -891,7 +908,7 @@ export default function WorkerDetailsPage() {
                               </p>
                             )}
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              💡 Competitive rates: ₹300-800/hour
+                              Competitive rates: ₹300-800/hour
                             </p>
                           </motion.div>
 
@@ -913,7 +930,7 @@ export default function WorkerDetailsPage() {
                                 type="number"
                                 step="50"
                                 min="200"
-                                className="h-11 md:h-12 pl-8 pr-3 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
+                                className="h-11 md:h-12 pl-8 pr-3 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all [appearance:textfield] [&::-webkit-outer-spin-button]:appearance-none [&::-webkit-inner-spin-button]:appearance-none"
                                 {...register("minimumFee", {
                                   required: "Minimum fee is required",
                                   min: {
@@ -953,7 +970,7 @@ export default function WorkerDetailsPage() {
                               </p>
                             )}
                             <p className="text-xs text-gray-500 dark:text-gray-400">
-                              💡 For small jobs regardless of time spent
+                              For small jobs regardless of time spent
                             </p>
                           </motion.div>
                         </div>
@@ -962,12 +979,12 @@ export default function WorkerDetailsPage() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
-                          className="bg-blue-50/50 dark:bg-blue-950/20 p-4 md:p-5 rounded-xl border border-blue-200/50 dark:border-blue-400/20"
+                          className="bg-[#303030] dark:bg-[#303030] p-4 md:p-5 rounded-xl border border-[#2c2c2c]"
                         >
-                          <h3 className="font-semibold text-blue-900 dark:text-blue-100 mb-3 flex items-center gap-2">
-                            <span className="text-lg">💡</span> Pricing Tips
+                          <h3 className="font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                            Pricing Tips
                           </h3>
-                          <ul className="text-sm text-blue-800 dark:text-blue-200 space-y-2">
+                          <ul className="text-sm text-gray-400 space-y-2">
                             <li className="flex items-start gap-2">
                               <span className="text-blue-500 dark:text-blue-400 mt-0.5">
                                 •
@@ -1028,7 +1045,7 @@ export default function WorkerDetailsPage() {
                                   onChange={(v) => setValue("address", v)}
                                   onSelect={applyGeocode}
                                   placeholder="Street address, building name, etc."
-                                  inputClassName="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                                  inputClassName="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
                                 />
                               </div>
                               <Button
@@ -1068,7 +1085,7 @@ export default function WorkerDetailsPage() {
                               </label>
                               <Input
                                 placeholder="Enter city name"
-                                className="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                                className="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
                                 {...register("city", {
                                   required: "City is required",
                                 })}
@@ -1091,7 +1108,7 @@ export default function WorkerDetailsPage() {
                               </label>
                               <Input
                                 placeholder="Enter state name"
-                                className="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                                className="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
                                 {...register("state", {
                                   required: "State is required",
                                 })}
@@ -1116,7 +1133,7 @@ export default function WorkerDetailsPage() {
                               </label>
                               <Input
                                 placeholder="Enter country"
-                                className="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                                className="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
                                 {...register("country", {
                                   required: "Country is required",
                                 })}
@@ -1139,7 +1156,7 @@ export default function WorkerDetailsPage() {
                               </label>
                               <Input
                                 placeholder="Enter postal code"
-                                className="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                                className="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
                                 {...register("postalCode", {
                                   required: "Postal code is required",
                                 })}
@@ -1190,8 +1207,8 @@ export default function WorkerDetailsPage() {
                             )}
                           />
 
-                          <p className="text-xs text-center text-gray-500 dark:text-gray-400 bg-gray-50 dark:bg-gray-800/50 p-3 rounded-lg">
-                            💡 Upload a clear, professional photo to increase
+                          <p className="text-xs text-center text-gray-500 dark:text-gray-400 bg-[#303030] dark:bg-[#303030] p-3 rounded-lg">
+                            Upload a clear, professional photo to increase
                             your booking chances by 3x
                           </p>
                         </motion.div>

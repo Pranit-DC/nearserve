@@ -305,7 +305,7 @@ export default function PreviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#212121]">
       <div className="container mx-auto px-4 py-6 md:py-10">
         <div className="max-w-5xl mx-auto">
           {/* Header Section */}
@@ -354,7 +354,7 @@ export default function PreviewPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className="bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm border-0 shadow-xl rounded-2xl mb-6 overflow-hidden">
+                <Card className="bg-white/80 dark:bg-[#181818] backdrop-blur-sm border-0 shadow-xl rounded-2xl mb-6 overflow-hidden">
                   <CardContent className="p-6 md:p-10">
                     <div className="flex flex-col md:flex-row gap-6 md:gap-8">
                       {/* Profile Image */}
@@ -364,14 +364,14 @@ export default function PreviewPage() {
                         transition={{ type: "spring", stiffness: 300 }}
                       >
                         <div className="relative">
-                          <div className="w-28 h-28 md:w-32 md:h-32 bg-blue-50 dark:bg-blue-950/20 rounded-full flex items-center justify-center overflow-hidden shadow-lg ring-4 ring-white dark:ring-gray-800">
+                          <div className="w-28 h-28 md:w-32 md:h-32 bg-[#303030] dark:bg-[#303030] rounded-full flex items-center justify-center overflow-hidden shadow-lg ring-4 ring-gray-700 dark:ring-gray-800">
                             <ProfileImage
                               src={workerDetails.profilePic}
                               alt="Profile"
                               className="w-28 h-28 md:w-32 md:h-32 rounded-full object-cover"
                             />
                           </div>
-                          <div className="absolute -bottom-2 -right-2 bg-blue-600 rounded-full p-2 shadow-lg">
+                          <div className="absolute -bottom-2 -right-2 bg-gray-600 rounded-full p-2 shadow-lg">
                             <Check className="h-4 w-4 text-white" />
                           </div>
                         </div>
@@ -431,7 +431,7 @@ export default function PreviewPage() {
                               >
                                 <Badge
                                   variant="secondary"
-                                  className="bg-blue-50 dark:bg-blue-950/30 text-blue-700 dark:text-blue-300 border border-blue-200 dark:border-blue-800 hover:bg-blue-100 dark:hover:bg-blue-900/40 transition-all px-3 py-1"
+                                  className="bg-[#303030] dark:bg-[#303030] text-gray-300 border border-[#2c2c2c] hover:bg-[#3a3a3a] transition-all px-3 py-1"
                                 >
                                   {skill}
                                 </Badge>
@@ -465,24 +465,24 @@ export default function PreviewPage() {
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.9 }}
                         >
-                          <div className="bg-blue-50 dark:bg-blue-950/20 rounded-xl p-4 md:p-5 border border-blue-200/50 dark:border-blue-800/30 hover:shadow-lg transition-all">
-                            <h4 className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1 flex items-center gap-1">
+                          <div className="bg-[#303030] dark:bg-[#303030] rounded-xl p-4 md:p-5 border border-[#2c2c2c] hover:shadow-lg transition-all">
+                            <h4 className="text-xs font-medium text-gray-400 mb-1 flex items-center gap-1">
                               <Clock className="h-3 w-3" />
                               Hourly Rate
                             </h4>
-                            <p className="text-xl md:text-2xl font-bold text-blue-900 dark:text-blue-100">
+                            <p className="text-xl md:text-2xl font-bold text-gray-300">
                               ₹{workerDetails.hourlyRate}
-                              <span className="text-sm font-normal text-blue-600 dark:text-blue-400">
+                              <span className="text-sm font-normal text-gray-400">
                                 /hr
                               </span>
                             </p>
                           </div>
-                          <div className="bg-purple-50 dark:bg-purple-950/20 rounded-xl p-4 md:p-5 border border-purple-200/50 dark:border-purple-800/30 hover:shadow-lg transition-all">
-                            <h4 className="text-xs font-medium text-purple-600 dark:text-purple-400 mb-1 flex items-center gap-1">
+                          <div className="bg-[#303030] dark:bg-[#303030] rounded-xl p-4 md:p-5 border border-[#2c2c2c] hover:shadow-lg transition-all">
+                            <h4 className="text-xs font-medium text-gray-400 mb-1 flex items-center gap-1">
                               <Award className="h-3 w-3" />
                               Minimum Fee
                             </h4>
-                            <p className="text-xl md:text-2xl font-bold text-purple-900 dark:text-purple-100">
+                            <p className="text-xl md:text-2xl font-bold text-gray-300">
                               ₹{workerDetails.minimumFee}
                             </p>
                           </div>
@@ -500,7 +500,7 @@ export default function PreviewPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.5 }}
                 >
-                  <Card className="bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm border-0 shadow-xl rounded-2xl mb-6">
+                  <Card className="bg-white/80 dark:bg-[#181818] backdrop-blur-sm border-0 shadow-xl rounded-2xl mb-6">
                     <CardContent className="p-6 md:p-10">
                       <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                         <div className="p-2 bg-blue-100 dark:bg-blue-900/30 rounded-lg">
@@ -581,7 +581,7 @@ export default function PreviewPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.7 }}
                 >
-                  <Card className="bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm border-0 shadow-xl rounded-2xl mb-6">
+                  <Card className="bg-white/80 dark:bg-[#181818] backdrop-blur-sm border-0 shadow-xl rounded-2xl mb-6">
                     <CardContent className="p-6 md:p-10">
                       <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                         <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
@@ -621,7 +621,7 @@ export default function PreviewPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.3 }}
               >
-                <Card className="bg-white/80 dark:bg-gray-800/50 backdrop-blur-sm border-0 shadow-xl rounded-2xl mb-6">
+                <Card className="bg-white/80 dark:bg-[#181818] backdrop-blur-sm border-0 shadow-xl rounded-2xl mb-6">
                   <CardContent className="p-6 md:p-10">
                     <div className="text-center mb-8">
                       <motion.div
@@ -629,10 +629,10 @@ export default function PreviewPage() {
                         whileHover={{ scale: 1.05 }}
                         transition={{ type: "spring", stiffness: 300 }}
                       >
-                        <div className="w-24 h-24 md:w-28 md:h-28 bg-blue-50 dark:bg-blue-950/20 rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg ring-4 ring-white dark:ring-gray-800">
-                          <User className="h-12 w-12 md:h-14 md:w-14 text-blue-600 dark:text-blue-400" />
+                        <div className="w-24 h-24 md:w-28 md:h-28 bg-[#303030] dark:bg-[#303030] rounded-full flex items-center justify-center mx-auto mb-6 shadow-lg ring-4 ring-gray-700 dark:ring-gray-800">
+                          <User className="h-12 w-12 md:h-14 md:w-14 text-gray-400" />
                         </div>
-                        <div className="absolute -bottom-2 -right-2 bg-blue-600 rounded-full p-2 shadow-lg">
+                        <div className="absolute -bottom-2 -right-2 bg-gray-600 rounded-full p-2 shadow-lg">
                           <Check className="h-4 w-4 text-white" />
                         </div>
                       </motion.div>

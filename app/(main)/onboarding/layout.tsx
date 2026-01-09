@@ -12,7 +12,7 @@ const OnBoardingLayout = async ({
   // Ensure only users without a role can access onboarding
   await checkOnboardingAccess();
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black pt-20">
+    <div className="min-h-screen bg-white dark:bg-[#212121] pt-20 text-gray-900 dark:text-white">
       <div className="container mx-auto px-4 py-4">
         <div className="max-w-7xl mx-auto">
           {children}

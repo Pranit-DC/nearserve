@@ -108,9 +108,9 @@ export default function FinishPage() {
                   type: "spring",
                   bounce: 0.6,
                 }}
-                className="w-24 h-24 md:w-28 md:h-28 bg-gradient-to-br from-emerald-500 to-emerald-600 rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-emerald-500/30"
+                className="w-24 h-24 md:w-28 md:h-28 bg-[#303030] dark:bg-[#303030] rounded-full flex items-center justify-center mx-auto shadow-2xl shadow-black/30"
               >
-                <CheckCircle className="h-12 w-12 md:h-14 md:w-14 text-white" />
+                <CheckCircle className="h-12 w-12 md:h-14 md:w-14 text-gray-300" />
               </motion.div>
 
               {/* Sparkles around success icon */}
@@ -169,19 +169,19 @@ export default function FinishPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.8, duration: 0.6 }}
           >
-            <Card className="border-2 border-gray-200/60 dark:border-gray-800/60 bg-white/80 dark:bg-black/80 backdrop-blur-sm shadow-xl mb-8">
+            <Card className="border-2 border-gray-200/60 dark:border-[#2c2c2c] bg-white/80 dark:bg-[#181818] backdrop-blur-sm shadow-xl mb-8">
               <CardContent className="p-6 md:p-8">
                 <div className="flex items-center gap-4 md:gap-6 mb-6">
                   <motion.div
                     initial={{ scale: 0, rotate: -180 }}
                     animate={{ scale: 1, rotate: 0 }}
                     transition={{ delay: 1, duration: 0.5, type: "spring" }}
-                    className="w-16 h-16 md:w-20 md:h-20 bg-gradient-to-br from-emerald-500/20 to-emerald-600/20 dark:from-emerald-500/10 dark:to-emerald-600/10 rounded-2xl flex items-center justify-center border-2 border-emerald-200 dark:border-emerald-800"
+                    className="w-16 h-16 md:w-20 md:h-20 bg-[#303030] dark:bg-[#303030] rounded-2xl flex items-center justify-center border-2 border-[#2c2c2c]"
                   >
                     {userRole === "WORKER" ? (
-                      <Briefcase className="h-8 w-8 md:h-10 md:w-10 text-emerald-600 dark:text-emerald-400" />
+                      <Briefcase className="h-8 w-8 md:h-10 md:w-10 text-gray-400" />
                     ) : (
-                      <User className="h-8 w-8 md:h-10 md:w-10 text-emerald-600 dark:text-emerald-400" />
+                      <User className="h-8 w-8 md:h-10 md:w-10 text-gray-400" />
                     )}
                   </motion.div>
                   <div className="flex-1">
@@ -306,7 +306,7 @@ export default function FinishPage() {
               <Button
                 onClick={handleGoToDashboard}
                 size="lg"
-                className="bg-gradient-to-r from-emerald-600 to-emerald-700 hover:from-emerald-700 hover:to-emerald-800 text-white px-8 md:px-12 py-3 md:py-4 text-base md:text-lg font-semibold shadow-xl shadow-emerald-500/30 dark:shadow-emerald-500/20 transition-all duration-300 hover:scale-105"
+                className="bg-gray-700 hover:bg-gray-600 text-white px-8 md:px-12 py-3 md:py-4 text-base md:text-lg font-semibold shadow-xl shadow-black/30 transition-all duration-300 hover:scale-105"
               >
                 Go to Dashboard
                 <ArrowRight className="h-5 w-5 ml-2" />
@@ -315,7 +315,7 @@ export default function FinishPage() {
 
             <p className="text-sm text-gray-500 dark:text-gray-400">
               Need help getting started?{" "}
-              <span className="text-emerald-600 dark:text-emerald-400 cursor-pointer hover:underline font-medium">
+              <span className="text-gray-400 cursor-pointer hover:underline font-medium">
                 Check out our guide
               </span>
             </p>

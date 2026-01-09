@@ -204,7 +204,7 @@ export default function PreviousWorkPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-black">
+    <div className="min-h-screen bg-white dark:bg-[#212121]">
       <div className="container mx-auto px-4 py-8">
         <div className="max-w-6xl mx-auto">
           {/* Header */}
@@ -341,7 +341,7 @@ export default function PreviousWorkPage() {
                 exit={{ opacity: 0, scale: 0.95 }}
                 className="mb-8"
               >
-                <Card className="border border-gray-200 dark:border-gray-700">
+                <Card className="border border-gray-200 dark:border-[#2c2c2c] dark:bg-[#181818]">
                   <CardContent className="p-6">
                     <div className="flex justify-between items-center mb-6">
                       <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -566,7 +566,7 @@ export default function PreviousWorkPage() {
                     transition={{ delay: index * 0.1 }}
                     className="group"
                   >
-                    <Card className="border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all duration-300">
+                    <Card className="border border-gray-200 dark:border-[#2c2c2c] dark:bg-[#181818] hover:shadow-lg transition-all duration-300">
                       <CardContent className="p-0">
                         {/* Image */}
                         <div className="relative">
