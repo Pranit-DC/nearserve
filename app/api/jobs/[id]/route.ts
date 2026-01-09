@@ -1,18 +1,19 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
-import { COLLECTIONS, JobLog, Transaction, CustomerProfile } from "@/lib/firestore";
+import { COLLECTIONS, JobLog, Transaction } from "@/lib/firestore";
 import { cookies } from "next/headers";
 import { FieldValue } from "firebase-admin/firestore";
 import {
   createRazorpayOrder,
   verifyPaymentSignature,
 } from "@/lib/razorpay-service";
-import { notifyCustomerJobAccepted } from "@/lib/sendNotification";import { 
+import { 
   notifyCustomerJobAcceptedInApp, 
   notifyCustomerJobStarted, 
   notifyCustomerJobCompleted,
   notifyWorkerPaymentReceived 
 } from '@/lib/notification-service';
+import { sendPushNotification } from '@/lib/push-notification';
 export async function PATCH(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -36,8 +37,8 @@ export async function PATCH(
     const body = await _req.json();
     const { action } = body || {};
 
-    // Valid actions: ACCEPT, START, COMPLETE, CANCEL
-    if (!["ACCEPT", "START", "COMPLETE", "CANCEL"].includes(action)) {
+    // Valid actions: ACCEPT, START, WORKER_COMPLETE, COMPLETE, CANCEL
+    if (!["ACCEPT", "START", "WORKER_COMPLETE", "COMPLETE", "CANCEL"].includes(action)) {
       return NextResponse.json({ error: "Invalid action" }, { status: 400 });
     }
 
@@ -111,45 +112,31 @@ export async function PATCH(
       try {
         console.log(`[NOTIFICATION] Worker accepted job, notifying customer ${job.customerId}`);
         
-        const customerProfilesRef = adminDb.collection(COLLECTIONS.CUSTOMER_PROFILES);
-        const customerProfileQuery = await customerProfilesRef
-          .where('userId', '==', job.customerId)
-          .limit(1)
-          .get();
+        // Create in-app notification
+        await notifyCustomerJobAcceptedInApp(job.customerId, {
+          workerName: workerDoc?.data()?.name || 'Worker',
+          serviceName: job.description,
+          date: job.date?.toDate?.()?.toLocaleDateString() || 'Soon',
+          jobId: job.id,
+        });
+        console.log(`[Notification] ✅ In-app notification created for customer ${job.customerId}`);
         
-        if (!customerProfileQuery.empty) {
-          const customerProfile = customerProfileQuery.docs[0].data() as CustomerProfile;
-          console.log(`[NOTIFICATION] Found customer profile, has FCM token: ${!!customerProfile.fcmToken}`);
-          
-          if (customerProfile.fcmToken) {
-            console.log('[NOTIFICATION] Sending job accepted notification to customer...');
-            const result = await notifyCustomerJobAccepted(customerProfile.fcmToken, {
-              workerName: workerDoc?.data()?.name || 'Worker',
-              serviceName: job.description,
-              date: job.date?.toDate?.()?.toLocaleDateString() || 'Soon',
-            });
-            console.log(`[NOTIFICATION] Result:`, result);
-            
-            if (result.success) {
-              console.log(`\u2705 Notification sent to customer ${job.customerId}`);
-            } else {
-              console.error(`\u274c Failed to send notification:`, result.error);
-            }            
-            // Create in-app notification
-            await notifyCustomerJobAcceptedInApp(job.customerId, {
-              workerName: workerDoc?.data()?.name || 'Worker',
-              serviceName: job.description,
-              date: job.date?.toDate?.()?.toLocaleDateString() || 'Soon',
-              jobId: id,
-            });
-            console.log(`[Notification] Created in-app notification for customer ${job.customerId}`);          } else {
-            console.log(`[NOTIFICATION] Customer ${job.customerId} has not enabled notifications`);
-          }
+        // Send push notification
+        const pushResult = await sendPushNotification({
+          userId: job.customerId,
+          title: '✅ Job Accepted',
+          message: `${workerDoc?.data()?.name || 'Worker'} has accepted your ${job.description} request`,
+          type: 'JOB_ACCEPTED',
+          actionUrl: `/customer/bookings`,
+        });
+        
+        if (pushResult.pushSent) {
+          console.log(`[Push] ✅ Push notification sent to customer ${job.customerId}`);
         } else {
-          console.log(`[NOTIFICATION] No customer profile found for userId: ${job.customerId}`);
+          console.log(`[Push] ℹ️ Customer ${job.customerId} has no FCM token or push failed`);
         }
       } catch (notifError) {
-        console.error('Failed to send notification to customer:', notifError);
+        console.error('[Notification] ❌ Failed:', notifError);
       }
 
       const updated = { ...job, status: "ACCEPTED" };
@@ -236,9 +223,18 @@ export async function PATCH(
         await notifyCustomerJobStarted(job.customerId, {
           workerName: workerDoc?.data()?.name || 'Worker',
           serviceName: job.description,
-          jobId: id,
+          jobId: job.id,
         });
         console.log(`[Notification] Created in-app notification for customer ${job.customerId} - job started`);
+        
+        // Send push notification
+        await sendPushNotification({
+          userId: job.customerId,
+          title: '🚀 Job Started',
+          message: `${workerDoc?.data()?.name || 'Worker'} has started working on your ${job.description}`,
+          type: 'JOB_STARTED',
+          actionUrl: `/customer/bookings`,
+        });
       } catch (notifError) {
         console.error('Failed to create in-app notification:', notifError);
       }
@@ -252,6 +248,87 @@ export async function PATCH(
         startedAt: new Date()
       };
       return NextResponse.json({ success: true, job: updated });
+    }
+
+    // ===========================
+    // ACTION: WORKER_COMPLETE (Worker only)
+    // Worker marks their work as done, notifies customer
+    // Status stays IN_PROGRESS until customer confirms and pays
+    // ===========================
+    if (action === "WORKER_COMPLETE") {
+      // Authorization: Only worker can mark their work complete
+      if (user.role !== "WORKER" || job.workerId !== user.id) {
+        return NextResponse.json(
+          { error: "Only the assigned worker can mark work as complete" },
+          { status: 403 }
+        );
+      }
+
+      // State validation: Must be IN_PROGRESS
+      if (job.status !== "IN_PROGRESS") {
+        return NextResponse.json(
+          { error: "Job must be in progress to mark as complete" },
+          { status: 400 }
+        );
+      }
+
+      // Check if already marked as worker complete
+      if (job.workerMarkedComplete) {
+        return NextResponse.json(
+          { error: "You have already marked this job as complete" },
+          { status: 400 }
+        );
+      }
+
+      // Update job with worker completion flag
+      await jobDoc.ref.update({
+        workerMarkedComplete: true,
+        workerMarkedCompleteAt: FieldValue.serverTimestamp(),
+        updatedAt: FieldValue.serverTimestamp(),
+      });
+
+      // Log worker completion
+      const jobLogsRef = adminDb.collection(COLLECTIONS.JOB_LOGS);
+      await jobLogsRef.add({
+        jobId: job.id,
+        fromStatus: "IN_PROGRESS",
+        toStatus: "IN_PROGRESS", // Status doesn't change yet
+        action: "WORKER_MARKED_COMPLETE",
+        performedBy: user.id,
+        createdAt: FieldValue.serverTimestamp(),
+      });
+
+      // Notify customer that worker has completed the work
+      try {
+        await notifyCustomerJobCompleted(job.customerId, {
+          workerName: workerDoc?.data()?.name || 'Worker',
+          serviceName: job.description,
+          jobId: job.id,
+        });
+        console.log(`[Notification] Created in-app notification for customer ${job.customerId} - worker completed work`);
+        
+        // Send push notification to customer
+        await sendPushNotification({
+          userId: job.customerId,
+          title: '✅ Work Completed',
+          message: `${workerDoc?.data()?.name || 'Worker'} has completed your ${job.description}. Please confirm and pay ₹${job.charge}`,
+          type: 'JOB_COMPLETED',
+          actionUrl: `/customer/bookings`,
+        });
+      } catch (notifError) {
+        console.error('Failed to create completion notification:', notifError);
+      }
+
+      const updated = { 
+        ...job, 
+        workerMarkedComplete: true,
+        workerMarkedCompleteAt: new Date()
+      };
+      return NextResponse.json({ 
+        success: true, 
+        job: updated,
+        message: "Work marked as complete. Customer has been notified to confirm and pay."
+      });
     }
 
     // ===========================
@@ -323,17 +400,9 @@ export async function PATCH(
         createdAt: FieldValue.serverTimestamp(),
       });
 
-      // Notify customer that work is complete and ready for payment
-      try {
-        await notifyCustomerJobCompleted(job.customerId, {
-          workerName: workerDoc?.data()?.name || 'Worker',
-          serviceName: job.description,
-          jobId: job.id,
-        });
-        console.log(`[Notification] Created in-app notification for customer ${job.customerId} - work completed, payment required`);
-      } catch (notifError) {
-        console.error('Failed to create completion notification:', notifError);
-      }
+      // Note: Customer notification is NOT sent here because:
+      // - If worker marked complete first (WORKER_COMPLETE action), customer was already notified
+      // - This action is triggered BY the customer clicking "Complete & Pay", so they don't need notification
 
       // Return Razorpay order for frontend payment modal
       return NextResponse.json({
@@ -562,6 +631,15 @@ export async function POST(
         jobId: job.id,
       });
       console.log(`[Notification] Created in-app notification for worker ${job.workerId} - payment received`);
+      
+      // Send push notification
+      await sendPushNotification({
+        userId: job.workerId,
+        title: '💰 Payment Received',
+        message: `You received ₹${job.workerEarnings} from ${customerDoc?.data()?.name || 'customer'} for ${job.description}`,
+        type: 'PAYMENT_RECEIVED',
+        actionUrl: `/worker/earnings`,
+      });
     } catch (notifError) {
       console.error('Failed to create payment notification:', notifError);
     }

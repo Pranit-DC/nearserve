@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/use-user-profile';
 import { requestNotificationPermission, onMessageListener } from '@/lib/fcm';
 import { Bell, BellOff, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function CustomerNotificationPermission() {
-  const { user } = useAuth();
+  const { userProfile } = useUserProfile();
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [showPrompt, setShowPrompt] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
@@ -53,7 +53,7 @@ export function CustomerNotificationPermission() {
         setShowPrompt(false);
         
         // Save FCM token to customer profile
-        if (user?.uid) {
+        if (userProfile?.id) {
           await fetch('/api/customer/update-fcm-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },

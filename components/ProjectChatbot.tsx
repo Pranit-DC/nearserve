@@ -70,9 +70,16 @@ export default function ProjectChatbot() {
         "Hi! Ask me anything about the NearServe architecture or features.",
     },
   ]);
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   // Initialize and update dimensions on client side
   useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return;
+    
     // Set initial dimensions after mount
     setDimensions(getResponsiveDimensions());
     // Throttle resize updates using requestAnimationFrame to avoid
@@ -101,7 +108,7 @@ export default function ProjectChatbot() {
       }
       window.removeEventListener("resize", handleResize);
     };
-  }, []);
+  }, [mounted]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });

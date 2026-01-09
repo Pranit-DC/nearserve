@@ -186,6 +186,8 @@ export function CustomerSidebar({
   ];
 
   const changeLanguage = (langCode: string) => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+    
     const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
     if (select) {
       select.value = langCode;

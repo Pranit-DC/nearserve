@@ -30,7 +30,7 @@ import { FaRupeeSign } from "react-icons/fa";
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
-import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from '@/hooks/use-user-profile';
 import { useRealtimeJobs } from "@/hooks/use-realtime-jobs";
 
 type Job = {
@@ -44,12 +44,13 @@ type Job = {
   status: "PENDING" | "ACCEPTED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   customer: { name: string | null };
   review?: { rating: number; comment: string | null } | null;
+  workerMarkedComplete?: boolean;
 };
 
 type Tab = "NEW" | "PREVIOUS";
 
 export default function WorkerJobsPage() {
-  const { user } = useAuth();
+  const { userProfile } = useUserProfile();
   const [tab, setTab] = useState<Tab>("NEW");
   const [acting, setActing] = useState<string | null>(null);
   const [searchQuery, setSearchQuery] = useState("");
@@ -66,9 +67,9 @@ export default function WorkerJobsPage() {
 
   // Real-time Firestore listener - instant updates when jobs change!
   const { jobs, loading, error } = useRealtimeJobs({
-    userId: user?.uid || null,
+    userId: userProfile?.id || null,
     role: 'worker',
-    enabled: !!user?.uid
+    enabled: !!userProfile?.id
   });
 
   // Fallback to API if Firestore fails
@@ -269,6 +270,31 @@ export default function WorkerJobsPage() {
     } catch (error) {
       console.error("Start work error:", error);
       toast.error("Failed to start work. Please try again.");
+    } finally {
+      setActing(null);
+    }
+  };
+
+  // Mark work as complete (notifies customer)
+  const markWorkComplete = async (jobId: string) => {
+    setActing(jobId);
+    try {
+      const res = await fetch(`/api/jobs/${jobId}`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ action: "WORKER_COMPLETE" }),
+      });
+
+      const data = await res.json();
+
+      if (res.ok) {
+        toast.success("Work marked as complete! Customer has been notified to pay.");
+      } else {
+        toast.error(data.error || "Failed to mark work as complete");
+      }
+    } catch (error) {
+      console.error("Mark complete error:", error);
+      toast.error("Failed to mark work as complete");
     } finally {
       setActing(null);
     }
@@ -864,17 +890,47 @@ export default function WorkerJobsPage() {
                   )}
                   {tab === "NEW" && j.status === "IN_PROGRESS" && (
                     <div className="mt-3 pt-3 border-t border-gray-200 dark:border-[#2a2a2a]">
-                      <div className="bg-purple-50 dark:bg-[#1a1a1a] border border-purple-200 dark:border-purple-800/30 rounded-lg p-3">
-                        <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
-                          <FiPlay className="h-5 w-5 animate-pulse" />
-                          <span className="text-sm font-medium">
-                            Work in Progress
-                          </span>
+                      {j.workerMarkedComplete ? (
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30 rounded-lg p-3">
+                          <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                            <FiCheck className="h-5 w-5" />
+                            <span className="text-sm font-medium">
+                              Work Completed
+                            </span>
+                          </div>
+                          <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                            Waiting for customer to confirm and make payment
+                          </p>
                         </div>
-                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                          Waiting for customer to complete and make payment
-                        </p>
-                      </div>
+                      ) : (
+                        <div className="space-y-2">
+                          <div className="bg-purple-50 dark:bg-[#1a1a1a] border border-purple-200 dark:border-purple-800/30 rounded-lg p-3">
+                            <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                              <FiPlay className="h-5 w-5 animate-pulse" />
+                              <span className="text-sm font-medium">
+                                Work in Progress
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => markWorkComplete(j.id)}
+                            disabled={acting === j.id}
+                            className="w-full bg-green-600 hover:bg-green-500 text-white"
+                          >
+                            {acting === j.id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <FiCheck className="h-4 w-4 mr-2" />
+                                Mark Work as Completed
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </Card>
@@ -1081,17 +1137,47 @@ export default function WorkerJobsPage() {
                   )}
                   {tab === "NEW" && j.status === "IN_PROGRESS" && (
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-[#2a2a2a]">
-                      <div className="bg-purple-50 dark:bg-[#1a1a1a] border border-purple-200 dark:border-purple-800/30 rounded-xl p-3">
-                        <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
-                          <FiPlay className="h-5 w-5 animate-pulse" />
-                          <span className="text-sm font-medium">
-                            Work in Progress
-                          </span>
+                      {j.workerMarkedComplete ? (
+                        <div className="bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800/30 rounded-xl p-3">
+                          <div className="flex items-center gap-2 text-green-700 dark:text-green-300">
+                            <FiCheck className="h-5 w-5" />
+                            <span className="text-sm font-medium">
+                              Work Completed
+                            </span>
+                          </div>
+                          <p className="text-xs text-green-600 dark:text-green-400 mt-1">
+                            Waiting for customer to confirm and make payment
+                          </p>
                         </div>
-                        <p className="text-xs text-purple-600 dark:text-purple-400 mt-1">
-                          Waiting for customer to complete and make payment
-                        </p>
-                      </div>
+                      ) : (
+                        <div className="space-y-3">
+                          <div className="bg-purple-50 dark:bg-[#1a1a1a] border border-purple-200 dark:border-purple-800/30 rounded-xl p-3">
+                            <div className="flex items-center gap-2 text-purple-700 dark:text-purple-300">
+                              <FiPlay className="h-5 w-5 animate-pulse" />
+                              <span className="text-sm font-medium">
+                                Work in Progress
+                              </span>
+                            </div>
+                          </div>
+                          <Button
+                            onClick={() => markWorkComplete(j.id)}
+                            disabled={acting === j.id}
+                            className="w-full bg-green-600 hover:bg-green-500 text-white"
+                          >
+                            {acting === j.id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+                                Processing...
+                              </>
+                            ) : (
+                              <>
+                                <FiCheck className="h-4 w-4 mr-2" />
+                                Mark Work as Completed
+                              </>
+                            )}
+                          </Button>
+                        </div>
+                      )}
                     </div>
                   )}
                 </Card>

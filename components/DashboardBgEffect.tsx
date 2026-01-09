@@ -3,6 +3,8 @@ import { useEffect } from "react";
 
 export default function DashboardBgEffect() {
   useEffect(() => {
+    if (typeof document === 'undefined') return;
+    
     console.log("DashboardBgEffect mounted");
     const isDark = document.documentElement.classList.contains("dark");
     

@@ -58,7 +58,9 @@ export default function BookWorkerButton({
   // Effect to cleanup body scroll on unmount
   React.useEffect(() => {
     return () => {
-      document.body.style.overflow = 'unset';
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = 'unset';
+      }
     };
   }, []);
 
@@ -361,19 +363,25 @@ export default function BookWorkerButton({
   // Open dialog and prevent body scroll
   const openDialog = () => {
     if (!user) {
-      window.location.href = "/sign-in";
+      if (typeof window !== 'undefined') {
+        window.location.href = "/sign-in";
+      }
       return;
     }
     resetForm();
     setOpen(true);
     // Prevent body scroll when modal is open
-    document.body.style.overflow = 'hidden';
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = 'hidden';
+    }
   };
 
   // Close dialog and restore body scroll
   const closeDialog = () => {
     setOpen(false);
-    document.body.style.overflow = 'unset';
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = 'unset';
+    }
   };
 
   // Effect to cleanup body scroll on unmount

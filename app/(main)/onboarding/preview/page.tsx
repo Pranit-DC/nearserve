@@ -226,6 +226,8 @@ export default function PreviewPage() {
   const userName = user?.displayName || "Professional";
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     // Check if user is worker or customer based on stored data
     const storedWorkerDetails = sessionStorage.getItem("workerDetails");
     const storedCustomerDetails = sessionStorage.getItem("customerDetails");
@@ -249,9 +251,11 @@ export default function PreviewPage() {
   useEffect(() => {
     if (data?.success && data.redirect) {
       // Clear session storage
-      sessionStorage.removeItem("workerDetails");
-      sessionStorage.removeItem("customerDetails");
-      sessionStorage.removeItem("previousWorks");
+      if (typeof window !== 'undefined') {
+        sessionStorage.removeItem("workerDetails");
+        sessionStorage.removeItem("customerDetails");
+        sessionStorage.removeItem("previousWorks");
+      }
 
       router.push(data.redirect);
     }

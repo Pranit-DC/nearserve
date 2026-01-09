@@ -31,7 +31,7 @@ import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import Script from "next/script";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
-import { useAuth } from "@/contexts/AuthContext";
+import { useUserProfile } from '@/hooks/use-user-profile';
 import { useRealtimeJobs } from "@/hooks/use-realtime-jobs";
 
 // Extend Window interface for Razorpay
@@ -66,7 +66,7 @@ type RazorpayOrder = {
 };
 
 export default function CustomerBookingsPage() {
-  const { user } = useAuth();
+  const { userProfile } = useUserProfile();
   const [tab, setTab] = useState<Tab>("ONGOING");
   const [acting, setActing] = useState<string | null>(null);
   const [reviewOpen, setReviewOpen] = useState(false);
@@ -82,9 +82,9 @@ export default function CustomerBookingsPage() {
 
   // Real-time Firestore listener - instant updates when bookings change!
   const { jobs, loading, error } = useRealtimeJobs({
-    userId: user?.uid || null,
+    userId: userProfile?.id || null,
     role: 'customer',
-    enabled: !!user?.uid
+    enabled: !!userProfile?.id
   });
 
   // Fallback to API if Firestore fails

@@ -46,9 +46,11 @@ service cloud.firestore {
          request.auth.uid == resource.data.workerId);
     }
     
-    // Notifications - users can only read their own notifications
+    // Notifications - users can read their own notifications
+    // Note: userId in notifications is the database user ID, not Firebase UID
+    // The client queries with their database user ID from userProfile.id
     match /notifications/{notificationId} {
-      allow read: if isSignedIn() && request.auth.uid == resource.data.userId;
+      allow read: if isSignedIn();
       allow write: if false; // Only server (Admin SDK) can write
     }
     
@@ -125,6 +127,24 @@ service cloud.firestore {
       // Only document creator or admin can delete
       allow delete: if isSignedIn() && 
         (request.auth.uid == resource.data.createdBy || isAdmin());
+    }
+    
+    // ===================================================================
+    // FCM TOKEN STORAGE COLLECTION
+    // For Firebase Cloud Messaging push notification tokens
+    // ===================================================================
+    match /refresh_data_tokens/{tokenId} {
+      // Allow anyone to read all tokens (needed for broadcast)
+      allow read: if true;
+      
+      // Allow anyone to create tokens (supports anonymous users)
+      allow create: if true;
+      
+      // Allow anyone to update tokens (for token refresh)
+      allow update: if true;
+      
+      // Allow anyone to delete tokens (for cleanup)
+      allow delete: if true;
     }
     
     // Default deny all

@@ -4,9 +4,16 @@ import { useState, useEffect } from 'react';
 import { Languages } from 'lucide-react';
 
 export function LanguageSwitcher() {
+  const [mounted, setMounted] = useState(false);
   const [currentLang, setCurrentLang] = useState('en');
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted) return;
+    
     // Check if Google Translate has set a language
     const checkLanguage = () => {
       const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
@@ -18,9 +25,11 @@ export function LanguageSwitcher() {
     // Check periodically for language changes
     const interval = setInterval(checkLanguage, 500);
     return () => clearInterval(interval);
-  }, []);
+  }, [mounted]);
 
   const changeLanguage = (langCode: string) => {
+    if (!mounted || typeof window === 'undefined') return;
+    
     const select = document.querySelector('.goog-te-combo') as HTMLSelectElement;
     if (select) {
       select.value = langCode;
@@ -34,6 +43,8 @@ export function LanguageSwitcher() {
   
   // Restore language preference on mount
   useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return;
+    
     const savedLang = localStorage.getItem('preferredLanguage');
     if (savedLang && savedLang !== 'en') {
       // Wait for Google Translate to load
@@ -48,13 +59,24 @@ export function LanguageSwitcher() {
       // Clear interval after 5 seconds if not found
       setTimeout(() => clearInterval(interval), 5000);
     }
-  }, []);
+  }, [mounted]);
 
   const languages = [
     { code: 'en', name: 'English', native: 'English' },
     { code: 'hi', name: 'Hindi', native: 'हिन्दी' },
     { code: 'mr', name: 'Marathi', native: 'मराठी' },
   ];
+
+  if (!mounted) {
+    return (
+      <div className="space-y-1">
+        <div className="flex items-center gap-2 px-3 py-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+          <Languages className="h-4 w-4" />
+          <span>Language</span>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-1">

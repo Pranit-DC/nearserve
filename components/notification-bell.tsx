@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useRef, useEffect } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/use-user-profile';
 import { useNotifications } from '@/hooks/use-notifications';
 import { FiBell, FiCheck, FiCheckCircle, FiClock, FiX } from 'react-icons/fi';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -9,10 +9,10 @@ import { useRouter } from 'next/navigation';
 import { toast } from 'sonner';
 
 export function NotificationBell() {
-  const { user } = useAuth();
+  const { userProfile } = useUserProfile();
   const { notifications, unreadCount, loading } = useNotifications({
-    userId: user?.uid || null,
-    enabled: !!user?.uid,
+    userId: userProfile?.id || null,
+    enabled: !!userProfile?.id,
     maxNotifications: 20,
   });
   

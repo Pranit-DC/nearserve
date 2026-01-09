@@ -31,6 +31,8 @@ export default function ExpandableCardsWorkers({
   const ref = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     function onKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") setActive(null);
     }
