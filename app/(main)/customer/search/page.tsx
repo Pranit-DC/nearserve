@@ -297,19 +297,19 @@ function SearchPageContent() {
 
   // Mobile-Responsive Skeleton Loader Component
   const SkeletonCard = () => (
-    <Card className="border border-[#232323] dark:border-[#232323] bg-[#181818] dark:bg-[#181818] p-4 sm:p-6 animate-pulse">
+    <Card className="border border-gray-200 dark:border-[#232323] bg-white dark:bg-[#181818] p-4 sm:p-6 animate-pulse">
       <div className="flex items-start gap-4">
-        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-[#222] dark:bg-[#222] flex-shrink-0" />
+        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-gray-200 dark:bg-[#222] flex-shrink-0" />
         <div className="flex-1 space-y-3">
-          <div className="h-5 bg-[#222] dark:bg-[#222] rounded w-3/4" />
-          <div className="h-4 bg-[#222] dark:bg-[#222] rounded w-1/2" />
+          <div className="h-5 bg-gray-200 dark:bg-[#222] rounded w-3/4" />
+          <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-1/2" />
           <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-[#222] dark:bg-[#222] rounded" />
-            <div className="h-4 bg-[#222] dark:bg-[#222] rounded w-40" />
+            <div className="h-4 w-4 bg-gray-200 dark:bg-[#222] rounded" />
+            <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-40" />
           </div>
           <div className="flex gap-2">
-            <div className="h-8 bg-[#222] dark:bg-[#222] rounded-lg w-16" />
-            <div className="h-8 bg-[#222] dark:bg-[#222] rounded-lg w-20" />
+            <div className="h-8 bg-gray-200 dark:bg-[#222] rounded-lg w-16" />
+            <div className="h-8 bg-gray-200 dark:bg-[#222] rounded-lg w-20" />
           </div>
         </div>
       </div>

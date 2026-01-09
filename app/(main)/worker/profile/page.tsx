@@ -368,7 +368,7 @@ export default function WorkerProfilePage() {
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
+      <main className="min-h-screen bg-white dark:bg-[#212121]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
             <div className="h-10 bg-gray-200 dark:bg-gray-700 rounded w-48 mb-2 animate-pulse"></div>
@@ -390,7 +390,7 @@ export default function WorkerProfilePage() {
 
   if (!data || !data.workerProfile) {
     return (
-      <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
+      <main className="min-h-screen bg-white dark:bg-[#212121]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="text-center py-16">
             <FiAlertCircle className="h-16 w-16 text-red-500 mx-auto mb-4" />
@@ -412,7 +412,7 @@ export default function WorkerProfilePage() {
   const profile = data.workerProfile;
 
   return (
-    <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
+    <main className="min-h-screen bg-white dark:bg-[#212121]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8 flex items-start justify-between">
@@ -460,7 +460,7 @@ export default function WorkerProfilePage() {
         <div className="grid gap-6 lg:grid-cols-3">
           {/* Left Sidebar - Profile Card */}
           <div className="lg:col-span-1">
-            <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323] sticky top-6">
+            <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323] sticky top-6">
               <motion.div
                 initial={{ opacity: 0, y: 20 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -598,7 +598,7 @@ export default function WorkerProfilePage() {
                   className="space-y-6"
                 >
                   {/* Bio Section */}
-                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                  <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     <div className="flex items-center gap-2 mb-4">
                       <FiFileText className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -612,7 +612,7 @@ export default function WorkerProfilePage() {
                           setEditedProfile({ ...editedProfile, bio: e.target.value })
                         }
                         placeholder="Tell customers about yourself and your work..."
-                        className="min-h-32 bg-[#303030] dark:bg-[#303030]"
+                        className="min-h-32 bg-gray-100 dark:bg-[#303030]"
                         rows={4}
                       />
                     ) : (
@@ -623,7 +623,7 @@ export default function WorkerProfilePage() {
                   </Card>
 
                   {/* Skills */}
-                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                  <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     <div className="flex items-center gap-2 mb-4">
                       <FiBriefcase className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -717,7 +717,7 @@ export default function WorkerProfilePage() {
 
                   {/* Rates */}
                   <div className="grid md:grid-cols-2 gap-6">
-                    <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                    <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                       <div className="flex items-center gap-2 mb-4">
                         <FaRupeeSign className="h-5 w-5 text-green-600 dark:text-green-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -735,7 +735,7 @@ export default function WorkerProfilePage() {
                             })
                           }
                           placeholder="Enter hourly rate"
-                          className="bg-[#303030] dark:bg-[#303030]"
+                          className="bg-white dark:bg-[#303030]"
                         />
                       ) : (
                         <div className="text-3xl font-bold text-green-600 dark:text-green-400">
@@ -749,7 +749,7 @@ export default function WorkerProfilePage() {
                       )}
                     </Card>
 
-                    <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                    <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                       <div className="flex items-center gap-2 mb-4">
                         <FaRupeeSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -767,7 +767,7 @@ export default function WorkerProfilePage() {
                             })
                           }
                           placeholder="Enter minimum fee"
-                          className="bg-[#303030] dark:bg-[#303030]"
+                          className="bg-white dark:bg-[#303030]"
                         />
                       ) : (
                         <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">
@@ -779,7 +779,7 @@ export default function WorkerProfilePage() {
 
                   {/* Qualification & Experience */}
                   <div className="grid md:grid-cols-2 gap-6">
-                    <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                    <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                       <div className="flex items-center gap-2 mb-4">
                         <FiAward className="h-5 w-5 text-blue-600 dark:text-blue-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -803,7 +803,7 @@ export default function WorkerProfilePage() {
                                 setEditedProfile({ ...editedProfile, qualification: e.target.value });
                               }}
                               placeholder="Enter your qualification"
-                              className="bg-[#303030] dark:bg-[#303030]"
+                              className="bg-white dark:bg-[#303030]"
                             />
                           )}
                         </div>
@@ -814,7 +814,7 @@ export default function WorkerProfilePage() {
                       )}
                     </Card>
 
-                    <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                    <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                       <div className="flex items-center gap-2 mb-4">
                         <FiClock className="h-5 w-5 text-purple-600 dark:text-purple-400" />
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -845,7 +845,7 @@ export default function WorkerProfilePage() {
                   </div>
 
                   {/* Address */}
-                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                  <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     <div className="flex items-center justify-between mb-4">
                       <div className="flex items-center gap-2">
                         <FiMapPin className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -881,7 +881,7 @@ export default function WorkerProfilePage() {
                               })
                             }
                             placeholder="Enter street address"
-                            className="bg-[#303030] dark:bg-[#303030]"
+                            className="bg-white dark:bg-[#303030]"
                             rows={2}
                           />
                         </div>
@@ -900,7 +900,7 @@ export default function WorkerProfilePage() {
                                 })
                               }
                               placeholder="City"
-                              className="bg-[#303030] dark:bg-[#303030]"
+                              className="bg-white dark:bg-[#303030]"
                             />
                           </div>
                           
@@ -917,7 +917,7 @@ export default function WorkerProfilePage() {
                                 })
                               }
                               placeholder="State"
-                              className="bg-[#303030] dark:bg-[#303030]"
+                              className="bg-white dark:bg-[#303030]"
                             />
                           </div>
                         </div>
@@ -936,7 +936,7 @@ export default function WorkerProfilePage() {
                                 })
                               }
                               placeholder="Postal Code"
-                              className="bg-[#303030] dark:bg-[#303030]"
+                              className="bg-white dark:bg-[#303030]"
                             />
                           </div>
                           
@@ -953,7 +953,7 @@ export default function WorkerProfilePage() {
                                 })
                               }
                               placeholder="Country"
-                              className="bg-[#303030] dark:bg-[#303030]"
+                              className="bg-white dark:bg-[#303030]"
                             />
                           </div>
                         </div>
@@ -1010,7 +1010,7 @@ export default function WorkerProfilePage() {
                         animate={{ opacity: 1, height: "auto" }}
                         exit={{ opacity: 0, height: 0 }}
                       >
-                        <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                        <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                           <div className="space-y-6">
                             <div className="flex justify-between items-center">
                               <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
@@ -1133,7 +1133,7 @@ export default function WorkerProfilePage() {
                   </AnimatePresence>
 
                   {/* Portfolio Grid */}
-                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                        <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     {profile.previousWorks && profile.previousWorks.length > 0 ? (
                       <div className="grid md:grid-cols-2 gap-4">
                         {profile.previousWorks.map((work, index) => {
@@ -1217,7 +1217,7 @@ export default function WorkerProfilePage() {
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -20 }}
                 >
-                  <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                        <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     <div className="flex items-center gap-2 mb-6">
                       <FiStar className="h-5 w-5 text-yellow-600 dark:text-yellow-400" />
                       <h3 className="text-lg font-semibold text-gray-900 dark:text-white">

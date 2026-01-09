@@ -243,22 +243,22 @@ export default function CustomerProfilePage() {
 
   // Skeleton loader component
   const SkeletonCard = () => (
-    <Card className="p-6 animate-pulse bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+    <Card className="p-6 animate-pulse bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
       <div className="space-y-4">
-        <div className="h-6 bg-[#222] dark:bg-[#222] rounded w-32"></div>
-        <div className="h-4 bg-[#222] dark:bg-[#222] rounded w-full"></div>
-        <div className="h-4 bg-[#222] dark:bg-[#222] rounded w-3/4"></div>
+        <div className="h-6 bg-gray-200 dark:bg-[#222] rounded w-32"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-full"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-3/4"></div>
       </div>
     </Card>
   );
 
   if (loading) {
     return (
-      <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
+      <main className="min-h-screen bg-white dark:bg-[#212121]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
           <div className="mb-8">
-            <div className="h-10 bg-[#222] dark:bg-[#222] rounded w-48 mb-2 animate-pulse"></div>
-            <div className="h-5 bg-[#222] dark:bg-[#222] rounded w-64 animate-pulse"></div>
+            <div className="h-10 bg-gray-200 dark:bg-[#222] rounded w-48 mb-2 animate-pulse"></div>
+            <div className="h-5 bg-gray-200 dark:bg-[#222] rounded w-64 animate-pulse"></div>
           </div>
           <div className="grid gap-6 lg:grid-cols-3">
             <div className="lg:col-span-1">
