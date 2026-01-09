@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    // Helper functions
+    function isSignedIn() {
+      return request.auth != null;
+    }
+    
+    function isOwner(userId) {
+      return isSignedIn() && request.auth.uid == userId;
+    }
+    
+    function isAdmin() {
+      return isSignedIn() && 
+        get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'ADMIN';
+    }
+    
+    // Users collection
+    match /users/{userId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && 
+        (isOwner(resource.data.firebaseUid) || request.auth.uid == resource.data.firebaseUid);
+    }
+    
+    // Worker profiles
+    match /worker_profiles/{profileId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Customer profiles  
+    match /customer_profiles/{profileId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && resource.data.userId == request.auth.uid;
+    }
+    
+    // Jobs
+    match /jobs/{jobId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && 
+        (request.auth.uid == resource.data.customerId || 
+         request.auth.uid == resource.data.workerId);
+    }
+    
+    // Notifications - users can only read their own notifications
+    match /notifications/{notificationId} {
+      allow read: if isSignedIn() && request.auth.uid == resource.data.userId;
+      allow write: if false; // Only server (Admin SDK) can write
+    }
+    
+    // Previous works (portfolio)
+    match /previous_works/{workId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if isSignedIn();
+    }
+    
+    // Reviews
+    match /reviews/{reviewId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn() && request.auth.uid == request.resource.data.customerId;
+      allow update, delete: if false; // Reviews are immutable
+    }
+    
+    // Transactions
+    match /transactions/{transactionId} {
+      allow read: if isSignedIn() && request.auth.uid == resource.data.userId;
+      allow create: if isSignedIn();
+      allow update, delete: if false; // Transactions are immutable
+    }
+    
+    // Job postings
+    match /job_postings/{postingId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && request.auth.uid == resource.data.employerId;
+    }
+    
+    // Job applications
+    match /job_applications/{applicationId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update: if isSignedIn() && 
+        (request.auth.uid == resource.data.workerId || 
+         request.auth.uid == get(/databases/$(database)/documents/job_postings/$(resource.data.jobPostingId)).data.employerId);
+    }
+    
+    // Job logs (audit trail)
+    match /job_logs/{logId} {
+      allow read: if isSignedIn();
+      allow create: if isSignedIn();
+      allow update, delete: if false; // Logs are immutable
+    }
+    
+    // ===================================================================
+    // REAL-TIME REFRESH DATA COLLECTION
+    // For live content updates via WebSocket
+    // ===================================================================
+    match /refresh_data/{docId} {
+      // Public read access - anyone can see live updates
+      // Change to 'if isSignedIn()' if you want auth-only access
+      allow read: if true;
+      
+      // Only authenticated users can write
+      allow create: if isSignedIn() && 
+        request.resource.data.keys().hasAll(['title', 'message', 'timestamp']) &&
+        request.resource.data.title is string &&
+        request.resource.data.message is string &&
+        request.resource.data.title.size() <= 200 &&
+        request.resource.data.message.size() <= 1000;
+      
+      // Only document creator or admin can update
+      allow update: if isSignedIn() && 
+        (request.auth.uid == resource.data.createdBy || isAdmin()) &&
+        request.resource.data.keys().hasAll(['title', 'message', 'timestamp']) &&
+        request.resource.data.title is string &&
+        request.resource.data.message is string &&
+        request.resource.data.title.size() <= 200 &&
+        request.resource.data.message.size() <= 1000;
+      
+      // Only document creator or admin can delete
+      allow delete: if isSignedIn() && 
+        (request.auth.uid == resource.data.createdBy || isAdmin());
+    }
+    
+    // Default deny all
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
