@@ -222,7 +222,7 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
                 className="flex items-center space-x-3 cursor-pointer"
               >
                 <img 
-                  src="/hard-hat_11270170.svg" 
+                  src="/logo.svg" 
                   alt="NearServe Logo" 
                   className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
                 />
@@ -230,7 +230,7 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
               </motion.div>
             ) : (
               <img 
-                src="/hard-hat_11270170.svg" 
+                src="/logo.svg" 
                 alt="NearServe Logo" 
                 className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert cursor-pointer"
               />

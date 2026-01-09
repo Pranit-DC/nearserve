@@ -1,4 +1,5 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<svg xmlns="http://www.w3.org/2000/svg" id="Layer_1" data-name="Layer 1" viewBox="0 0 24 24">
-  <path d="m23.038,17H1.038c-.552,0-1,.448-1,1H.038c0,.552.448,1,1,1h.477c1.523,1.5,4.523,4,10.523,4s9-2.5,10.523-4h.477c.552,0,1-.448,1-1h0c0-.552-.448-1-1-1Zm-14-2V4c0-1.657,1.343-3,3-3h0c1.657,0,3,1.343,3,3v11h-6Zm-2,0H1.038v-2.448c0-4.094,2.384-7.769,6-9.579v12.028Zm16-2.448v2.448h-6V2.972c3.616,1.81,6,5.486,6,9.579Z"/>
+<svg width="100" height="100" viewBox="0 0 100 100" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <circle cx="50" cy="50" r="12" fill="#2563EB"/>
+  <path d="M50 25C63.8071 25 75 36.1929 75 50C75 63.8071 63.8071 75 50 75" stroke="#1E293B" stroke-width="8" stroke-linecap="round"/>
+  <path d="M50 10C72.0914 10 90 27.9086 90 50" stroke="#94A3B8" stroke-width="8" stroke-linecap="round"/>
 </svg>

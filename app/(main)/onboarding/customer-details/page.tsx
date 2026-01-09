@@ -126,7 +126,7 @@ export default function CustomerDetailsPage() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.2 }}
           >
-            <Card className="border-2 border-gray-200/60 dark:border-gray-800/60 bg-white/80 dark:bg-black/80 backdrop-blur-sm shadow-xl">
+            <Card className="border-2 border-gray-200/60 dark:border-[#2c2c2c] bg-white/80 dark:bg-[#181818] backdrop-blur-sm shadow-xl">
               <CardContent className="p-6 md:p-8">
                 {/* Step Badge */}
                 <div className="flex items-center justify-center mb-6">

@@ -93,7 +93,7 @@ export default function WorkerEarningsPage() {
       : "bg-red-50 dark:bg-red-900/20";
 
   return (
-    <main className="min-h-screen bg-[#212121] dark:bg-[#212121]">
+    <main className="min-h-screen bg-white dark:bg-[#212121]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
         {/* Header */}
         <div className="mb-8">
@@ -127,7 +127,7 @@ export default function WorkerEarningsPage() {
                   {Array.from({ length: 3 }).map((_, i) => (
                     <div
                       key={i}
-                      className="animate-pulse flex items-center justify-between p-4 rounded-lg bg-gray-100 dark:bg-gray-800"
+                      className="animate-pulse flex items-center justify-between p-4 rounded-lg bg-white dark:bg-gray-800 border border-gray-200 dark:border-[#232323]"
                     >
                       <div className="flex-1 space-y-2">
                         <div className="h-5 bg-gray-200 dark:bg-gray-700 rounded w-48"></div>
@@ -178,7 +178,7 @@ export default function WorkerEarningsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.1 }}
                 >
-                  <Card className="p-6 hover:shadow-lg transition-all duration-200 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                  <Card className="p-6 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
@@ -204,7 +204,7 @@ export default function WorkerEarningsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.2 }}
                 >
-                  <Card className="p-6 hover:shadow-lg transition-all duration-200 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                  <Card className="p-6 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
@@ -230,7 +230,7 @@ export default function WorkerEarningsPage() {
                   animate={{ opacity: 1, y: 0 }}
                   transition={{ delay: 0.3 }}
                 >
-                  <Card className="p-6 hover:shadow-lg transition-all duration-200 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                  <Card className="p-6 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     <div className="flex items-start justify-between mb-4">
                       <div>
                         <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-1">
@@ -276,7 +276,7 @@ export default function WorkerEarningsPage() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ delay: 0.4 }}
               >
-                <Card className="p-6 bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323]">
+                <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                   <div className="flex items-center justify-between mb-6">
                     <div>
                       <h2 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -306,7 +306,7 @@ export default function WorkerEarningsPage() {
                           transition={{ delay: 0.5 + index * 0.05 }}
                           className="group"
                         >
-                          <div className="flex items-center justify-between p-4 rounded-lg bg-[#181818] dark:bg-[#181818] border border-[#232323] dark:border-[#232323] hover:shadow-md hover:border-[#252525] dark:hover:border-[#252525] transition-all duration-200">
+                          <div className="flex items-center justify-between p-4 rounded-lg bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323] hover:shadow-md hover:border-gray-300 dark:hover:border-[#252525] transition-all duration-200">
                             <div className="flex-1 flex items-start gap-3">
                               <div className="w-10 h-10 rounded-lg bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center flex-shrink-0">
                                 <FaRupeeSign className="h-5 w-5 text-blue-600 dark:text-blue-400" />
@@ -358,26 +358,26 @@ export default function WorkerEarningsPage() {
                   transition={{ delay: 0.6 }}
                   className="mt-6"
                 >
-                  <Card className="p-6 bg-[#303030] dark:bg-[#303030] border border-[#232323] dark:border-[#232323]">
+                  <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-3">
-                        <div className="w-12 h-12 rounded-xl bg-blue-600 flex items-center justify-center">
-                          <FiBarChart2 className="h-6 w-6 text-white" />
+                        <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-600 flex items-center justify-center">
+                          <FiBarChart2 className="h-6 w-6 text-blue-600 dark:text-white" />
                         </div>
                         <div>
-                          <p className="text-sm font-medium text-blue-900 dark:text-blue-300">
+                          <p className="text-sm font-medium text-gray-600 dark:text-blue-300">
                             Average Earning per Job
                           </p>
-                          <p className="text-2xl font-bold text-blue-600 dark:text-blue-400">
+                          <p className="text-2xl font-bold text-gray-900 dark:text-blue-400">
                             ₹{(data.total / data.jobs.length).toFixed(2)}
                           </p>
                         </div>
                       </div>
                       <div className="text-right">
-                        <p className="text-xs text-blue-700 dark:text-blue-400 mb-1">
+                        <p className="text-xs text-gray-600 dark:text-blue-400 mb-1">
                           Total Jobs Completed
                         </p>
-                        <p className="text-3xl font-bold text-blue-600 dark:text-blue-400">
+                        <p className="text-3xl font-bold text-gray-900 dark:text-blue-400">
                           {data.jobs.length}
                         </p>
                       </div>
