@@ -26,10 +26,22 @@ export function NotificationBell() {
   useEffect(() => {
     if (isOpen && buttonRef.current) {
       const rect = buttonRef.current.getBoundingClientRect();
-      setDropdownPosition({
-        top: rect.top,
-        left: rect.right + 8 // 8px gap to the right of bell
-      });
+      let top = rect.bottom + 8; // 8px gap below button
+      let left = rect.left;
+      
+      // Prevent dropdown from going below viewport
+      const dropdownHeight = 400; // approximate height
+      if (top + dropdownHeight > window.innerHeight - 80) { // 80px buffer for taskbar
+        top = rect.top - dropdownHeight - 8; // Place above button instead
+      }
+      
+      // Prevent dropdown from going off right edge
+      const dropdownWidth = 384; // w-96 = 384px
+      if (left + dropdownWidth > window.innerWidth) {
+        left = window.innerWidth - dropdownWidth - 16; // 16px margin from edge
+      }
+      
+      setDropdownPosition({ top, left });
     }
   }, [isOpen]);
 
@@ -103,11 +115,11 @@ export function NotificationBell() {
 
   return (
     <div className="relative" ref={dropdownRef}>
-      {/* Bell Button */}
+      {/* Bell Button - Full width clickable area */}
       <button
         ref={buttonRef}
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors"
+        className="relative w-full p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-800 transition-colors flex items-center gap-2"
         aria-label="Notifications"
       >
         <FiBell className="w-5 h-5 text-gray-600 dark:text-gray-400" />
@@ -132,24 +144,24 @@ export function NotificationBell() {
             initial={{ opacity: 0, y: -10 }}
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -10 }}
-            className="fixed w-80 sm:w-96 bg-white dark:bg-gray-900 rounded-lg shadow-xl border border-gray-200 dark:border-gray-700 z-[9999] max-h-[80vh] flex flex-col"
+            className="fixed w-80 sm:w-96 bg-white dark:bg-[#181818] rounded-lg shadow-xl border border-gray-200 dark:border-[#232323] z-[9999] max-h-[80vh] flex flex-col"
             style={{
               top: `${dropdownPosition.top}px`,
               left: `${dropdownPosition.left}px`
             }}
           >
             {/* Header */}
-            <div className="p-4 border-b border-gray-200 dark:border-gray-700 flex items-center justify-between">
+            <div className="p-4 border-b border-gray-200 dark:border-[#232323] flex items-center justify-between">
               <h3 className="font-semibold text-gray-900 dark:text-white">
                 Notifications
                 {unreadCount > 0 && (
-                  <span className="ml-2 text-sm text-gray-500">({unreadCount} new)</span>
+                  <span className="ml-2 text-sm text-gray-500 dark:text-gray-400">({unreadCount} new)</span>
                 )}
               </h3>
               {unreadCount > 0 && (
                 <button
                   onClick={markAllAsRead}
-                  className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
+                  className="text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
                 >
                   Mark all read
                 </button>
@@ -159,8 +171,8 @@ export function NotificationBell() {
             {/* Notifications List */}
             <div className="overflow-y-auto flex-1">
               {loading ? (
-                <div className="p-8 text-center text-gray-500">
-                  <div className="animate-spin w-6 h-6 border-2 border-gray-300 border-t-blue-600 rounded-full mx-auto"></div>
+                <div className="p-8 text-center text-gray-500 dark:text-gray-400">
+                  <div className="animate-spin w-6 h-6 border-2 border-gray-300 dark:border-gray-600 border-t-blue-600 rounded-full mx-auto"></div>
                   <p className="mt-2 text-sm">Loading...</p>
                 </div>
               ) : notifications.length === 0 ? (
@@ -169,7 +181,7 @@ export function NotificationBell() {
                   <p className="text-sm">No notifications yet</p>
                 </div>
               ) : (
-                <div className="divide-y divide-gray-200 dark:divide-gray-700">
+                <div className="divide-y divide-gray-200 dark:divide-[#232323]">
                   {notifications.map((notification) => (
                     <motion.div
                       key={notification.id}
@@ -177,8 +189,8 @@ export function NotificationBell() {
                       animate={{ opacity: 1 }}
                       className={`p-4 cursor-pointer transition-colors ${
                         !notification.read
-                          ? 'bg-blue-50 dark:bg-blue-900/10 hover:bg-blue-100 dark:hover:bg-blue-900/20'
-                          : 'hover:bg-gray-50 dark:hover:bg-gray-800'
+                          ? 'bg-blue-50 dark:bg-[#1f1f1f] hover:bg-blue-100 dark:hover:bg-[#232323]'
+                          : 'hover:bg-gray-50 dark:hover:bg-[#1f1f1f]'
                       }`}
                       onClick={() => handleNotificationClick(notification)}
                     >
@@ -195,8 +207,8 @@ export function NotificationBell() {
                             {notification.message}
                           </p>
                           <div className="flex items-center gap-2 mt-2">
-                            <FiClock className="w-3 h-3 text-gray-400" />
-                            <span className="text-xs text-gray-500">
+                            <FiClock className="w-3 h-3 text-gray-400 dark:text-gray-500" />
+                            <span className="text-xs text-gray-500 dark:text-gray-500">
                               {formatTime(notification.createdAt)}
                             </span>
                           </div>
@@ -215,13 +227,13 @@ export function NotificationBell() {
 
             {/* Footer */}
             {notifications.length > 0 && (
-              <div className="p-3 border-t border-gray-200 dark:border-gray-700 text-center">
+              <div className="p-3 border-t border-gray-200 dark:border-[#232323] text-center">
                 <button
                   onClick={() => {
                     router.push('/notifications');
                     setIsOpen(false);
                   }}
-                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 font-medium"
+                  className="text-sm text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 font-medium"
                 >
                   View all notifications
                 </button>
