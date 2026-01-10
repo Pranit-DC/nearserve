@@ -2,144 +2,151 @@
 
 import React from "react";
 import { Card } from "@/components/ui/card";
+import FaqSection from "@/components/ui/messaging-like-qna";
 import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
-import {
-  Info,
   HelpCircle,
+  UserCheck,
   Shield,
   Phone,
   Mail,
-  MessageSquare,
+  User,
+  FileText,
+  Smartphone,
+  Wallet,
+  AlertCircle,
+  Star,
+  Target,
 } from "lucide-react";
 import Link from "next/link";
 
-export default function HelpPage() {
+export default function WorkerHelpPage() {
   const faqs = [
     {
-      question: "What is NearServe?",
+      id: 1,
+      question: "What is NearServe for Workers?",
       answer:
-        "NearServe is a digital bridge connecting customers with verified blue-collar workers such as plumbers, electricians, drivers, cleaners, and more. It helps customers find skilled professionals easily and enables workers to get fair and frequent job opportunities.",
+        "NearServe helps skilled workers like plumbers, electricians, drivers, cleaners, and other professionals connect directly with customers who need their services. It ensures fair opportunities and consistent job access.",
+      icon: User,
     },
     {
-      question: "How do I book a worker?",
+      id: 2,
+      question: "How can I register as a worker?",
       answer:
-        "Browse through categories or search for the required profession. Once you find a worker, click on the 'Book Worker' button, provide your project details, and confirm your booking. You’ll receive a confirmation and can track your booking status from your dashboard.",
+        "You can sign up using your mobile number or email, complete your basic profile, and upload your ID proof for verification. Once approved, you'll start receiving job requests from nearby customers.",
+      icon: FileText,
     },
     {
-      question: "Is there a limit to how many workers I can book?",
+      id: 3,
+      question: "How do I get job bookings?",
       answer:
-        "Free-tier customers can book a limited number of workers per week. For unlimited bookings and premium support, you can explore our subscription plans from the Pricing section.",
+        "Once your account is verified, customers can view your profile and hire you for tasks. You'll get job notifications in your dashboard, and you can accept or decline based on your availability.",
+      icon: Smartphone,
     },
     {
-      question: "How are workers verified?",
+      id: 4,
+      question: "When and how do I receive payments?",
       answer:
-        "All workers undergo a basic verification process, including ID proof and skill validation. NearServe ensures transparency and safety for both customers and workers.",
+        "Payments are made directly to your registered bank account or UPI after successful job completion. NearServe ensures transparent transactions with low service charges.",
+      icon: Wallet,
     },
     {
-      question: "What if the worker doesn't show up or cancels?",
+      id: 5,
+      question: "What if a customer cancels or doesn't pay?",
       answer:
-        "If a worker fails to arrive, you can report the issue directly from your booking details page. Our support team will help you reschedule or refund your booking as per our cancellation policy.",
+        "In case of cancellations or payment disputes, raise a complaint from your 'My Jobs' section. Our support team will verify and assist in resolving the issue promptly.",
+      icon: AlertCircle,
     },
     {
-      question: "How do I contact support?",
+      id: 6,
+      question: "How do I improve my visibility and ratings?",
       answer:
-        "You can reach our support team via email, chat, or phone. Scroll below for the contact details.",
+        "Complete your profile, upload genuine work photos, and maintain good ratings from customers. Higher ratings and verified profiles are shown first to potential clients.",
+      icon: Star,
+    },
+    {
+      id: 7,
+      question: "Is there any subscription or limit for workers?",
+      answer:
+        "Basic accounts can receive a limited number of job requests per week. For more visibility, unlimited requests, and premium support, you can upgrade to a Pro Worker Plan.",
+      icon: Target,
     },
   ];
 
   return (
-    <div className="space-y-10">
+    <div className="min-h-screen space-y-8 bg-white dark:bg-[#212121] px-4 sm:px-6 lg:px-8 py-6">
       {/* Header Section */}
-      <div className="space-y-2 text-center">
+      <div className="space-y-2 text-center pt-4">
         <div className="flex justify-center mb-2">
-          <HelpCircle className="h-10 w-10 text-blue-600 dark:text-blue-400 mt-20" />
+          <HelpCircle className="h-10 w-10 text-emerald-600 dark:text-emerald-400" />
         </div>
         <h1 className="text-3xl font-semibold text-gray-900 dark:text-white">
-          Help & Support
+          Worker Help & Support
         </h1>
         <p className="text-gray-600 dark:text-gray-400 max-w-2xl mx-auto">
-          Have questions about using NearServe? Find answers, guidance, and
-          support below.
+          Everything you need to know about using NearServe as a worker — from
+          registration to payments and support.
         </p>
       </div>
 
       {/* FAQs Section */}
-      <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4 flex items-center">
-          <Info className="h-5 w-5 mr-2 text-blue-600 dark:text-blue-400" />
-          Frequently Asked Questions
+      <div className="flex flex-col items-center w-full">
+        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-6 flex items-center">
+          <UserCheck className="h-5 w-5 mr-2 text-emerald-600 dark:text-emerald-400" />
+          Common Questions for Workers
         </h2>
-
-        <Accordion type="single" collapsible className="w-full">
-          {faqs.map((faq, index) => (
-            <AccordionItem key={index} value={`faq-${index}`}>
-              <AccordionTrigger className="text-left text-gray-900 dark:text-gray-100 font-medium">
-                {faq.question}
-              </AccordionTrigger>
-              <AccordionContent className="text-gray-600 dark:text-gray-400 text-sm">
-                {faq.answer}
-              </AccordionContent>
-            </AccordionItem>
-          ))}
-        </Accordion>
-      </Card>
+        <FaqSection data={faqs} />
+      </div>
 
       {/* Support Contact Section */}
-      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black text-center">
-          <Phone className="h-8 w-8 text-green-600 dark:text-green-400 mx-auto mb-3" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">
-            Call Support
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Reach us at <span className="font-medium">+91 98765 43210</span>
-          </p>
+      <div className="grid gap-6 sm:grid-cols-2 lg:grid-cols-2 max-w-3xl mx-auto">
+        <Card className="p-8 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323] hover:shadow-lg transition-shadow">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 rounded-full bg-green-50 dark:bg-green-900/20 flex items-center justify-center mb-4">
+              <Phone className="h-6 w-6 text-green-600 dark:text-green-400" />
+            </div>
+            <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-3">
+              Call Support
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 text-center">
+              Call us at
+            </p>
+            <a href="tel:+919876543210" className="text-green-600 dark:text-green-400 font-semibold text-lg hover:underline mt-2">
+              +91 98765 *****
+            </a>
+          </div>
         </Card>
 
-        <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black text-center">
-          <Mail className="h-8 w-8 text-blue-600 dark:text-blue-400 mx-auto mb-3" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">
-            Email Support
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Write to us at{" "}
-            <span className="font-medium">support@nearserve.com</span>
-          </p>
-        </Card>
-
-        <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black text-center">
-          <MessageSquare className="h-8 w-8 text-amber-600 dark:text-amber-400 mx-auto mb-3" />
-          <h3 className="font-semibold text-gray-900 dark:text-white">
-            Live Chat
-          </h3>
-          <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-            Chat with our team 9AM – 6PM IST daily.
-          </p>
-          <Link href="#">
-            <button className="mt-3 bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 text-sm rounded-md transition-all duration-200">
-              Start Chat
-            </button>
-          </Link>
+        <Card className="p-8 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323] hover:shadow-lg transition-shadow">
+          <div className="flex flex-col items-center">
+            <div className="w-12 h-12 rounded-full bg-blue-50 dark:bg-blue-900/20 flex items-center justify-center mb-4">
+              <Mail className="h-6 w-6 text-blue-600 dark:text-blue-400" />
+            </div>
+            <h3 className="font-semibold text-gray-900 dark:text-white text-lg mb-3">
+              Email Support
+            </h3>
+            <p className="text-gray-600 dark:text-gray-400 text-center">
+              Write to us at
+            </p>
+            <a href="mailto:customerservice@example.com" className="text-blue-600 dark:text-blue-400 font-semibold text-sm hover:underline mt-2 break-all text-center">
+              customerservice@example.com
+            </a>
+          </div>
         </Card>
       </div>
 
       {/* Safety Section */}
-      <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-black">
+      <Card className="p-6 bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
         <div className="flex items-start gap-3">
           <Shield className="h-6 w-6 text-emerald-600 dark:text-emerald-400 mt-1" />
           <div>
             <h3 className="font-semibold text-gray-900 dark:text-white">
-              Safety and Trust Commitment
+              Worker Protection & Safety
             </h3>
             <p className="text-gray-600 dark:text-gray-400 text-sm mt-1">
-              NearServe prioritizes the safety of both customers and workers.
-              All profiles are verified, and your data is protected using
-              industry-standard security measures.
+              NearServe values worker dignity and safety. We verify all
+              customers, ensure secure payments, and provide direct support for
+              disputes or emergencies. Your data and work records remain fully
+              confidential.
             </p>
           </div>
         </div>
