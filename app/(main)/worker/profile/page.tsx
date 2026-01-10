@@ -664,7 +664,7 @@ export default function WorkerProfilePage() {
                             value={customSkill}
                             onChange={(e) => setCustomSkill(e.target.value)}
                             onKeyPress={(e) => e.key === 'Enter' && addCustomSkill()}
-                            className="bg-[#303030] dark:bg-[#303030]"
+                            className="bg-white dark:bg-[#303030]"
                           />
                           <Button
                             type="button"
@@ -832,7 +832,7 @@ export default function WorkerProfilePage() {
                             })
                           }
                           placeholder="Years of experience"
-                          className="bg-[#303030] dark:bg-[#303030]"
+                          className="bg-white dark:bg-[#303030]"
                         />
                       ) : (
                         <p className="text-gray-700 dark:text-gray-300">
@@ -1043,7 +1043,7 @@ export default function WorkerProfilePage() {
                                   placeholder="e.g., Kitchen Renovation"
                                   value={newWork.title}
                                   onChange={(e) => setNewWork({ ...newWork, title: e.target.value })}
-                                  className="bg-[#303030] dark:bg-[#303030] border-gray-200 dark:border-[#232323]"
+                                  className="bg-white dark:bg-[#303030] border border-gray-200 dark:border-[#232323]"
                                 />
                               </div>
 
@@ -1056,7 +1056,7 @@ export default function WorkerProfilePage() {
                                   placeholder="e.g., Andheri, Mumbai"
                                   value={newWork.location}
                                   onChange={(e) => setNewWork({ ...newWork, location: e.target.value })}
-                                  className="bg-[#303030] dark:bg-[#303030] border-gray-200 dark:border-[#232323]"
+                                  className="bg-white dark:bg-[#303030] border border-gray-200 dark:border-[#232323]"
                                 />
                               </div>
 
@@ -1084,7 +1084,7 @@ export default function WorkerProfilePage() {
                                   placeholder="Describe the work you did, challenges faced, materials used..."
                                   value={newWork.description}
                                   onChange={(e) => setNewWork({ ...newWork, description: e.target.value })}
-                                  className="bg-[#303030] dark:bg-[#303030] border-gray-200 dark:border-[#232323] min-h-24"
+                                  className="bg-white dark:bg-[#303030] border border-gray-200 dark:border-[#232323] min-h-24"
                                   rows={4}
                                 />
                               </div>
