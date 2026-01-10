@@ -15,10 +15,17 @@ export const AnimatedThemeToggler = ({
   duration = 400,
   ...props
 }: AnimatedThemeTogglerProps) => {
+  const [mounted, setMounted] = useState(false)
   const [isDark, setIsDark] = useState(false)
   const buttonRef = useRef<HTMLButtonElement>(null)
 
   useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  useEffect(() => {
+    if (!mounted || typeof document === 'undefined') return
+    
     const updateTheme = () => {
       setIsDark(document.documentElement.classList.contains("dark"))
     }
@@ -32,10 +39,10 @@ export const AnimatedThemeToggler = ({
     })
 
     return () => observer.disconnect()
-  }, [])
+  }, [mounted])
 
   const toggleTheme = useCallback(async () => {
-    if (!buttonRef.current) return
+    if (!mounted || !buttonRef.current || typeof document === 'undefined' || typeof window === 'undefined') return
 
     await document.startViewTransition(() => {
       flushSync(() => {
@@ -68,7 +75,7 @@ export const AnimatedThemeToggler = ({
         pseudoElement: "::view-transition-new(root)",
       }
     )
-  }, [isDark, duration])
+  }, [isDark, duration, mounted])
 
   return (
     <button

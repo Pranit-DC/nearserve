@@ -22,8 +22,18 @@ export async function POST(req: NextRequest) {
 
     const firebaseUid = decodedToken.uid;
 
-    // Use firebaseUid directly (notifications are stored with firebaseUid now)
-    const result = await markAllNotificationsAsRead(firebaseUid);
+    // Look up the database user document ID from Firebase UID
+    const usersRef = adminDb.collection(COLLECTIONS.USERS);
+    const userQuery = await usersRef.where('firebaseUid', '==', firebaseUid).limit(1).get();
+    
+    if (userQuery.empty) {
+      return NextResponse.json({ error: 'User not found' }, { status: 404 });
+    }
+    
+    const userId = userQuery.docs[0].id;
+
+    // Use database user document ID (notifications are stored with userProfile.id)
+    const result = await markAllNotificationsAsRead(userId);
 
     if (result.success) {
       return NextResponse.json({ success: true, count: result.count });

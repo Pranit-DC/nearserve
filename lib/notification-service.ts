@@ -12,7 +12,7 @@ export type NotificationType =
   | 'REVIEW_RECEIVED';
 
 export interface NotificationData {
-  userId: string; // This should be the firebaseUid from Firebase Auth
+  userId: string; // This should be the database user document ID (same as userProfile.id)
   type: NotificationType;
   title: string;
   message: string;
@@ -25,6 +25,7 @@ export interface NotificationData {
 /**
  * Create a notification in Firestore
  * This notification will be displayed in the in-app notification center
+ * NOTE: userId should be the database document ID (userProfile.id), not Firebase UID
  */
 export async function createNotification(data: NotificationData) {
   try {
@@ -49,6 +50,7 @@ export async function createNotification(data: NotificationData) {
 
 /**
  * Create a notification for worker when they get booked
+ * workerId is the database document ID
  */
 export async function notifyWorkerJobCreated(workerId: string, jobData: {
   customerName: string;
@@ -57,17 +59,9 @@ export async function notifyWorkerJobCreated(workerId: string, jobData: {
   time: string;
   jobId: string;
 }) {
-  // Get firebaseUid from user document
-  const userDoc = await adminDb.collection(COLLECTIONS.USERS).doc(workerId).get();
-  const firebaseUid = userDoc.data()?.firebaseUid;
-  
-  if (!firebaseUid) {
-    console.error(`[Notification] No firebaseUid found for worker ${workerId}`);
-    return { success: false, error: 'User not found' };
-  }
-  
+  // Use workerId directly as it's already the database document ID
   return createNotification({
-    userId: firebaseUid,
+    userId: workerId,
     type: 'JOB_CREATED',
     title: '🎉 New Job Request!',
     message: `${jobData.customerName} booked you for "${jobData.serviceName}" on ${jobData.date} at ${jobData.time}`,
@@ -79,6 +73,7 @@ export async function notifyWorkerJobCreated(workerId: string, jobData: {
 
 /**
  * Create a notification for customer when worker accepts job
+ * customerId is the database document ID
  */
 export async function notifyCustomerJobAcceptedInApp(customerId: string, jobData: {
   workerName: string;
@@ -86,17 +81,9 @@ export async function notifyCustomerJobAcceptedInApp(customerId: string, jobData
   date: string;
   jobId: string;
 }) {
-  // Get firebaseUid from user document
-  const userDoc = await adminDb.collection(COLLECTIONS.USERS).doc(customerId).get();
-  const firebaseUid = userDoc.data()?.firebaseUid;
-  
-  if (!firebaseUid) {
-    console.error(`[Notification] No firebaseUid found for customer ${customerId}`);
-    return { success: false, error: 'User not found' };
-  }
-  
+  // Use customerId directly as it's already the database document ID
   return createNotification({
-    userId: firebaseUid,
+    userId: customerId,
     type: 'JOB_ACCEPTED',
     title: '✅ Job Accepted!',
     message: `${jobData.workerName} accepted your booking for "${jobData.serviceName}"`,
@@ -108,23 +95,16 @@ export async function notifyCustomerJobAcceptedInApp(customerId: string, jobData
 
 /**
  * Create a notification for customer when worker starts job
+ * customerId is the database document ID
  */
 export async function notifyCustomerJobStarted(customerId: string, jobData: {
   workerName: string;
   serviceName: string;
   jobId: string;
 }) {
-  // Get firebaseUid from user document
-  const userDoc = await adminDb.collection(COLLECTIONS.USERS).doc(customerId).get();
-  const firebaseUid = userDoc.data()?.firebaseUid;
-  
-  if (!firebaseUid) {
-    console.error(`[Notification] No firebaseUid found for customer ${customerId}`);
-    return { success: false, error: 'User not found' };
-  }
-  
+  // Use customerId directly as it's already the database document ID
   return createNotification({
-    userId: firebaseUid,
+    userId: customerId,
     type: 'JOB_STARTED',
     title: '🚀 Work Started!',
     message: `${jobData.workerName} has started working on "${jobData.serviceName}"`,
@@ -136,23 +116,16 @@ export async function notifyCustomerJobStarted(customerId: string, jobData: {
 
 /**
  * Create a notification for customer when worker completes job
+ * customerId is the database document ID
  */
 export async function notifyCustomerJobCompleted(customerId: string, jobData: {
   workerName: string;
   serviceName: string;
   jobId: string;
 }) {
-  // Get firebaseUid from user document
-  const userDoc = await adminDb.collection(COLLECTIONS.USERS).doc(customerId).get();
-  const firebaseUid = userDoc.data()?.firebaseUid;
-  
-  if (!firebaseUid) {
-    console.error(`[Notification] No firebaseUid found for customer ${customerId}`);
-    return { success: false, error: 'User not found' };
-  }
-  
+  // Use customerId directly as it's already the database document ID
   return createNotification({
-    userId: firebaseUid,
+    userId: customerId,
     type: 'JOB_COMPLETED',
     title: '✨ Job Completed!',
     message: `${jobData.workerName} has completed "${jobData.serviceName}". Please make payment.`,
@@ -164,6 +137,7 @@ export async function notifyCustomerJobCompleted(customerId: string, jobData: {
 
 /**
  * Create a notification for worker when they receive payment
+ * workerId is the database document ID
  */
 export async function notifyWorkerPaymentReceived(workerId: string, jobData: {
   customerName: string;
@@ -171,23 +145,37 @@ export async function notifyWorkerPaymentReceived(workerId: string, jobData: {
   serviceName: string;
   jobId: string;
 }) {
-  // Get firebaseUid from user document
-  const userDoc = await adminDb.collection(COLLECTIONS.USERS).doc(workerId).get();
-  const firebaseUid = userDoc.data()?.firebaseUid;
-  
-  if (!firebaseUid) {
-    console.error(`[Notification] No firebaseUid found for worker ${workerId}`);
-    return { success: false, error: 'User not found' };
-  }
-  
+  // Use workerId directly as it's already the database document ID
   return createNotification({
-    userId: firebaseUid,
+    userId: workerId,
     type: 'PAYMENT_RECEIVED',
     title: '💰 Payment Received!',
     message: `Received ₹${jobData.amount} from ${jobData.customerName} for "${jobData.serviceName}"`,
     actionUrl: `/worker/earnings`,
     jobId: jobData.jobId,
     metadata: jobData,
+  });
+}
+
+/**
+ * Create a notification for worker when they receive a review
+ * workerId is the database document ID
+ */
+export async function notifyWorkerReviewReceived(workerId: string, reviewData: {
+  customerName: string;
+  rating: number;
+  comment?: string | null;
+  jobId: string;
+}) {
+  // Use workerId directly as it's already the database document ID
+  return createNotification({
+    userId: workerId,
+    type: 'REVIEW_RECEIVED',
+    title: '⭐ New Review!',
+    message: `${reviewData.customerName} gave you ${reviewData.rating} stars${reviewData.comment ? `: "${reviewData.comment.substring(0, 50)}${reviewData.comment.length > 50 ? '...' : ''}"` : ''}`,
+    actionUrl: `/worker/profile`,
+    jobId: reviewData.jobId,
+    metadata: reviewData,
   });
 }
 

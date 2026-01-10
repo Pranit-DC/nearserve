@@ -1,10 +1,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
-import { COLLECTIONS, Job, JobLog, WorkerProfile } from "@/lib/firestore";
+import { COLLECTIONS, Job, JobLog } from "@/lib/firestore";
 import { protectCustomerApi } from "@/lib/api-auth";
 import { calculateFees } from "@/lib/razorpay-service";
 import { FieldValue } from "firebase-admin/firestore";
-import { notifyWorkerBooked } from "@/lib/sendNotification";import { notifyWorkerJobCreated } from '@/lib/notification-service';
+import { notifyWorkerJobCreated } from '@/lib/notification-service';
+import { sendPushNotification } from '@/lib/push-notification';
 export async function POST(req: NextRequest) {
   try {
     const { user, response } = await protectCustomerApi(req);
@@ -111,46 +112,31 @@ export async function POST(req: NextRequest) {
 
     // Send push notification to worker
     try {
-      console.log(`[NOTIFICATION] Attempting to send notification to worker ${workerId}`);
+      console.log(`[NOTIFICATION] Sending notification to worker ${workerId}`);
       
-      const workerProfileRef = adminDb.collection(COLLECTIONS.WORKER_PROFILES);
-      const workerProfileQuery = await workerProfileRef.where('userId', '==', workerId).limit(1).get();
+      // Create in-app notification
+      await notifyWorkerJobCreated(workerId, {
+        customerName: customer.name,
+        serviceName: description,
+        date: date.toLocaleDateString(),
+        time: time.toLocaleTimeString(),
+        jobId: jobId,
+      });
+      console.log(`[Notification] ✅ In-app notification created for worker ${workerId}`);
       
-      if (!workerProfileQuery.empty) {
-        const workerProfile = workerProfileQuery.docs[0].data() as WorkerProfile;
-        console.log(`[NOTIFICATION] Found worker profile, has FCM token: ${!!workerProfile.fcmToken}`);
-        
-        if (workerProfile.fcmToken) {
-          console.log('[NOTIFICATION] Sending booking notification...');
-          const result = await notifyWorkerBooked(workerProfile.fcmToken, {
-            customerName: customer.name,
-            serviceName: description,
-            date: date.toLocaleDateString(),
-            time: time.toLocaleTimeString(),
-            location: location,
-          });
-          console.log(`[NOTIFICATION] Result:`, result);
-          
-          if (result.success) {
-            console.log(`✅ Notification sent to worker ${workerId}`);
-          } else {
-            console.error(`❌ Failed to send notification:`, result.error);
-          }
-          
-          // Create in-app notification
-          await notifyWorkerJobCreated(workerId, {
-            customerName: customer.name,
-            serviceName: description,
-            date: date.toLocaleDateString(),
-            time: time.toLocaleTimeString(),
-            jobId: jobId,
-          });
-          console.log(`[Notification] Created in-app notification for worker ${workerId}`);
-        } else {
-          console.log(`[NOTIFICATION] Worker ${workerId} has not enabled notifications`);
-        }
+      // Send push notification
+      const pushResult = await sendPushNotification({
+        userId: workerId,
+        title: '🔔 New Job Available',
+        message: `${customer.name || 'A customer'} wants to book ${description}`,
+        type: 'JOB_CREATED',
+        actionUrl: `/worker/dashboard`,
+      });
+      
+      if (pushResult.pushSent) {
+        console.log(`[Push] ✅ Push notification sent to worker ${workerId}`);
       } else {
-        console.log(`[NOTIFICATION] No worker profile found for userId: ${workerId}`);
+        console.log(`[Push] ℹ️ Worker ${workerId} has no FCM token or push failed`);
       }
     } catch (notifError) {
       // Don't fail the job creation if notification fails

@@ -90,7 +90,7 @@ export function Header() {
             <img
               src="/logo.svg"
               alt="NearServe Logo"
-              className="w-8 h-8 object-contain hover:scale-105 transition-transform duration-200 filter brightness-0 dark:brightness-100 dark:invert"
+              className="w-6 h-6 object-contain hover:scale-105 transition-transform duration-200 filter brightness-0 dark:brightness-100 dark:invert"
             />
             <span className="font-semibold text-black dark:text-white tracking-tight">
               NearServe

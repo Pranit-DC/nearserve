@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebase-admin';
 import { COLLECTIONS } from '@/lib/firestore';
 import { protectWorkerApi } from '@/lib/api-auth';
+import { FieldValue } from 'firebase-admin/firestore';
 
 export async function POST(req: NextRequest) {
   try {
@@ -33,11 +34,23 @@ export async function POST(req: NextRequest) {
 
     const workerProfileDoc = workerProfileQuery.docs[0];
     
-    // Update FCM token
+    // Update FCM token in worker profile
     await workerProfileDoc.ref.update({
       fcmToken,
-      updatedAt: new Date(),
+      updatedAt: FieldValue.serverTimestamp(),
     });
+
+    // Also update FCM token in users collection for consistency
+    try {
+      const userRef = adminDb.collection(COLLECTIONS.USERS).doc(user.id);
+      await userRef.set({
+        fcmToken,
+        fcmTokenUpdatedAt: FieldValue.serverTimestamp(),
+        notificationsEnabled: true,
+      }, { merge: true });
+    } catch (e) {
+      console.warn('[FCM] Failed to update users collection, continuing...');
+    }
 
     return NextResponse.json({
       success: true,
