@@ -405,7 +405,7 @@ export default function PreviewPage() {
                               </span>
                             </div>
                             <div className="flex items-center justify-center md:justify-start text-gray-600 dark:text-gray-400">
-                              <Briefcase className="h-4 w-4 mr-2 text-purple-600" />
+                              <Briefcase className="h-4 w-4 mr-2 text-blue-700" />
                               <span className="text-sm">
                                 {workerDetails.yearsExperience} years experience
                               </span>
@@ -453,7 +453,7 @@ export default function PreviewPage() {
                             transition={{ delay: 0.8 }}
                           >
                             <h3 className="text-base md:text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center justify-center md:justify-start gap-2">
-                              <User className="h-5 w-5 text-purple-600" />
+                              <User className="h-5 w-5 text-blue-700" />
                               About
                             </h3>
                             <p className="text-gray-600 dark:text-gray-400 leading-relaxed text-sm md:text-base">
@@ -474,7 +474,7 @@ export default function PreviewPage() {
                               <Clock className="h-3 w-3" />
                               Hourly Rate
                             </h4>
-                            <p className="text-xl md:text-2xl font-bold text-gray-300">
+                            <p className="text-xl md:text-2xl font-bold text-blue-700 dark:text-gray-300">
                               ₹{workerDetails.hourlyRate}
                               <span className="text-sm font-normal text-gray-400">
                                 /hr
@@ -589,7 +589,7 @@ export default function PreviewPage() {
                     <CardContent className="p-6 md:p-10">
                       <h3 className="text-xl md:text-2xl font-bold text-gray-900 dark:text-white mb-6 flex items-center gap-3">
                         <div className="p-2 bg-purple-100 dark:bg-purple-900/30 rounded-lg">
-                          <MapPin className="h-5 w-5 md:h-6 md:w-6 text-purple-600 dark:text-purple-400" />
+                          <MapPin className="h-5 w-5 md:h-6 md:w-6 text-blue-700 dark:text-blue-400" />
                         </div>
                         Service Areas
                       </h3>
@@ -732,7 +732,7 @@ export default function PreviewPage() {
               transition={{ delay: 1.1 }}
               className="mt-4 text-sm text-gray-500 dark:text-gray-400"
             >
-              🎉 You&apos;re one click away from joining our community!
+              You&apos;re one click away from joining our community!
             </motion.p>
           </motion.div>
         </div>

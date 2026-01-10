@@ -60,7 +60,7 @@ export default function OnboardingPage() {
   const [hoveredCard, setHoveredCard] = useState<string | null>(null);
 
   return (
-    <div className="space-y-8 pb-8 bg-[#212121] min-h-screen">
+    <div className="space-y-8 pb-8 bg-gray-50 dark:bg-[#212121] min-h-screen">
       {/* Hero Section with Text Effects */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
@@ -68,9 +68,9 @@ export default function OnboardingPage() {
         transition={{ duration: 0.8 }}
         className="text-center space-y-4 max-w-4xl mx-auto"
       >
-        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-[#303030] dark:bg-[#303030] border border-[#2c2c2c] backdrop-blur-sm">
-          <Sparkles className="h-4 w-4 text-gray-400" />
-          <span className="text-sm font-medium text-gray-300">
+        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50 dark:bg-[#303030] border border-blue-200 dark:border-[#2c2c2c] backdrop-blur-sm">
+          <Sparkles className="h-4 w-4 text-blue-600 dark:text-gray-400" />
+          <span className="text-sm font-medium text-blue-700 dark:text-gray-300">
             Welcome to your journey
           </span>
         </div>
@@ -94,21 +94,21 @@ export default function OnboardingPage() {
           onHoverEnd={() => setHoveredCard(null)}
         >
           <Card
-            className="h-full border-2 border-[#2c2c2c] bg-[#181818] cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-black/40 hover:border-[#3a3a3a] group backdrop-blur-sm hover:scale-[1.02]"
+            className="h-full border-2 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#181818] cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-gray-900/10 dark:hover:shadow-black/40 hover:border-blue-300 dark:hover:border-[#3a3a3a] group backdrop-blur-sm hover:scale-[1.02]"
             onClick={() => router.push("/onboarding/customer-details")}
           >
             <CardContent className="p-8 md:p-10">
               {/* Header */}
               <div className="flex items-start justify-between mb-8">
                 <div className="flex items-start space-x-4 flex-1">
-                  <div className="p-4 bg-[#303030] rounded-2xl group-hover:scale-110 transition-transform duration-300 border border-[#2c2c2c] shadow-lg shadow-black/20">
-                    <User className="h-7 w-7 text-gray-300" />
+                  <div className="p-4 bg-blue-50 dark:bg-[#303030] rounded-2xl group-hover:scale-110 transition-transform duration-300 border border-blue-200 dark:border-[#2c2c2c] shadow-lg shadow-gray-900/5 dark:shadow-black/20">
+                    <User className="h-7 w-7 text-blue-600 dark:text-gray-300" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-2xl font-semibold text-white mb-2 tracking-tight">
+                    <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-white mb-2 tracking-tight">
                       Join as a Customer
                     </CardTitle>
-                    <CardDescription className="text-base text-gray-300 font-medium">
+                    <CardDescription className="text-base text-gray-600 dark:text-gray-300 font-medium">
                       Find and hire skilled professionals
                     </CardDescription>
                   </div>
@@ -133,9 +133,9 @@ export default function OnboardingPage() {
                     className="flex items-start space-x-3 group/item"
                   >
                     <div className="mt-0.5">
-                      <CheckCircle className="h-5 w-5 text-gray-300 flex-shrink-0 group-hover/item:scale-110 transition-transform" />
+                      <CheckCircle className="h-5 w-5 text-blue-600 dark:text-gray-300 flex-shrink-0 group-hover/item:scale-110 transition-transform" />
                     </div>
-                    <span className="text-sm leading-relaxed text-gray-200 font-medium">
+                    <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-200 font-medium">
                       {feature}
                     </span>
                   </motion.div>
@@ -144,7 +144,7 @@ export default function OnboardingPage() {
 
               {/* CTA Button */}
               <Button
-                className="w-full bg-[#303030] hover:bg-[#3a3a3a] text-white transition-all duration-300 group-hover:scale-[1.02] shadow-lg shadow-black/30 h-12 text-base font-semibold rounded-xl"
+                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-[#303030] dark:hover:bg-[#3a3a3a] text-white transition-all duration-300 group-hover:scale-[1.02] shadow-lg shadow-blue-500/30 dark:shadow-black/30 h-12 text-base font-semibold rounded-xl"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push("/onboarding/customer-details");
@@ -166,21 +166,21 @@ export default function OnboardingPage() {
           onHoverEnd={() => setHoveredCard(null)}
         >
           <Card
-            className="h-full border-2 border-[#2c2c2c] bg-[#181818] cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-black/40 hover:border-[#3a3a3a] group backdrop-blur-sm hover:scale-[1.02]"
+            className="h-full border-2 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#181818] cursor-pointer transition-all duration-500 hover:shadow-2xl hover:shadow-gray-900/10 dark:hover:shadow-black/40 hover:border-blue-300 dark:hover:border-[#3a3a3a] group backdrop-blur-sm hover:scale-[1.02]"
             onClick={() => router.push("/onboarding/worker-details")}
           >
             <CardContent className="p-8 md:p-10">
               {/* Header */}
               <div className="flex items-start justify-between mb-8">
                 <div className="flex items-start space-x-4 flex-1">
-                  <div className="p-4 bg-[#303030] rounded-2xl group-hover:scale-110 transition-transform duration-300 border border-[#2c2c2c] shadow-lg shadow-black/20">
-                    <Wrench className="h-7 w-7 text-gray-300" />
+                  <div className="p-4 bg-blue-50 dark:bg-[#303030] rounded-2xl group-hover:scale-110 transition-transform duration-300 border border-blue-200 dark:border-[#2c2c2c] shadow-lg shadow-gray-900/5 dark:shadow-black/20">
+                    <Wrench className="h-7 w-7 text-blue-600 dark:text-gray-300" />
                   </div>
                   <div className="flex-1">
-                    <CardTitle className="text-2xl font-semibold text-white mb-2 tracking-tight">
+                    <CardTitle className="text-2xl font-semibold text-gray-900 dark:text-white mb-2 tracking-tight">
                       Join as a Worker
                     </CardTitle>
-                    <CardDescription className="text-base text-gray-300 font-medium">
+                    <CardDescription className="text-base text-gray-600 dark:text-gray-300 font-medium">
                       Offer your services
                     </CardDescription>
                   </div>
@@ -205,9 +205,9 @@ export default function OnboardingPage() {
                     className="flex items-start space-x-3 group/item"
                   >
                     <div className="mt-0.5">
-                      <CheckCircle className="h-5 w-5 text-gray-300 flex-shrink-0 group-hover/item:scale-110 transition-transform" />
+                      <CheckCircle className="h-5 w-5 text-blue-600 dark:text-gray-300 flex-shrink-0 group-hover/item:scale-110 transition-transform" />
                     </div>
-                    <span className="text-sm leading-relaxed text-gray-200 font-medium">
+                    <span className="text-sm leading-relaxed text-gray-700 dark:text-gray-200 font-medium">
                       {feature}
                     </span>
                   </motion.div>
@@ -216,7 +216,7 @@ export default function OnboardingPage() {
 
               {/* CTA Button */}
               <Button
-                className="w-full bg-[#303030] hover:bg-[#3a3a3a] text-white transition-all duration-300 group-hover:scale-[1.02] shadow-lg shadow-black/30 h-12 text-base font-semibold rounded-xl"
+                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-[#303030] dark:hover:bg-[#3a3a3a] text-white transition-all duration-300 group-hover:scale-[1.02] shadow-lg shadow-blue-500/30 dark:shadow-black/30 h-12 text-base font-semibold rounded-xl"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push("/onboarding/worker-details");
@@ -232,11 +232,11 @@ export default function OnboardingPage() {
 
       {/* Divider */}
       <div className="max-w-4xl mx-auto">
-        <div className="h-px bg-[#303030]"></div>
+        <div className="h-px bg-gray-200 dark:bg-[#303030]"></div>
       </div>
 
       {/* Stats Section - Redesigned with Apple-style cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
+      {/* <div className="grid grid-cols-1 md:grid-cols-3 gap-4 max-w-4xl mx-auto">
         {stats.map((stat, index) => (
           <motion.div
             key={stat.label}
@@ -244,20 +244,24 @@ export default function OnboardingPage() {
             animate={{ opacity: 1, scale: 1 }}
             transition={{ duration: 0.5, delay: 0.8 + index * 0.1 }}
           >
-            <Card className="text-center border-[#2c2c2c] bg-[#181818] backdrop-blur-sm hover:shadow-lg transition-all duration-300">
+            <Card className="text-center border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#181818] backdrop-blur-sm hover:shadow-lg transition-all duration-300">
               <CardContent className="p-6">
                 <div className="flex items-center justify-center mb-3">
-                  <div className="p-3 bg-[#303030] rounded-2xl">
-                    <stat.icon className="h-6 w-6 text-gray-300" />
+                  <div className="p-3 bg-blue-50 dark:bg-[#303030] rounded-2xl">
+                    <stat.icon className="h-6 w-6 text-blue-600 dark:text-gray-300" />
                   </div>
                 </div>
-                <div className="text-3xl font-semibold text-white mb-1">{stat.value}</div>
-                <div className="text-sm font-medium text-gray-300">{stat.label}</div>
+                <div className="text-3xl font-semibold text-gray-900 dark:text-white mb-1">
+                  {stat.value}
+                </div>
+                <div className="text-sm font-medium text-gray-600 dark:text-gray-300">
+                  {stat.label}
+                </div>
               </CardContent>
             </Card>
           </motion.div>
         ))}
-      </div>
+      </div> */}
 
       {/* Trust Indicators - Redesigned */}
       <motion.div
@@ -266,19 +270,19 @@ export default function OnboardingPage() {
         transition={{ duration: 0.6, delay: 1.2 }}
         className="text-center max-w-2xl mx-auto"
       >
-        <div className="flex items-center justify-center gap-6 text-sm text-gray-300 flex-wrap">
+        <div className="flex items-center justify-center gap-6 text-sm text-gray-600 dark:text-gray-300 flex-wrap">
           <div className="flex items-center gap-2">
-            <Shield className="h-4 w-4 text-gray-300" />
+            <Shield className="h-4 w-4 text-blue-600 dark:text-gray-300" />
             <span className="font-medium">Secure platform</span>
           </div>
-          <div className="w-1 h-1 rounded-full bg-[#303030]"></div>
+          <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#303030]"></div>
           <div className="flex items-center gap-2">
-            <CheckCircle className="h-4 w-4 text-gray-300" />
+            <CheckCircle className="h-4 w-4 text-blue-600 dark:text-gray-300" />
             <span className="font-medium">Verified profiles</span>
           </div>
-          <div className="w-1 h-1 rounded-full bg-[#303030]"></div>
+          <div className="w-1 h-1 rounded-full bg-gray-300 dark:bg-[#303030]"></div>
           <div className="flex items-center gap-2">
-            <Sparkles className="h-4 w-4 text-gray-300" />
+            <Sparkles className="h-4 w-4 text-blue-600 dark:text-gray-300" />
             <span className="font-medium">Protected payments</span>
           </div>
         </div>

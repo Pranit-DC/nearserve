@@ -23,9 +23,13 @@ import {
   FiCheckCircle,
   FiAlertCircle,
   FiBriefcase,
+  FiStar,
 } from "react-icons/fi";
 import { getCurrentUser } from "@/app/api/actions/onboarding";
 import ClickSpark from "@/components/ClickSpark";
+import { ReviewDialog } from "@/components/review-dialog";
+import { useAutoRefresh } from "@/hooks/use-auto-refresh";
+import { toast } from "sonner";
 
 type CustomerProfile = {
   id: string;
@@ -80,6 +84,9 @@ export default function CustomerProfilePage() {
   const [fetchingLocation, setFetchingLocation] = useState(false);
   const [bookings, setBookings] = useState<Job[]>([]);
   const [bookingsLoading, setBookingsLoading] = useState(false);
+  const [reviewOpen, setReviewOpen] = useState(false);
+  const [reviewJobId, setReviewJobId] = useState<string | null>(null);
+  const [reviewedJobs, setReviewedJobs] = useState<Set<string>>(new Set());
 
   const handleGetCurrentLocation = async () => {
     setFetchingLocation(true);
@@ -178,6 +185,7 @@ export default function CustomerProfilePage() {
   };
 
   const loadBookings = async () => {
+    if (bookingsLoading) return; // Prevent concurrent loads
     setBookingsLoading(true);
     try {
       const res = await fetch("/api/customer/jobs", { cache: "no-store" });
@@ -191,6 +199,28 @@ export default function CustomerProfilePage() {
       setBookingsLoading(false);
     }
   };
+
+  // Auto-refresh bookings every 30 seconds when on bookings tab
+  useAutoRefresh(() => loadBookings(), {
+    interval: 30000,
+    enabled: activeTab === "bookings" && bookings.length > 0,
+  });
+
+  const openReview = (jobId: string) => {
+    setReviewJobId(jobId);
+    setReviewOpen(true);
+  };
+
+  // Display bookings with local review state
+  const displayBookings = bookings.map((booking) => {
+    if (reviewedJobs.has(booking.id)) {
+      return {
+        ...booking,
+        review: { id: "pending", rating: 5, comment: null },
+      };
+    }
+    return booking;
+  });
 
   const handleSave = async () => {
     setSaving(true);
@@ -358,9 +388,9 @@ export default function CustomerProfilePage() {
                 {/* Profile Picture */}
                 <div className="relative inline-block mb-4">
                   <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden flex items-center justify-center border-2 sm:border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-[#171717]">
-                    {user?.imageUrl ? (
+                    {data?.imageUrl ? (
                       <Image
-                        src={user.imageUrl}
+                        src={data.imageUrl}
                         alt={data.name}
                         width={128}
                         height={128}
@@ -421,16 +451,17 @@ export default function CustomerProfilePage() {
                     </span>
                   </div>
 
-                {data.phone && !String(data.phone).startsWith("no-phone-") && (
-                  <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                    <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
-                      <FiPhone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
-                    </div>
-                      <span className="text-gray-700 dark:text-gray-300">
-                        {data.phone}
-                      </span>
-                    </div>
-                  )}
+                  {data.phone &&
+                    !String(data.phone).startsWith("no-phone-") && (
+                      <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
+                        <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          <FiPhone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
+                        </div>
+                        <span className="text-gray-700 dark:text-gray-300">
+                          {data.phone}
+                        </span>
+                      </div>
+                    )}
 
                   <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
                     <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
@@ -525,16 +556,17 @@ export default function CustomerProfilePage() {
                           </p>
                         </div>
                       </div>
-                      {data.phone && !String(data.phone).startsWith("no-phone-") && (
-                        <div>
-                          <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Phone Number
-                          </label>
-                          <p className="text-sm sm:text-base text-gray-900 dark:text-white font-medium">
-                            {data.phone}
-                          </p>
-                        </div>
-                      )}
+                      {data.phone &&
+                        !String(data.phone).startsWith("no-phone-") && (
+                          <div>
+                            <label className="block text-xs sm:text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                              Phone Number
+                            </label>
+                            <p className="text-sm sm:text-base text-gray-900 dark:text-white font-medium">
+                              {data.phone}
+                            </p>
+                          </div>
+                        )}
                     </div>
                   </Card>
 
@@ -765,7 +797,7 @@ export default function CustomerProfilePage() {
                   ) : (
                     // Booking Cards
                     <div className="space-y-4">
-                      {bookings.map((booking) => (
+                      {displayBookings.map((booking) => (
                         <Card
                           key={booking.id}
                           className="p-4 sm:p-6 bg-white dark:bg-gray-800 border-gray-200 dark:border-gray-700 hover:shadow-lg transition-shadow"
@@ -804,6 +836,34 @@ export default function CustomerProfilePage() {
                                   )}
                                 </div>
                               </div>
+
+                              {/* Review Display */}
+                              {booking.status === "COMPLETED" &&
+                                booking.review && (
+                                  <div className="mb-3 p-2 sm:p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg">
+                                    <div className="flex items-center gap-2 mb-1">
+                                      {Array.from({ length: 5 }).map((_, i) => (
+                                        <FiStar
+                                          key={i}
+                                          className={`h-3 w-3 sm:h-4 sm:w-4 ${
+                                            i < booking.review!.rating
+                                              ? "fill-yellow-400 text-yellow-400"
+                                              : "text-gray-300 dark:text-gray-600"
+                                          }`}
+                                        />
+                                      ))}
+                                      <span className="text-xs sm:text-sm font-semibold text-gray-900 dark:text-white">
+                                        {booking.review.rating}/5
+                                      </span>
+                                    </div>
+                                    {booking.review.comment && (
+                                      <p className="text-xs sm:text-sm text-gray-700 dark:text-gray-300 italic line-clamp-2">
+                                        &quot;{booking.review.comment}&quot;
+                                      </p>
+                                    )}
+                                  </div>
+                                )}
+
                               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                                 <div className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
                                   Booked on{" "}
@@ -822,14 +882,17 @@ export default function CustomerProfilePage() {
                                   >
                                     View Details
                                   </Button>
-                                  {booking.status === "COMPLETED" && (
-                                    <Button
-                                      size="sm"
-                                      className="bg-blue-600 hover:bg-blue-700 text-xs sm:text-sm"
-                                    >
-                                      Leave Review
-                                    </Button>
-                                  )}
+                                  {booking.status === "COMPLETED" &&
+                                    !booking.review && (
+                                      <Button
+                                        size="sm"
+                                        onClick={() => openReview(booking.id)}
+                                        className="bg-emerald-600 hover:bg-emerald-700 text-xs sm:text-sm"
+                                      >
+                                        <FiStar className="mr-1 h-3 w-3 sm:h-4 sm:w-4" />
+                                        Leave Review
+                                      </Button>
+                                    )}
                                 </div>
                               </div>
                             </div>
@@ -844,6 +907,24 @@ export default function CustomerProfilePage() {
           </div>
         </div>
       </div>
+
+      {/* Review Dialog */}
+      <ReviewDialog
+        open={reviewOpen}
+        onOpenChange={setReviewOpen}
+        jobId={reviewJobId}
+        onSubmitted={() => {
+          // Immediately mark job as reviewed in local state
+          if (reviewJobId) {
+            setReviewedJobs((prev) => new Set(prev).add(reviewJobId));
+          }
+          toast.success("Review submitted successfully!");
+          setReviewOpen(false);
+          setReviewJobId(null);
+          // Refresh bookings to get updated data from server
+          loadBookings();
+        }}
+      />
     </main>
   );
 }

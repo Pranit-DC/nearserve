@@ -4,6 +4,7 @@ import { Button } from "@/components/ui/button";
 import BookWorkerButton from "@/components/book-worker-button";
 import { adminDb, COLLECTIONS } from "@/lib/firebase-admin";
 import { serializeFirestoreData } from "@/lib/firestore-serialization";
+import { CustomerDashboardStats } from "@/components/customer-dashboard-stats";
 import {
   Wrench,
   Plug,
@@ -15,9 +16,6 @@ import {
   Car,
   ArrowRight,
   MapPin,
-  Star,
-  Clock,
-  CheckCircle,
 } from "lucide-react";
 
 const categories = [
@@ -79,7 +77,6 @@ const categories = [
   },
 ];
 
-
 import DashboardBgEffect from "@/components/DashboardBgEffect";
 
 export default async function CustomerDashboardPage() {
@@ -134,58 +131,8 @@ export default async function CustomerDashboardPage() {
           </Link>
         </div>
 
-        {/* Quick Stats and Usage Tracker */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Active Bookings
-                </p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  2
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Clock className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Completed Jobs
-                </p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  8
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Star className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Avg Rating Given
-                </p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  4.8
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Usage Tracker removed */}
-        </div>
+        {/* Quick Stats - Real Data */}
+        <CustomerDashboardStats />
       </div>
 
       {/* Categories Section */}
@@ -272,7 +219,8 @@ export default async function CustomerDashboardPage() {
                       {worker.name ?? "Professional"}
                     </h3>
                     <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      {worker.workerProfile?.qualification || "Skilled Professional"}
+                      {worker.workerProfile?.qualification ||
+                        "Skilled Professional"}
                     </p>
                     <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-2">
                       <MapPin className="h-4 w-4 mr-1" />
@@ -310,4 +258,3 @@ export default async function CustomerDashboardPage() {
     </div>
   );
 }
-
