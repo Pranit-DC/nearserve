@@ -111,7 +111,7 @@ export default function WorkerHelpPage() {
               Call us at
             </p>
             <a href="tel:+919876543210" className="text-green-600 dark:text-green-400 font-semibold text-lg hover:underline mt-2">
-              +91 98765 43210
+              +91 98765 *****
             </a>
           </div>
         </Card>
@@ -127,8 +127,8 @@ export default function WorkerHelpPage() {
             <p className="text-gray-600 dark:text-gray-400 text-center">
               Write to us at
             </p>
-            <a href="mailto:workersupport@nearserve.com" className="text-blue-600 dark:text-blue-400 font-semibold text-sm hover:underline mt-2 break-all text-center">
-              workersupport@nearserve.com
+            <a href="mailto:customerservice@example.com" className="text-blue-600 dark:text-blue-400 font-semibold text-sm hover:underline mt-2 break-all text-center">
+              customerservice@example.com
             </a>
           </div>
         </Card>
