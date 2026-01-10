@@ -53,8 +53,9 @@ export function NotificationDebug() {
         const app = (await import('@/lib/firebase-client')).default;
         
         const messaging = getMessaging(app);
+        const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'BDPvgu8CPLAajELN-5fNOXh2knClUn_qqCFmVJayfnVUM81y8pEyrFt7UMvZYtbX1etUUzf6ZPx4Uvd0fo9DxoU';
         const token = await getToken(messaging, {
-          vapidKey: 'BAL5WnQvwQkt-h9UKBl3EhSWPwhnC_8Mo92_jPwozpkiN7WyaPKJl7h2-Qv-e2hNqKCBDgkNFUU_WZiv_0s-aGg',
+          vapidKey: vapidKey,
           serviceWorkerRegistration: registration,
         });
         

@@ -18,8 +18,7 @@ import app from './firebase-client';
 import { db } from './firebase-client';
 
 // VAPID key for web push (get from Firebase Console → Project Settings → Cloud Messaging)
-// Replace with your actual VAPID key
-const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'YOUR_VAPID_KEY_HERE';
+const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'BDPvgu8CPLAajELN-5fNOXh2knClUn_qqCFmVJayfnVUM81y8pEyrFt7UMvZYtbX1etUUzf6ZPx4Uvd0fo9DxoU';
 
 // Firestore collection for FCM tokens
 const TOKENS_COLLECTION = 'refresh_data_tokens';
@@ -238,14 +237,14 @@ export function setupForegroundNotifications(
       const { notification, data } = payload;
       const title = notification?.title || 'NearServe';
       const body = notification?.body || 'You have a new notification';
-      const icon = notification?.icon || '/icon-192x192.png';
+      const icon = notification?.icon || '/logo.png';
 
       // Show browser notification (even in foreground)
       if ('Notification' in window && Notification.permission === 'granted') {
         const notificationInstance = new Notification(title, {
           body,
           icon,
-          badge: '/icon-192x192.png',
+          badge: '/logo.png',
           tag: data?.type || 'foreground',
           data,
         });

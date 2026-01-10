@@ -46,7 +46,7 @@ export interface UseFCMReturn {
 }
 
 export function useFCMNotifications(userId?: string): UseFCMReturn {
-  const [isSupported] = useState(isPushNotificationSupported());
+  const [isSupported, setIsSupported] = useState<boolean>(false);
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [token, setToken] = useState<string | null>(null);
   const [subscribed, setSubscribed] = useState(false);
@@ -54,14 +54,24 @@ export function useFCMNotifications(userId?: string): UseFCMReturn {
   const [error, setError] = useState<string | null>(null);
   const [lastNotification, setLastNotification] = useState<FCMNotification | null>(null);
 
+  // Check if push notifications are supported on mount
+  useEffect(() => {
+    const checkSupport = async () => {
+      const supported = await isPushNotificationSupported();
+      setIsSupported(supported);
+    };
+    checkSupport();
+  }, []);
+
   // Request notification permission
   const requestPermission = useCallback(async (): Promise<boolean> => {
     setLoading(true);
     setError(null);
 
     try {
-      const granted = await requestNotificationPermission();
-      setPermission(granted ? 'granted' : 'denied');
+      const permissionResult = await requestNotificationPermission();
+      const granted = permissionResult === 'granted';
+      setPermission(permissionResult);
       return granted;
     } catch (err) {
       const errorMsg = err instanceof Error ? err.message : 'Permission request failed';

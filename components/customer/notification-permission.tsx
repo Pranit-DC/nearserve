@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { useUserProfile } from '@/hooks/use-user-profile';
-import { requestNotificationPermission, onMessageListener } from '@/lib/fcm';
+import { requestNotificationPermission, setupForegroundMessageListener } from '@/lib/fcm';
 import { Bell, BellOff, X } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -27,21 +27,33 @@ export function CustomerNotificationPermission() {
     }
   }, []);
 
+  // Set up continuous foreground message listener
   useEffect(() => {
-    if (permission === 'granted') {
-      // Listen for foreground messages
-      onMessageListener()
-        .then((payload: any) => {
-          console.log('Received foreground message:', payload);
-          
-          // Show toast notification
-          toast.info(payload.notification?.title || 'New notification', {
-            description: payload.notification?.body,
-            duration: 5000,
-          });
-        })
-        .catch((err) => console.error('Failed to receive message:', err));
+    if (permission !== 'granted') {
+      return;
     }
+
+    console.log('🔔 [Customer] Setting up foreground notification listener...');
+    
+    // Set up the continuous listener
+    const unsubscribe = setupForegroundMessageListener((payload: any) => {
+      console.log('📨 [Customer] Received foreground message:', payload);
+      
+      const title = payload.notification?.title || payload.data?.title || 'New notification';
+      const body = payload.notification?.body || payload.data?.message || '';
+      
+      // Show toast notification
+      toast.info(title, {
+        description: body,
+        duration: 5000,
+      });
+    });
+
+    // Cleanup listener on unmount or when permission changes
+    return () => {
+      console.log('🔕 [Customer] Cleaning up foreground notification listener');
+      unsubscribe();
+    };
   }, [permission]);
 
   const handleEnableNotifications = async () => {

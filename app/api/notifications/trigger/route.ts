@@ -10,7 +10,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase-admin';
+import { adminDb } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -22,7 +22,7 @@ export async function POST(request: NextRequest) {
     // Get the document that triggered this
     let docData;
     if (documentId) {
-      const docRef = await db.collection(collection).doc(documentId).get();
+      const docRef = await adminDb.collection(collection).doc(documentId).get();
       if (!docRef.exists) {
         return NextResponse.json(
           { error: 'Document not found' },
@@ -32,7 +32,7 @@ export async function POST(request: NextRequest) {
       docData = docRef.data();
     } else {
       // Get the most recent document
-      const snapshot = await db.collection(collection)
+      const snapshot = await adminDb.collection(collection)
         .orderBy('created_at', 'desc')
         .limit(1)
         .get();
@@ -54,8 +54,8 @@ export async function POST(request: NextRequest) {
     const message = docData?.message || 'You have a new notification';
 
     // Get all tokens
-    const tokensSnapshot = await db.collection('refresh_data_tokens').get();
-    const tokens = tokensSnapshot.docs.map(doc => doc.data().token).filter(Boolean);
+    const tokensSnapshot = await adminDb.collection('refresh_data_tokens').get();
+    const tokens = tokensSnapshot.docs.map((doc: any) => doc.data().token).filter(Boolean);
 
     if (tokens.length === 0) {
       console.log('⚠️ [Trigger] No tokens found');
@@ -66,19 +66,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Send notification
-    const fcmResponse = await fetch(`${request.nextUrl.origin}/api/fcm/send`, {
+    // Send notification via FCM v1 API
+    const fcmResponse = await fetch(`${request.nextUrl.origin}/api/fcm/send-v1`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         tokens,
-        notification: {
-          title,
-          body: message,
-          icon: '/icon-192x192.png',
-        },
+        title,
+        body: message,
+        icon: '/logo.png',
         data: {
           type: 'refresh_data_update',
           documentId: documentId || 'latest',

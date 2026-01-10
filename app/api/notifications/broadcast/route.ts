@@ -8,7 +8,7 @@
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-import { db } from '@/lib/firebase-admin';
+import { adminDb } from '@/lib/firebase-admin';
 
 export async function POST(request: NextRequest) {
   try {
@@ -26,7 +26,7 @@ export async function POST(request: NextRequest) {
     console.log('📢 [Broadcast] Broadcasting notification to all users:', { title, message });
 
     // Get all FCM tokens from Firestore
-    const tokensSnapshot = await db.collection('refresh_data_tokens').get();
+    const tokensSnapshot = await adminDb.collection('refresh_data_tokens').get();
     
     if (tokensSnapshot.empty) {
       console.log('⚠️ [Broadcast] No tokens found in database');
@@ -37,7 +37,7 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    const tokens = tokensSnapshot.docs.map(doc => doc.data().token).filter(Boolean);
+    const tokens = tokensSnapshot.docs.map((doc: any) => doc.data().token).filter(Boolean);
     console.log(`📤 [Broadcast] Found ${tokens.length} tokens`);
 
     if (tokens.length === 0) {
@@ -48,19 +48,17 @@ export async function POST(request: NextRequest) {
       });
     }
 
-    // Send notification via our FCM API route
-    const fcmResponse = await fetch(`${request.nextUrl.origin}/api/fcm/send`, {
+    // Send notification via FCM v1 API route (uses Firebase Admin SDK)
+    const fcmResponse = await fetch(`${request.nextUrl.origin}/api/fcm/send-v1`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
         tokens,
-        notification: {
-          title,
-          body: message,
-          icon: icon || '/icon-192x192.png',
-        },
+        title,
+        body: message,
+        icon: icon || '/logo.png',
         data: {
           type: 'broadcast',
           timestamp: new Date().toISOString()

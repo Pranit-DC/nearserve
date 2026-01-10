@@ -2,9 +2,9 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { getApps } from 'firebase/app';
 import app from './firebase-client';
 
-// VAPID key from Firebase Console
+// VAPID key from Firebase Console (with fallback)
 // Get this from: Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
-const VAPID_KEY = 'BDPvgu8CPLAajELN-5fNOXh2knClUn_qqCFmVJayfnVUM81y8pEyrFt7UMvZYtbX1etUUzf6ZPx4Uvd0fo9DxoU';
+const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'BDPvgu8CPLAajELN-5fNOXh2knClUn_qqCFmVJayfnVUM81y8pEyrFt7UMvZYtbX1etUUzf6ZPx4Uvd0fo9DxoU';
 
 /**
  * Check if FCM is properly configured
@@ -97,7 +97,34 @@ export const requestNotificationPermission = async () => {
 };
 
 /**
- * Listen for foreground messages
+ * Listen for foreground messages - Returns unsubscribe function
+ * This sets up a continuous listener for foreground notifications
+ */
+export const setupForegroundMessageListener = (
+  onNotificationReceived: (payload: any) => void
+): (() => void) => {
+  if (typeof window === 'undefined') {
+    return () => {};
+  }
+  
+  try {
+    const messaging = getMessaging(app);
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('📨 [FCM] Foreground message received:', payload);
+      onNotificationReceived(payload);
+    });
+    
+    console.log('✅ [FCM] Foreground message listener set up');
+    return unsubscribe;
+  } catch (error) {
+    console.error('❌ [FCM] Error setting up message listener:', error);
+    return () => {};
+  }
+};
+
+/**
+ * @deprecated Use setupForegroundMessageListener instead for continuous listening
+ * Listen for foreground messages (single message only - use for one-time checks)
  */
 export const onMessageListener = () =>
   new Promise((resolve) => {

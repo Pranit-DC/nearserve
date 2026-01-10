@@ -25,13 +25,44 @@ export async function sendPushNotification({
     // Send push notification if user has FCM token
     let pushNotificationSent = false;
     try {
+      let fcmToken: string | null = null;
+
+      // First, try to get token from users collection
       const userDoc = await adminDb
         .collection(COLLECTIONS.USERS)
         .doc(userId)
         .get();
 
       const userData = userDoc.data();
-      const fcmToken = userData?.fcmToken;
+      fcmToken = userData?.fcmToken || null;
+
+      // If no token found in users, check worker_profiles
+      if (!fcmToken) {
+        const workerProfileQuery = await adminDb
+          .collection(COLLECTIONS.WORKER_PROFILES)
+          .where('userId', '==', userId)
+          .limit(1)
+          .get();
+        
+        if (!workerProfileQuery.empty) {
+          const workerData = workerProfileQuery.docs[0].data();
+          fcmToken = workerData?.fcmToken || null;
+        }
+      }
+
+      // If still no token, check customer_profiles
+      if (!fcmToken) {
+        const customerProfileQuery = await adminDb
+          .collection(COLLECTIONS.CUSTOMER_PROFILES)
+          .where('userId', '==', userId)
+          .limit(1)
+          .get();
+        
+        if (!customerProfileQuery.empty) {
+          const customerData = customerProfileQuery.docs[0].data();
+          fcmToken = customerData?.fcmToken || null;
+        }
+      }
 
       if (fcmToken) {
         // Send push notification via Firebase Admin SDK
@@ -71,15 +102,43 @@ export async function sendPushNotification({
         } catch (fcmError: any) {
           console.log(`[Push] ⚠️ Failed:`, fcmError.code, fcmError.message);
           
-          // If token is invalid, remove it from user profile
+          // If token is invalid, remove it from all profile collections
           if (fcmError.code === 'messaging/registration-token-not-registered' || 
               fcmError.code === 'messaging/invalid-registration-token') {
             console.log(`[Push] 🧹 Removing invalid FCM token for user ${userId}`);
-            await adminDb.collection(COLLECTIONS.USERS).doc(userId).update({
-              fcmToken: null,
-              fcmTokenUpdatedAt: null,
-              notificationsEnabled: false,
-            });
+            
+            // Clear from users collection
+            try {
+              await adminDb.collection(COLLECTIONS.USERS).doc(userId).update({
+                fcmToken: null,
+                fcmTokenUpdatedAt: null,
+                notificationsEnabled: false,
+              });
+            } catch (e) { /* ignore if user doc doesn't exist */ }
+            
+            // Clear from worker_profiles
+            try {
+              const workerQuery = await adminDb
+                .collection(COLLECTIONS.WORKER_PROFILES)
+                .where('userId', '==', userId)
+                .limit(1)
+                .get();
+              if (!workerQuery.empty) {
+                await workerQuery.docs[0].ref.update({ fcmToken: null });
+              }
+            } catch (e) { /* ignore */ }
+            
+            // Clear from customer_profiles
+            try {
+              const customerQuery = await adminDb
+                .collection(COLLECTIONS.CUSTOMER_PROFILES)
+                .where('userId', '==', userId)
+                .limit(1)
+                .get();
+              if (!customerQuery.empty) {
+                await customerQuery.docs[0].ref.update({ fcmToken: null });
+              }
+            } catch (e) { /* ignore */ }
           }
         }
       } else {

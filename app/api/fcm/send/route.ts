@@ -1,16 +1,14 @@
 /**
- * FCM Send Notification API Route (FREE - No Admin SDK)
+ * FCM Send Notification API Route
  * 
- * Uses FCM HTTP v1 API directly to send push notifications
+ * Uses Firebase Admin SDK (FCM HTTP v1 API) to send push notifications
  * No Cloud Functions or billing account required
  * 
  * Endpoint: POST /api/fcm/send
  */
 
 import { NextRequest, NextResponse } from 'next/server';
-
-// FCM HTTP v1 API endpoint
-const FCM_API_URL = 'https://fcm.googleapis.com/fcm/send';
+import { adminMessaging } from '@/lib/firebase-admin';
 
 interface NotificationPayload {
   to?: string;           // Single device token
@@ -43,63 +41,97 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Get FCM Server Key from environment
-    const serverKey = process.env.FCM_SERVER_KEY;
-    if (!serverKey) {
-      console.error('❌ [FCM API] FCM_SERVER_KEY not configured in environment');
-      return NextResponse.json(
-        { error: 'FCM Server Key not configured' },
-        { status: 500 }
-      );
-    }
-
     console.log('📤 [FCM API] Sending notification:', {
       title: notification.title,
       body: notification.body,
       recipients: to ? 1 : tokens?.length || 0
     });
 
-    // Prepare notification payload for FCM HTTP API
-    const fcmPayload = {
-      notification: {
-        title: notification.title,
-        body: notification.body,
-        icon: notification.icon || '/icon-192x192.png',
-      },
-      data: data || {},
-      // Send to single token or multiple tokens
-      ...(to ? { to } : { registration_ids: tokens })
-    };
+    const icon = notification.icon || '/logo.png';
 
-    // Send to FCM HTTP API
-    const response = await fetch(FCM_API_URL, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'Authorization': `key=${serverKey}`,
-      },
-      body: JSON.stringify(fcmPayload),
-    });
+    // Prepare message data (must be string values)
+    const messageData = data ? Object.fromEntries(
+      Object.entries(data).map(([key, value]) => [key, String(value)])
+    ) : undefined;
 
-    const result = await response.json();
+    // Send to single token
+    if (to) {
+      const message = {
+        token: to,
+        notification: {
+          title: notification.title,
+          body: notification.body,
+        },
+        data: messageData,
+        webpush: {
+          notification: {
+            icon,
+            badge: '/logo.png',
+            tag: 'fcm-notification',
+            requireInteraction: false,
+          },
+          fcmOptions: {
+            link: data?.actionUrl || '/',
+          },
+        },
+      };
 
-    if (!response.ok) {
-      console.error('❌ [FCM API] Failed to send notification:', result);
-      return NextResponse.json(
-        { error: 'Failed to send notification', details: result },
-        { status: response.status }
-      );
+      const response = await adminMessaging.send(message);
+      console.log('✅ [FCM API] Message sent successfully:', response);
+
+      return NextResponse.json({
+        success: true,
+        messageId: response,
+        successCount: 1,
+        failureCount: 0,
+      });
     }
 
-    console.log('✅ [FCM API] Notification sent successfully:', result);
+    // Send to multiple tokens
+    if (tokens && tokens.length > 0) {
+      const messages = tokens.map(token => ({
+        token,
+        notification: {
+          title: notification.title,
+          body: notification.body,
+        },
+        data: messageData,
+        webpush: {
+          notification: {
+            icon,
+            badge: '/logo.png',
+            tag: 'fcm-notification',
+            requireInteraction: false,
+          },
+          fcmOptions: {
+            link: data?.actionUrl || '/',
+          },
+        },
+      }));
 
-    return NextResponse.json({
-      success: true,
-      messageId: result.multicast_id || result.message_id,
-      results: result.results || [],
-      successCount: result.success || 1,
-      failureCount: result.failure || 0,
-    });
+      const response = await adminMessaging.sendEach(messages);
+      console.log('✅ [FCM API] Batch messages sent:', {
+        successCount: response.successCount,
+        failureCount: response.failureCount,
+      });
+
+      return NextResponse.json({
+        success: true,
+        successCount: response.successCount,
+        failureCount: response.failureCount,
+        results: response.responses.map((r, i) => ({
+          token: tokens[i],
+          success: r.success,
+          messageId: r.messageId,
+          error: r.error?.message,
+        })),
+      });
+    }
+
+    return NextResponse.json(
+      { error: 'No valid recipients' },
+      { status: 400 }
+    );
 
   } catch (error) {
     console.error('❌ [FCM API] Error sending notification:', error);

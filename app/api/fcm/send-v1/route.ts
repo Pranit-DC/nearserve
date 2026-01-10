@@ -97,8 +97,8 @@ export async function POST(request: NextRequest) {
         data: messageData,
         webpush: {
           notification: {
-            icon: icon || '/icon-192x192.png',
-            badge: '/icon-192x192.png',
+            icon: icon || '/logo.png',
+            badge: '/logo.png',
             tag: 'fcm-notification',
             requireInteraction: false,
           },
@@ -127,8 +127,8 @@ export async function POST(request: NextRequest) {
         data: messageData,
         webpush: {
           notification: {
-            icon: icon || '/icon-192x192.png',
-            badge: '/icon-192x192.png',
+            icon: icon || '/logo.png',
+            badge: '/logo.png',
             tag: 'fcm-notification',
             requireInteraction: false,
           },

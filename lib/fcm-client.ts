@@ -18,8 +18,8 @@ import { collection, addDoc, query, where, getDocs, serverTimestamp, onSnapshot,
 import app from './firebase-client';
 import { db } from './firebase-client';
 
-// VAPID key from Firebase Console
-const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY;
+// VAPID key from Firebase Console (with fallback)
+const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'BDPvgu8CPLAajELN-5fNOXh2knClUn_qqCFmVJayfnVUM81y8pEyrFt7UMvZYtbX1etUUzf6ZPx4Uvd0fo9DxoU';
 
 // Firestore collections
 const TOKENS_COLLECTION = 'refresh_data_tokens';
@@ -238,14 +238,14 @@ export function setupForegroundNotifications(
       const { notification, data } = payload;
       const title = notification?.title || 'NearServe';
       const body = notification?.body || 'You have a new notification';
-      const icon = notification?.icon || '/icon-192x192.png';
+      const icon = notification?.icon || '/logo.png';
 
       // Display browser notification (even in foreground)
       if ('Notification' in window && Notification.permission === 'granted') {
         const notif = new Notification(title, {
           body,
           icon,
-          badge: '/icon-192x192.png',
+          badge: '/logo.png',
           tag: data?.type || 'foreground',
           data,
           requireInteraction: false,

@@ -36,7 +36,41 @@ export async function POST(request: NextRequest) {
       notificationsEnabled: true,
     }, { merge: true });
 
-    console.log(`✅ [API] FCM token saved to Firestore`);
+    console.log(`✅ [API] FCM token saved to users collection`);
+
+    // Also update worker profile if exists
+    try {
+      const workerProfileQuery = await adminDb
+        .collection(COLLECTIONS.WORKER_PROFILES)
+        .where('userId', '==', userId)
+        .limit(1)
+        .get();
+      
+      if (!workerProfileQuery.empty) {
+        await workerProfileQuery.docs[0].ref.update({
+          fcmToken,
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+        console.log(`✅ [API] FCM token saved to worker_profiles collection`);
+      }
+    } catch (e) { /* ignore - worker profile may not exist */ }
+
+    // Also update customer profile if exists
+    try {
+      const customerProfileQuery = await adminDb
+        .collection(COLLECTIONS.CUSTOMER_PROFILES)
+        .where('userId', '==', userId)
+        .limit(1)
+        .get();
+      
+      if (!customerProfileQuery.empty) {
+        await customerProfileQuery.docs[0].ref.update({
+          fcmToken,
+          updatedAt: FieldValue.serverTimestamp(),
+        });
+        console.log(`✅ [API] FCM token saved to customer_profiles collection`);
+      }
+    } catch (e) { /* ignore - customer profile may not exist */ }
 
     // Optionally subscribe to topic
     if (topic) {
