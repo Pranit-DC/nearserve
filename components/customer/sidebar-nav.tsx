@@ -237,7 +237,7 @@ export function CustomerSidebar({
                 <img
                   src="/logo.svg"
                   alt="NearServe Logo"
-                  className="w-8 h-8 object-contain filter brightness-0 dark:brightness-100 dark:invert"
+                  className="w-6 h-6 object-contain filter brightness-0 dark:brightness-100 dark:invert"
                 />
               </Link>
               <span className="font-semibold text-gray-900 dark:text-white tracking-tight">
@@ -288,27 +288,11 @@ export function CustomerSidebar({
         {/* Notification Bell */}
         <motion.div
           layout
-          className="relative flex h-10 w-full items-center rounded-lg transition-all duration-200 text-gray-600 dark:text-gray-400 hover:bg-gray-50 dark:hover:bg-gray-800/30 hover:text-gray-900 dark:hover:text-gray-200"
+          className="relative flex h-10 w-full items-center rounded-lg transition-all duration-200"
         >
-          <motion.div
-            layout
-            className="grid h-full w-10 place-content-center text-lg"
-          >
-            <div title={!isOpen ? "Notifications" : undefined}>
-              <NotificationBell />
-            </div>
-          </motion.div>
-          {isOpen && (
-            <motion.span
-              layout
-              initial={{ opacity: 0, y: 12 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.125 }}
-              className="text-sm font-medium"
-            >
-              Notifications
-            </motion.span>
-          )}
+          <div title={!isOpen ? "Notifications" : undefined}>
+            <NotificationBell isExpanded={isOpen} />
+          </div>
         </motion.div>
 
         {/* Theme Toggle */}
