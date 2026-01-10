@@ -1,7 +1,7 @@
 'use client';
 
-import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useState, useRef, useEffect } from 'react';
+import { useUserProfile } from '@/hooks/use-user-profile';
 import { useNotifications } from '@/hooks/use-notifications';
 import { FiBell, FiCheckCircle, FiClock, FiX, FiDollarSign, FiBriefcase, FiAlertCircle, FiInfo } from 'react-icons/fi';
 import { motion } from 'framer-motion';
@@ -18,12 +18,12 @@ import {
 } from '@/components/ui/drawer';
 import { Button } from '@/components/ui/button';
 
-export function NotificationBell({ isExpanded = false }: { isExpanded?: boolean }) {
-  const { user } = useAuth();
+export function NotificationBell() {
+  const { userProfile } = useUserProfile();
   const { notifications, unreadCount, loading } = useNotifications({
-    userId: user?.uid || null,
-    enabled: !!user?.uid,
-    maxNotifications: 50,
+    userId: userProfile?.id || null,
+    enabled: !!userProfile?.id,
+    maxNotifications: 20,
   });
   
   const [isOpen, setIsOpen] = useState(false);

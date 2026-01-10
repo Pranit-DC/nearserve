@@ -5,6 +5,7 @@ import { initializeApp, getApps, cert, type ServiceAccount } from 'firebase-admi
 import { getAuth } from 'firebase-admin/auth';
 import { getFirestore } from 'firebase-admin/firestore';
 import { getStorage } from 'firebase-admin/storage';
+import { getMessaging } from 'firebase-admin/messaging';
 
 // Initialize Firebase Admin (singleton pattern)
 const initializeFirebaseAdmin = () => {
@@ -59,6 +60,7 @@ const adminApp = initializeFirebaseAdmin();
 export const adminAuth = getAuth(adminApp);
 export const adminDb = getFirestore(adminApp);
 export const adminStorage = getStorage(adminApp);
+export const adminMessaging = getMessaging(adminApp);
 
 // Collection names - centralized for consistency
 export const COLLECTIONS = {

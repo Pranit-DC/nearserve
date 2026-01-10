@@ -1,20 +1,27 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 
 export default function GeolocationTestPage() {
+  const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<string>("Not started");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
   const [reverseGeocode, setReverseGeocode] = useState<any>(null);
   const [logs, setLogs] = useState<string[]>([]);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   const addLog = (msg: string) => {
     setLogs((prev) => [...prev, `${new Date().toLocaleTimeString()}: ${msg}`]);
   };
 
   const testBrowserLocation = () => {
+    if (!mounted) return;
+    
     setStatus("Testing browser geolocation...");
     addLog("Checking if geolocation is supported");
 
@@ -77,6 +84,8 @@ export default function GeolocationTestPage() {
   };
 
   const testGoogleMapsAPI = () => {
+    if (!mounted) return;
+    
     addLog("Testing Google Maps API key...");
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
     
@@ -129,8 +138,20 @@ export default function GeolocationTestPage() {
     }
   };
 
+  if (!mounted) {
+    return (
+      <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+        <div className="max-w-4xl mx-auto space-y-6">
+          <Card className="p-6">
+            <p className="text-gray-600">Loading...</p>
+          </Card>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">{
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold">Geolocation & Google Maps Debug</h1>
         

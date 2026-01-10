@@ -2,8 +2,16 @@ import { getMessaging, getToken, onMessage } from 'firebase/messaging';
 import { getApps } from 'firebase/app';
 import app from './firebase-client';
 
-// VAPID key from Firebase Console
-const VAPID_KEY = 'BAL5WnQvwQkt-h9UKBl3EhSWPwhnC_8Mo92_jPwozpkiN7WyaPKJl7h2-Qv-e2hNqKCBDgkNFUU_WZiv_0s-aGg';
+// VAPID key from Firebase Console (with fallback)
+// Get this from: Firebase Console → Project Settings → Cloud Messaging → Web Push certificates
+const VAPID_KEY = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'BDPvgu8CPLAajELN-5fNOXh2knClUn_qqCFmVJayfnVUM81y8pEyrFt7UMvZYtbX1etUUzf6ZPx4Uvd0fo9DxoU';
+
+/**
+ * Check if FCM is properly configured
+ */
+const isFCMAvailable = () => {
+  return VAPID_KEY && VAPID_KEY.length > 80 && !VAPID_KEY.includes('YOUR_');
+};
 
 /**
  * Request notification permission and get FCM token
@@ -21,58 +29,102 @@ export const requestNotificationPermission = async () => {
       return null;
     }
 
+    // Check if FCM is configured
+    if (!isFCMAvailable()) {
+      console.error('❌ FCM not configured: Invalid or missing VAPID key');
+      console.log('📝 Follow instructions in GET_VAPID_KEY.md to get your VAPID key');
+      return null;
+    }
+
     const permission = await Notification.requestPermission();
     
     if (permission === 'granted') {
-      // Register service worker
-      const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
-      
-      // Wait for service worker to be ready
-      await navigator.serviceWorker.ready;
-      
-      // Ensure the service worker is active
-      if (registration.active) {
-        console.log('Service worker is active and ready');
-      } else {
-        console.log('Waiting for service worker to activate...');
-        await new Promise((resolve) => {
-          if (registration.installing) {
-            registration.installing.addEventListener('statechange', (e) => {
-              if ((e.target as ServiceWorker).state === 'activated') {
-                resolve(undefined);
-              }
-            });
-          } else if (registration.waiting) {
-            registration.waiting.addEventListener('statechange', (e) => {
-              if ((e.target as ServiceWorker).state === 'activated') {
-                resolve(undefined);
-              }
-            });
-          }
+      try {
+        // Register service worker
+        const registration = await navigator.serviceWorker.register('/firebase-messaging-sw.js');
+        
+        // Wait for service worker to be ready
+        await navigator.serviceWorker.ready;
+        
+        // Ensure the service worker is active
+        if (registration.active) {
+          console.log('✅ Service worker is active and ready');
+        } else {
+          console.log('⏳ Waiting for service worker to activate...');
+          await new Promise((resolve) => {
+            if (registration.installing) {
+              registration.installing.addEventListener('statechange', (e) => {
+                if ((e.target as ServiceWorker).state === 'activated') {
+                  resolve(undefined);
+                }
+              });
+            } else if (registration.waiting) {
+              registration.waiting.addEventListener('statechange', (e) => {
+                if ((e.target as ServiceWorker).state === 'activated') {
+                  resolve(undefined);
+                }
+              });
+            }
+          });
+        }
+        
+        const messaging = getMessaging(app);
+        const token = await getToken(messaging, {
+          vapidKey: VAPID_KEY,
+          serviceWorkerRegistration: registration,
         });
+        
+        if (token) {
+          console.log('✅ FCM Token received:', token.substring(0, 20) + '...');
+          return token;
+        } else {
+          return null;
+        }
+      } catch (fcmError: any) {
+        // Silently return null - errors are expected when permission not granted
+        return null;
       }
-      
-      const messaging = getMessaging(app);
-      const token = await getToken(messaging, {
-        vapidKey: VAPID_KEY,
-        serviceWorkerRegistration: registration,
-      });
-      
-      console.log('FCM Token:', token);
-      return token;
     } else {
-      console.warn('Notification permission denied');
+      // Permission denied or default - silently return null
+      return null;
     }
     
     return null;
-  } catch (error) {
-    console.error('Error getting notification permission:', error);
+  } catch (error: any) {
+    // Silently return null on any error
     return null;
   }
 };
 
 /**
- * Listen for foreground messages
+ * Listen for foreground messages - Returns unsubscribe function
+ * This sets up a continuous listener for foreground notifications
+ */
+export const setupForegroundMessageListener = (
+  onNotificationReceived: (payload: any) => void
+): (() => void) => {
+  if (typeof window === 'undefined') {
+    return () => {};
+  }
+  
+  try {
+    const messaging = getMessaging(app);
+    const unsubscribe = onMessage(messaging, (payload) => {
+      console.log('📨 [FCM] Foreground message received:', payload);
+      onNotificationReceived(payload);
+    });
+    
+    console.log('✅ [FCM] Foreground message listener set up');
+    return unsubscribe;
+  } catch (error) {
+    console.error('❌ [FCM] Error setting up message listener:', error);
+    return () => {};
+  }
+};
+
+/**
+ * @deprecated Use setupForegroundMessageListener instead for continuous listening
+ * Listen for foreground messages (single message only - use for one-time checks)
  */
 export const onMessageListener = () =>
   new Promise((resolve) => {

@@ -1,13 +1,13 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
-import { requestNotificationPermission, onMessageListener } from '@/lib/fcm';
+import { useUserProfile } from '@/hooks/use-user-profile';
+import { requestNotificationPermission, setupForegroundMessageListener } from '@/lib/fcm';
 import { Bell, BellOff, X } from 'lucide-react';
 import { toast } from 'sonner';
 
 export function WorkerNotificationPermission() {
-  const { user } = useAuth();
+  const { userProfile } = useUserProfile();
   const [permission, setPermission] = useState<NotificationPermission>('default');
   const [showPrompt, setShowPrompt] = useState(false);
   const [isSupported, setIsSupported] = useState(false);
@@ -27,22 +27,68 @@ export function WorkerNotificationPermission() {
     }
   }, []);
 
+  // Set up continuous foreground message listener
   useEffect(() => {
-    if (permission === 'granted') {
-      // Listen for foreground messages
-      onMessageListener()
-        .then((payload: any) => {
-          console.log('Received foreground message:', payload);
-          
-          // Show toast notification
-          toast.info(payload.notification?.title || 'New notification', {
-            description: payload.notification?.body,
-            duration: 5000,
-          });
-        })
-        .catch((err) => console.error('Failed to receive message:', err));
+    if (permission !== 'granted') {
+      return;
     }
+
+    console.log('🔔 [Worker] Setting up foreground notification listener...');
+    
+    // Set up the continuous listener
+    const unsubscribe = setupForegroundMessageListener((payload: any) => {
+      console.log('📨 [Worker] Received foreground message:', payload);
+      
+      const title = payload.notification?.title || payload.data?.title || 'New notification';
+      const body = payload.notification?.body || payload.data?.message || '';
+      
+      // Show toast notification
+      toast.info(title, {
+        description: body,
+        duration: 5000,
+      });
+    });
+
+    // Cleanup listener on unmount or when permission changes
+    return () => {
+      console.log('🔕 [Worker] Cleaning up foreground notification listener');
+      unsubscribe();
+    };
   }, [permission]);
+
+  // Auto-register/refresh FCM token when permission is already granted
+  useEffect(() => {
+    if (permission !== 'granted' || !userProfile?.id) {
+      return;
+    }
+
+    const autoRegisterToken = async () => {
+      try {
+        console.log('🔄 [Worker] Auto-registering FCM token...');
+        const token = await requestNotificationPermission();
+        
+        if (token) {
+          // Save FCM token to worker profile
+          const response = await fetch('/api/worker/update-fcm-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ fcmToken: token }),
+          });
+          
+          if (response.ok) {
+            console.log('✅ [Worker] FCM token auto-registered successfully');
+          } else {
+            console.warn('⚠️ [Worker] FCM token auto-registration failed');
+          }
+        }
+      } catch (error) {
+        console.error('❌ [Worker] Auto-registration error:', error);
+      }
+    };
+
+    // Auto-register on mount
+    autoRegisterToken();
+  }, [permission, userProfile?.id]);
 
   const handleEnableNotifications = async () => {
     try {
@@ -53,7 +99,7 @@ export function WorkerNotificationPermission() {
         setShowPrompt(false);
         
         // Save FCM token to worker profile
-        if (user?.uid) {
+        if (userProfile?.id) {
           await fetch('/api/worker/update-fcm-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
