@@ -7,7 +7,9 @@ import { Card } from "@/components/ui/card";
 export default function GeolocationTestPage() {
   const [mounted, setMounted] = useState(false);
   const [status, setStatus] = useState<string>("Not started");
-  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
+    null
+  );
   const [reverseGeocode, setReverseGeocode] = useState<any>(null);
   const [logs, setLogs] = useState<string[]>([]);
 
@@ -21,7 +23,7 @@ export default function GeolocationTestPage() {
 
   const testBrowserLocation = () => {
     if (!mounted) return;
-    
+
     setStatus("Testing browser geolocation...");
     addLog("Checking if geolocation is supported");
 
@@ -63,9 +65,11 @@ export default function GeolocationTestPage() {
   const testReverseGeocode = async (lat: number, lng: number) => {
     addLog("Testing reverse geocoding API...");
     try {
-      const response = await fetch(`/api/reverse-geocode?lat=${lat}&lng=${lng}`);
+      const response = await fetch(
+        `/api/reverse-geocode?lat=${lat}&lng=${lng}`
+      );
       addLog(`API Response status: ${response.status}`);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         addLog(`❌ API Error: ${errorText}`);
@@ -85,10 +89,10 @@ export default function GeolocationTestPage() {
 
   const testGoogleMapsAPI = () => {
     if (!mounted) return;
-    
+
     addLog("Testing Google Maps API key...");
     const apiKey = process.env.NEXT_PUBLIC_GOOGLE_MAPS_API_KEY;
-    
+
     if (!apiKey) {
       addLog("❌ NEXT_PUBLIC_GOOGLE_MAPS_API_KEY not found");
       setStatus("❌ API key not configured");
@@ -120,7 +124,7 @@ export default function GeolocationTestPage() {
     try {
       const response = await fetch("/api/geocode?q=Mumbai, India");
       addLog(`API Response status: ${response.status}`);
-      
+
       if (!response.ok) {
         const errorText = await response.text();
         addLog(`❌ API Error: ${errorText}`);
@@ -151,23 +155,31 @@ export default function GeolocationTestPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">{
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 p-8">
       <div className="max-w-4xl mx-auto space-y-6">
         <h1 className="text-3xl font-bold">Geolocation & Google Maps Debug</h1>
-        
+
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Status: {status}</h2>
-          
+
           <div className="space-y-3">
             <Button onClick={testBrowserLocation} className="w-full">
               1. Test Browser Location
             </Button>
-            
-            <Button onClick={testGoogleMapsAPI} variant="outline" className="w-full">
+
+            <Button
+              onClick={testGoogleMapsAPI}
+              variant="outline"
+              className="w-full"
+            >
               2. Test Google Maps API
             </Button>
 
-            <Button onClick={testDirectGeocode} variant="outline" className="w-full">
+            <Button
+              onClick={testDirectGeocode}
+              variant="outline"
+              className="w-full"
+            >
               3. Test Geocoding API
             </Button>
           </div>
@@ -205,11 +217,25 @@ export default function GeolocationTestPage() {
         <Card className="p-6 bg-yellow-50 dark:bg-yellow-900/20">
           <h2 className="text-lg font-semibold mb-2">Common Issues</h2>
           <ul className="list-disc list-inside space-y-2 text-sm">
-            <li><strong>Ad Blocker:</strong> Disable extensions like uBlock Origin, Privacy Badger for localhost</li>
-            <li><strong>Browser Permissions:</strong> Allow location access when prompted</li>
-            <li><strong>Google Cloud Console:</strong> Enable "Maps JavaScript API" and "Geocoding API"</li>
-            <li><strong>API Key:</strong> Verify NEXT_PUBLIC_GOOGLE_MAPS_API_KEY in .env</li>
-            <li><strong>HTTPS:</strong> Location works on HTTPS or localhost only</li>
+            <li>
+              <strong>Ad Blocker:</strong> Disable extensions like uBlock
+              Origin, Privacy Badger for localhost
+            </li>
+            <li>
+              <strong>Browser Permissions:</strong> Allow location access when
+              prompted
+            </li>
+            <li>
+              <strong>Google Cloud Console:</strong> Enable "Maps JavaScript
+              API" and "Geocoding API"
+            </li>
+            <li>
+              <strong>API Key:</strong> Verify NEXT_PUBLIC_GOOGLE_MAPS_API_KEY
+              in .env
+            </li>
+            <li>
+              <strong>HTTPS:</strong> Location works on HTTPS or localhost only
+            </li>
           </ul>
         </Card>
       </div>
