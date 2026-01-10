@@ -165,7 +165,7 @@ curl -X POST http://localhost:3000/api/test-notification \
 
 ```env
 # These must be set correctly:
-FIREBASE_CLIENT_EMAIL=firebase-adminsdk-fbsvc@nearserve-pho.iam.gserviceaccount.com
+FIREBASE_CLIENT_EMAIL=firebase-adminsdk-xxxxx@your-project-id.iam.gserviceaccount.com
 FIREBASE_PRIVATE_KEY="-----BEGIN PRIVATE KEY-----\n...\n-----END PRIVATE KEY-----\n"
 ```
 

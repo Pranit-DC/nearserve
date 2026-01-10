@@ -5,7 +5,7 @@ import { collection, query, where, onSnapshot, QueryConstraint, orderBy, getDocs
 import { db } from '@/lib/firebase-client';
 
 interface UseRealtimeJobsOptions {
-  userId: string | null; // This is Firebase Auth UID
+  userId: string | null; // This is the database user document ID (userProfile.id)
   role: 'worker' | 'customer';
   enabled?: boolean;
 }
@@ -32,54 +32,21 @@ interface Job {
 /**
  * Real-time Firestore listener for jobs
  * Automatically updates when database changes
- * NOTE: userId is Firebase Auth UID, but jobs are stored with user document IDs
+ * NOTE: userId should be the database user document ID (userProfile.id), not Firebase UID
  */
 export function useRealtimeJobs({ userId, role, enabled = true }: UseRealtimeJobsOptions) {
   const [jobs, setJobs] = useState<Job[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [userDocId, setUserDocId] = useState<string | null>(null);
 
-  // First, convert Firebase Auth UID to user document ID
+  // Set up the real-time listener with the user document ID
   useEffect(() => {
     if (!enabled || !userId) {
       setLoading(false);
       return;
     }
 
-    const fetchUserDocId = async () => {
-      try {
-        console.log(`[Realtime] Looking up user document ID for auth UID: ${userId}`);
-        const usersRef = collection(db, 'users');
-        const q = query(usersRef, where('firebaseUid', '==', userId), limit(1));
-        const snapshot = await getDocs(q);
-        
-        if (!snapshot.empty) {
-          const docId = snapshot.docs[0].id;
-          console.log(`[Realtime] Found user document ID: ${docId}`);
-          setUserDocId(docId);
-        } else {
-          console.error(`[Realtime] No user document found for Firebase UID: ${userId}`);
-          setError('User not found in database');
-          setLoading(false);
-        }
-      } catch (err: any) {
-        console.error('[Realtime] Error fetching user document:', err);
-        setError(err.message);
-        setLoading(false);
-      }
-    };
-
-    fetchUserDocId();
-  }, [userId, enabled]);
-
-  // Then set up the real-time listener with the user document ID
-  useEffect(() => {
-    if (!enabled || !userDocId) {
-      return;
-    }
-
-    console.log(`[Realtime] Setting up listener for ${role} with user doc ID: ${userDocId}`);
+    console.log(`[Realtime] Setting up listener for ${role} with user ID: ${userId}`);
     setLoading(true);
     setError(null);
 
@@ -88,8 +55,8 @@ export function useRealtimeJobs({ userId, role, enabled = true }: UseRealtimeJob
       const jobsRef = collection(db, 'jobs');
       const constraints: QueryConstraint[] = [
         role === 'worker' 
-          ? where('workerId', '==', userDocId)
-          : where('customerId', '==', userDocId),
+          ? where('workerId', '==', userId)
+          : where('customerId', '==', userId),
         orderBy('createdAt', 'desc')
       ];
 
@@ -170,7 +137,7 @@ export function useRealtimeJobs({ userId, role, enabled = true }: UseRealtimeJob
       setError(err.message);
       setLoading(false);
     }
-  }, [userDocId, role, enabled]);
+  }, [userId, role, enabled]);
 
   return { jobs, loading, error };
 }

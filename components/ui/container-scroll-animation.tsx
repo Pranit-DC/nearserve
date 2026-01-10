@@ -32,6 +32,8 @@ export const ContainerScroll = ({
   const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
+    if (typeof window === 'undefined') return;
+    
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };

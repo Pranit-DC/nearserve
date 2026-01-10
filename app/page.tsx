@@ -14,10 +14,17 @@ import { TypewriterEffect } from "@/components/ui/typewriter-effect";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 
 export default function Home() {
+  const [mounted, setMounted] = useState(false);
   const [isFeaturesLoading, setIsFeaturesLoading] = useState(true);
   const [showScrollTop, setShowScrollTop] = useState(false);
 
   useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  useEffect(() => {
+    if (!mounted || typeof window === 'undefined') return;
+    
     // Simple Lenis setup that works better with sticky elements
     const lenis = new Lenis();
 
@@ -44,7 +51,7 @@ export default function Home() {
       clearTimeout(featuresTimer);
       window.removeEventListener("scroll", handleScroll);
     };
-  }, []);
+  }, [mounted]);
 
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });

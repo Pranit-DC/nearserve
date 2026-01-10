@@ -3,6 +3,8 @@ import { adminDb } from "@/lib/firebase-admin";
 import { COLLECTIONS, Review } from "@/lib/firestore";
 import { protectCustomerApi } from "@/lib/api-auth";
 import { FieldValue } from "firebase-admin/firestore";
+import { sendPushNotification } from "@/lib/push-notification";
+import { notifyWorkerReviewReceived } from "@/lib/notification-service";
 
 export async function POST(req: NextRequest) {
   try {
@@ -58,6 +60,32 @@ export async function POST(req: NextRequest) {
     };
 
     const reviewRef = await reviewsRef.add(reviewData);
+    
+    // Send notification to worker
+    try {
+      const customerDoc = await adminDb.collection(COLLECTIONS.USERS).doc(customer.id).get();
+      const customerName = customerDoc?.data()?.name || 'Customer';
+      
+      // Create in-app notification
+      await notifyWorkerReviewReceived(job.workerId, {
+        customerName,
+        rating,
+        comment: comment || null,
+        jobId,
+      });
+      console.log(`[Notification] ✅ In-app review notification created for worker ${job.workerId}`);
+      
+      // Send push notification
+      await sendPushNotification({
+        userId: job.workerId,
+        title: '⭐ New Review',
+        message: `${customerName} gave you ${rating} stars${comment ? ': "' + comment.substring(0, 50) + '..."' : ''}`,
+        type: 'REVIEW_RECEIVED',
+        actionUrl: `/worker/profile`,
+      });
+    } catch (pushError) {
+      console.error('[Push] Failed to send review notification:', pushError);
+    }
     
     return NextResponse.json({ 
       success: true, 

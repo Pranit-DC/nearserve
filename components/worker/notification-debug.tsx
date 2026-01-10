@@ -1,10 +1,10 @@
 'use client';
 
 import { useState } from 'react';
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/use-user-profile';
 
 export function NotificationDebug() {
-  const { user } = useAuth();
+  const { userProfile } = useUserProfile();
   const [logs, setLogs] = useState<string[]>([]);
   const [fcmToken, setFcmToken] = useState<string>('');
 
@@ -53,8 +53,9 @@ export function NotificationDebug() {
         const app = (await import('@/lib/firebase-client')).default;
         
         const messaging = getMessaging(app);
+        const vapidKey = process.env.NEXT_PUBLIC_FIREBASE_VAPID_KEY || 'BDPvgu8CPLAajELN-5fNOXh2knClUn_qqCFmVJayfnVUM81y8pEyrFt7UMvZYtbX1etUUzf6ZPx4Uvd0fo9DxoU';
         const token = await getToken(messaging, {
-          vapidKey: 'BAL5WnQvwQkt-h9UKBl3EhSWPwhnC_8Mo92_jPwozpkiN7WyaPKJl7h2-Qv-e2hNqKCBDgkNFUU_WZiv_0s-aGg',
+          vapidKey: vapidKey,
           serviceWorkerRegistration: registration,
         });
         
@@ -64,7 +65,7 @@ export function NotificationDebug() {
           setFcmToken(token);
           
           // Save token to backend
-          if (user?.uid) {
+          if (userProfile?.id) {
             const response = await fetch('/api/worker/update-fcm-token', {
               method: 'POST',
               headers: { 'Content-Type': 'application/json' },
@@ -99,7 +100,7 @@ export function NotificationDebug() {
   };
 
   const sendTestNotification = async () => {
-    if (!user?.uid) {
+    if (!userProfile?.id) {
       addLog(`❌ Not logged in`);
       return;
     }
@@ -110,7 +111,7 @@ export function NotificationDebug() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          workerId: user.uid,
+          workerId: userProfile.id,
           title: 'Test Notification',
           body: 'This is a test notification from debug panel!',
         }),
@@ -203,7 +204,7 @@ export function NotificationDebug() {
       )}
 
       <div className="mt-3 text-xs text-gray-500 dark:text-gray-400">
-        User ID: {user?.uid || 'Not logged in'}
+        User ID: {userProfile?.id || 'Not logged in'}
       </div>
     </div>
   );

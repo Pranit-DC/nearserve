@@ -1,6 +1,6 @@
 'use client';
 
-import { useAuth } from '@/contexts/AuthContext';
+import { useUserProfile } from '@/hooks/use-user-profile';
 import { useNotifications } from '@/hooks/use-notifications';
 import { FiBell, FiArrowLeft, FiClock, FiCheckCircle } from 'react-icons/fi';
 import { motion } from 'framer-motion';
@@ -9,17 +9,17 @@ import { toast } from 'sonner';
 import Link from 'next/link';
 
 export default function NotificationsPage() {
-  const { user } = useAuth();
+  const { userProfile } = useUserProfile();
   const router = useRouter();
   const { notifications, unreadCount, loading } = useNotifications({
-    userId: user?.uid || null,
-    enabled: !!user?.uid,
+    userId: userProfile?.id || null,
+    enabled: !!userProfile?.id,
     maxNotifications: 100,
   });
 
   const handleBack = () => {
     // Check if there's history to go back to
-    if (window.history.length > 1) {
+    if (typeof window !== 'undefined' && window.history.length > 1) {
       router.back();
     } else {
       // Fallback: redirect to homepage

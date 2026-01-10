@@ -7,9 +7,13 @@ import { motion } from "framer-motion";
 export default function AuthCallbackLoading() {
   useEffect(() => {
     // Prevent scroll while loading
-    document.body.style.overflow = "hidden";
+    if (typeof document !== 'undefined') {
+      document.body.style.overflow = "hidden";
+    }
     return () => {
-      document.body.style.overflow = "unset";
+      if (typeof document !== 'undefined') {
+        document.body.style.overflow = "unset";
+      }
     };
   }, []);
 

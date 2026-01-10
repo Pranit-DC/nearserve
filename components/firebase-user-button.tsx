@@ -17,6 +17,8 @@ export function FirebaseUserButton() {
   const [openUp, setOpenUp] = useState(false);
 
   useEffect(() => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+    
     const handleClickOutside = (event: MouseEvent) => {
       if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
         setIsOpen(false);
