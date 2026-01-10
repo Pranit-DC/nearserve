@@ -31,14 +31,18 @@ const FEEDBACK_HEIGHT = 600;
 const MOBILE_BREAKPOINT = 640;
 
 // Classname groups for readability and maintainability
-const CHATBOT_BASE = "relative z-3 flex flex-col items-center overflow-hidden border bg-background";
-const CHATBOT_SHADOWS = "shadow-[0_12px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.6)]";
-const CHATBOT_HOVER = "hover:shadow-[0_20px_80px_rgba(0,0,0,0.28)] hover:dark:shadow-[0_22px_90px_rgba(0,0,0,0.7)] hover:-translate-y-1 hover:ring-4 hover:ring-primary/12";
-const CHATBOT_TRANSITION = "ring-0 transition-shadow transition-transform duration-200 ease-out";
+const CHATBOT_BASE =
+  "relative z-3 flex flex-col items-center overflow-hidden border bg-background";
+const CHATBOT_SHADOWS =
+  "shadow-[0_12px_50px_rgba(0,0,0,0.18)] dark:shadow-[0_18px_60px_rgba(0,0,0,0.6)]";
+const CHATBOT_HOVER =
+  "hover:shadow-[0_20px_80px_rgba(0,0,0,0.28)] hover:dark:shadow-[0_22px_90px_rgba(0,0,0,0.7)] hover:-translate-y-1 hover:ring-4 hover:ring-primary/12";
+const CHATBOT_TRANSITION =
+  "ring-0 transition-shadow transition-transform duration-200 ease-out";
 
 // Get responsive dimensions
 const getResponsiveDimensions = () => {
-  if (typeof window === 'undefined') {
+  if (typeof window === "undefined") {
     return { width: FEEDBACK_WIDTH, height: FEEDBACK_HEIGHT };
   }
   const v = (window as any).visualViewport;
@@ -53,7 +57,11 @@ const getResponsiveDimensions = () => {
   };
 };
 
-export default function ProjectChatbot() {
+export default function ProjectChatbot({
+  isExpanded = false,
+}: {
+  isExpanded?: boolean;
+}) {
   const rootRef = useRef<HTMLDivElement>(null);
   const feedbackRef = useRef<HTMLTextAreaElement | null>(null);
   const submitRef = useRef<HTMLButtonElement>(null);
@@ -62,7 +70,10 @@ export default function ProjectChatbot() {
   const [showFeedback, setShowFeedback] = useState(false);
   const [input, setInput] = useState("");
   const [isLoading, setIsLoading] = useState(false);
-  const [dimensions, setDimensions] = useState({ width: FEEDBACK_WIDTH, height: FEEDBACK_HEIGHT });
+  const [dimensions, setDimensions] = useState({
+    width: FEEDBACK_WIDTH,
+    height: FEEDBACK_HEIGHT,
+  });
   const [messages, setMessages] = useState<Message[]>([
     {
       role: "bot",
@@ -78,8 +89,8 @@ export default function ProjectChatbot() {
 
   // Initialize and update dimensions on client side
   useEffect(() => {
-    if (!mounted || typeof window === 'undefined') return;
-    
+    if (!mounted || typeof window === "undefined") return;
+
     // Set initial dimensions after mount
     setDimensions(getResponsiveDimensions());
     // Throttle resize updates using requestAnimationFrame to avoid
@@ -203,158 +214,22 @@ export default function ProjectChatbot() {
           delay: showFeedback ? 0 : CLOSE_DELAY,
         }}
       >
-          {/* Dock */}
-          <footer className="mt-auto flex h-[44px] select-none items-center justify-center whitespace-nowrap">
-            <div className="flex items-center justify-center gap-2 px-3 max-sm:h-10 max-sm:px-2">
-              <div className="flex w-fit items-center gap-2">
-                <AnimatePresence mode="wait">
-                  {showFeedback ? (
-                    <motion.div
-                      animate={{ opacity: 0 }}
-                      className="h-5 w-5"
-                      exit={{ opacity: 0 }}
-                      initial={{ opacity: 0 }}
-                      key="placeholder"
-                    />
-                  ) : (
-                    <motion.div
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
-                      initial={{ opacity: 0 }}
-                      key="siri-orb"
-                      transition={{ duration: 0.2 }}
-                    >
-                      <SiriOrb
-                        colors={{
-                          bg: "oklch(22.64% 0 0)",
-                        }}
-                        size="24px"
-                      />
-                    </motion.div>
-                  )}
-                </AnimatePresence>
-              </div>
-
-              {!showFeedback && (
-                <Button
-                  className="flex h-fit flex-1 justify-end rounded-full px-2 py-0.5!"
-                  onClick={openFeedback}
-                  type="button"
-                  variant="ghost"
-                >
-                  <span className="truncate">Ask AI</span>
-                </Button>
-              )}
-            </div>
-          </footer>
-
-          {/* Feedback/Chat Interface */}
-          <form
-            className="absolute bottom-0"
-            onSubmit={handleSubmit}
-            style={{
-              width: dimensions.width,
-              height: dimensions.height,
-              pointerEvents: showFeedback ? "all" : "none",
-            }}
-          >
-            <AnimatePresence>
-              {showFeedback && (
+        {/* Dock */}
+        <footer className="mt-auto flex h-[44px] select-none items-center justify-center whitespace-nowrap">
+          {!showFeedback && (
+            <button
+              onClick={openFeedback}
+              className="w-full p-2 rounded-lg hover:bg-muted transition-colors flex items-center gap-2"
+              type="button"
+            >
+              <AnimatePresence mode="wait">
                 <motion.div
                   animate={{ opacity: 1 }}
-                  className="flex h-full flex-col p-1"
                   exit={{ opacity: 0 }}
                   initial={{ opacity: 0 }}
-                  transition={{
-                    type: "spring",
-                    stiffness: SPRING_STIFFNESS / SPEED,
-                    damping: SPRING_DAMPING,
-                    mass: SPRING_MASS,
-                  }}
+                  key="siri-orb"
+                  transition={{ duration: 0.2 }}
                 >
-                  {/* Header */}
-                  <div className="flex justify-between py-6 px-2 max-sm:py-2 relative items-center">
-                    <p className="z-2 pl-[38px] max-sm:pl-[38px] flex select-none items-center gap-[6px] text-foreground font-semibold text-sm max-sm:text-base">
-                      NearServe AI
-                    </p>
-                    <button
-                      className="flex cursor-pointer select-none items-center justify-center gap-1 rounded-[12px] bg-transparent pr-1 text-center text-foreground hover:bg-muted max-sm:pr-0 max-sm:p-1.5"
-                      onClick={closeFeedback}
-                      type="button"
-                    >
-                      <X size={18} className="max-sm:w-5 max-sm:h-5" />
-                    </button>
-                  </div>
-
-                  {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto p-4 max-sm:p-2 space-y-4 max-sm:space-y-3 rounded-md bg-muted/30">
-                    {messages.map((msg, idx) => (
-                      <div
-                        key={idx}
-                        className={`flex ${
-                          msg.role === "user" ? "justify-end" : "justify-start"
-                        }`}
-                      >
-                        <div
-                          className={`max-w-[85%] max-sm:max-w-[90%] rounded-lg p-3 max-sm:p-2 text-sm max-sm:text-xs ${
-                            msg.role === "user"
-                              ? "bg-primary text-primary-foreground"
-                              : "bg-background border shadow-sm"
-                          }`}
-                        >
-                          <ReactMarkdown>{msg.content}</ReactMarkdown>
-                        </div>
-                      </div>
-                    ))}
-                    {isLoading && (
-                      <div className="flex justify-start">
-                        <div className="bg-background p-3 max-sm:p-2 rounded-lg border shadow-sm">
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        </div>
-                      </div>
-                    )}
-                    <div ref={messagesEndRef} />
-                  </div>
-
-                  {/* Input Area */}
-                  <div className="p-2 max-sm:p-1.5">
-                    <div className="flex items-end gap-2 max-sm:gap-1.5">
-                      <textarea
-                        className="flex-1 resize-none rounded-md bg-muted p-3 max-sm:p-2 outline-0 min-h-[60px] max-sm:min-h-[50px] max-h-[120px] max-sm:max-h-[100px] text-sm max-sm:text-xs"
-                        name="message"
-                        onKeyDown={onKeyDown}
-                        placeholder="Ask me anything..."
-                        ref={feedbackRef}
-                        value={input}
-                        onChange={(e) => setInput(e.target.value)}
-                        rows={2}
-                      />
-                      <button
-                        className="flex items-center justify-center gap-1 rounded-[12px] bg-primary text-primary-foreground px-3 py-2 max-sm:px-2 max-sm:py-1.5 hover:bg-primary/90 disabled:opacity-50"
-                        ref={submitRef}
-                        type="submit"
-                        disabled={isLoading || !input.trim()}
-                        aria-label="Send message"
-                      >
-                        <Kbd className="w-fit max-sm:text-xs">↵</Kbd>
-                      </button>
-                    </div>
-                    <div className="mt-1 text-xs text-muted-foreground">
-                      Enter to send — Shift+Enter for newline
-                    </div>
-                  </div>
-                </motion.div>
-              )}
-            </AnimatePresence>
-            <AnimatePresence>
-              {showFeedback && (
-                  <motion.div
-                    animate={{ opacity: 1 }}
-                    className="absolute left-3 top-6 max-sm:left-3 max-sm:top-3"
-                    exit={{ opacity: 0 }}
-                    initial={{ opacity: 0 }}
-                    transition={{ duration: 0.2 }}
-                  >
                   <SiriOrb
                     colors={{
                       bg: "oklch(22.64% 0 0)",
@@ -362,10 +237,133 @@ export default function ProjectChatbot() {
                     size="24px"
                   />
                 </motion.div>
-              )}
-            </AnimatePresence>
-          </form>
-        </motion.div>
+              </AnimatePresence>
+
+              <span className="text-sm font-medium text-foreground text-left">
+                Ask AI
+              </span>
+            </button>
+          )}
+        </footer>
+
+        {/* Feedback/Chat Interface */}
+        <form
+          className="absolute bottom-0"
+          onSubmit={handleSubmit}
+          style={{
+            width: dimensions.width,
+            height: dimensions.height,
+            pointerEvents: showFeedback ? "all" : "none",
+          }}
+        >
+          <AnimatePresence>
+            {showFeedback && (
+              <motion.div
+                animate={{ opacity: 1 }}
+                className="flex h-full flex-col p-1"
+                exit={{ opacity: 0 }}
+                initial={{ opacity: 0 }}
+                transition={{
+                  type: "spring",
+                  stiffness: SPRING_STIFFNESS / SPEED,
+                  damping: SPRING_DAMPING,
+                  mass: SPRING_MASS,
+                }}
+              >
+                {/* Header */}
+                <div className="flex justify-between py-6 px-2 max-sm:py-2 relative items-center">
+                  <p className="z-2 pl-[38px] max-sm:pl-[38px] flex select-none items-center gap-[6px] text-foreground font-semibold text-sm max-sm:text-base">
+                    NearServe AI
+                  </p>
+                  <button
+                    className="flex cursor-pointer select-none items-center justify-center gap-1 rounded-[12px] bg-transparent pr-1 text-center text-foreground hover:bg-muted max-sm:pr-0 max-sm:p-1.5"
+                    onClick={closeFeedback}
+                    type="button"
+                  >
+                    <X size={18} className="max-sm:w-5 max-sm:h-5" />
+                  </button>
+                </div>
+
+                {/* Messages Area */}
+                <div className="flex-1 overflow-y-auto p-4 max-sm:p-2 space-y-4 max-sm:space-y-3 rounded-md bg-muted/30">
+                  {messages.map((msg, idx) => (
+                    <div
+                      key={idx}
+                      className={`flex ${
+                        msg.role === "user" ? "justify-end" : "justify-start"
+                      }`}
+                    >
+                      <div
+                        className={`max-w-[85%] max-sm:max-w-[90%] rounded-lg p-3 max-sm:p-2 text-sm max-sm:text-xs ${
+                          msg.role === "user"
+                            ? "bg-primary text-primary-foreground"
+                            : "bg-background border shadow-sm"
+                        }`}
+                      >
+                        <ReactMarkdown>{msg.content}</ReactMarkdown>
+                      </div>
+                    </div>
+                  ))}
+                  {isLoading && (
+                    <div className="flex justify-start">
+                      <div className="bg-background p-3 max-sm:p-2 rounded-lg border shadow-sm">
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      </div>
+                    </div>
+                  )}
+                  <div ref={messagesEndRef} />
+                </div>
+
+                {/* Input Area */}
+                <div className="p-2 max-sm:p-1.5">
+                  <div className="flex items-end gap-2 max-sm:gap-1.5">
+                    <textarea
+                      className="flex-1 resize-none rounded-md bg-muted p-3 max-sm:p-2 outline-0 min-h-[60px] max-sm:min-h-[50px] max-h-[120px] max-sm:max-h-[100px] text-sm max-sm:text-xs"
+                      name="message"
+                      onKeyDown={onKeyDown}
+                      placeholder="Ask me anything..."
+                      ref={feedbackRef}
+                      value={input}
+                      onChange={(e) => setInput(e.target.value)}
+                      rows={2}
+                    />
+                    <button
+                      className="flex items-center justify-center gap-1 rounded-[12px] bg-primary text-primary-foreground px-3 py-2 max-sm:px-2 max-sm:py-1.5 hover:bg-primary/90 disabled:opacity-50"
+                      ref={submitRef}
+                      type="submit"
+                      disabled={isLoading || !input.trim()}
+                      aria-label="Send message"
+                    >
+                      <Kbd className="w-fit max-sm:text-xs">↵</Kbd>
+                    </button>
+                  </div>
+                  <div className="mt-1 text-xs text-muted-foreground">
+                    Enter to send — Shift+Enter for newline
+                  </div>
+                </div>
+              </motion.div>
+            )}
+          </AnimatePresence>
+          <AnimatePresence>
+            {showFeedback && (
+              <motion.div
+                animate={{ opacity: 1 }}
+                className="absolute left-3 top-6 max-sm:left-3 max-sm:top-3"
+                exit={{ opacity: 0 }}
+                initial={{ opacity: 0 }}
+                transition={{ duration: 0.2 }}
+              >
+                <SiriOrb
+                  colors={{
+                    bg: "oklch(22.64% 0 0)",
+                  }}
+                  size="24px"
+                />
+              </motion.div>
+            )}
+          </AnimatePresence>
+        </form>
+      </motion.div>
     </div>
   );
 }

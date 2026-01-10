@@ -4,24 +4,16 @@ import { Button } from "@/components/ui/button";
 import { adminDb, COLLECTIONS } from "@/lib/firebase-admin";
 import { checkUser } from "@/lib/checkUser";
 import { serializeFirestoreData } from "@/lib/firestore-serialization";
+import { WorkerDashboardStats } from "@/components/worker-dashboard-stats";
 import {
-  Briefcase,
   Clock,
-  CheckCircle,
-  TrendingUp,
   Calendar,
   Eye,
   Settings,
   ArrowRight,
-  Star,
   MapPin,
-  Users,
-  Wrench,
-  Award,
-  Target,
 } from "lucide-react";
 import { FaRupeeSign } from "react-icons/fa";
-
 
 import DashboardBgEffect from "@/components/DashboardBgEffect";
 
@@ -37,39 +29,29 @@ export default async function WorkerDashboardPage() {
     );
   }
 
-  // Fetch all jobs for this worker from Firestore
+  // Fetch recent jobs for this worker from Firestore
   const jobsSnapshot = await adminDb
     .collection(COLLECTIONS.JOBS)
     .where("workerId", "==", worker.id)
+    .orderBy("createdAt", "desc")
+    .limit(5)
     .get();
 
-  const allJobs = serializeFirestoreData(
+  const recentJobs = serializeFirestoreData(
     jobsSnapshot.docs.map((doc) => ({
       id: doc.id,
       ...doc.data(),
     }))
   );
 
-  // Calculate statistics
-  const totalJobs = allJobs.length;
-  const pendingJobs = allJobs.filter((job: import("@/lib/firestore").Job) => job.status === "PENDING").length;
-  const completedJobs = allJobs.filter((job: import("@/lib/firestore").Job) => job.status === "COMPLETED").length;
-  const acceptedJobs = allJobs.filter((job: import("@/lib/firestore").Job) => job.status === "ACCEPTED").length;
+  // Get pending jobs count for quick actions
+  const pendingSnapshot = await adminDb
+    .collection(COLLECTIONS.JOBS)
+    .where("workerId", "==", worker.id)
+    .where("status", "==", "PENDING")
+    .get();
 
-  // Calculate total earnings from completed jobs
-  const totalEarnings = allJobs
-    .filter((job: import("@/lib/firestore").Job) => job.status === "COMPLETED")
-    .reduce((sum: number, job: import("@/lib/firestore").Job) => sum + (job.charge || 0), 0);
-
-  // Get recent jobs (last 5)
-  const recentJobs = allJobs
-    .sort((a: import("@/lib/firestore").Job, b: import("@/lib/firestore").Job) => {
-      // Since dates are now ISO strings after serialization
-      const aDate = a.createdAt ? new Date(a.createdAt as any) : new Date(0);
-      const bDate = b.createdAt ? new Date(b.createdAt as any) : new Date(0);
-      return bDate.getTime() - aDate.getTime();
-    })
-    .slice(0, 5);
+  const pendingJobs = pendingSnapshot.size;
 
   // Fetch customer names for recent jobs
   const recentJobsWithCustomers = serializeFirestoreData(
@@ -110,58 +92,8 @@ export default async function WorkerDashboardPage() {
           </Link>
         </div>
 
-        {/* Quick Stats and Usage Tracker */}
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <CheckCircle className="h-6 w-6 text-green-600 dark:text-green-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Active Jobs
-                </p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {acceptedJobs}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <Briefcase className="h-6 w-6 text-blue-600 dark:text-blue-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Completed Jobs
-                </p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {completedJobs}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          <Card className="p-4 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818]">
-            <div className="flex items-center">
-              <div className="flex-shrink-0">
-                <FaRupeeSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
-              </div>
-              <div className="ml-3">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  Total Earnings
-                </p>
-                <p className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  ₹{totalEarnings.toFixed(0)}
-                </p>
-              </div>
-            </div>
-          </Card>
-
-          {/* Usage Tracker removed */}
-        </div>
+        {/* Quick Stats - Real Data */}
+        <WorkerDashboardStats />
       </div>
 
       {/* Quick Actions Section */}
@@ -185,7 +117,7 @@ export default async function WorkerDashboardPage() {
           >
             <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950/20 flex items-center justify-center">
+                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center">
                   <Calendar className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
@@ -207,8 +139,8 @@ export default async function WorkerDashboardPage() {
           >
             <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-purple-50 dark:bg-purple-950 flex items-center justify-center">
-                  <Eye className="h-6 w-6 text-purple-600 dark:text-purple-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center">
+                  <Eye className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
@@ -229,8 +161,8 @@ export default async function WorkerDashboardPage() {
           >
             <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-emerald-50 dark:bg-emerald-950 flex items-center justify-center">
-                  <Settings className="h-6 w-6 text-emerald-600 dark:text-emerald-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center">
+                  <Settings className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
@@ -251,8 +183,8 @@ export default async function WorkerDashboardPage() {
           >
             <Card className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200 hover:-translate-y-1">
               <div className="flex flex-col items-center text-center space-y-3">
-                <div className="w-12 h-12 rounded-xl bg-amber-50 dark:bg-amber-950 flex items-center justify-center">
-                  <FaRupeeSign className="h-6 w-6 text-amber-600 dark:text-amber-400" />
+                <div className="w-12 h-12 rounded-xl bg-blue-50 dark:bg-blue-950 flex items-center justify-center">
+                  <FaRupeeSign className="h-6 w-6 text-blue-600 dark:text-blue-400" />
                 </div>
                 <div>
                   <h3 className="font-medium text-gray-900 dark:text-white group-hover:text-blue-600 dark:group-hover:text-blue-400 transition-colors">
@@ -296,76 +228,97 @@ export default async function WorkerDashboardPage() {
           </Card>
         ) : (
           <div className="grid gap-6 sm:grid-cols-1 lg:grid-cols-2">
-            {recentJobsWithCustomers.map((job: import("@/lib/firestore").Job & { customer?: { name: string } }) => (
-              <Card
-                key={job.id}
-                className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200"
-              >
-                <div className="flex items-start justify-between mb-4">
-                  <div className="flex-1">
-                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                      {job.description || "Job Request"}
-                    </h3>
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                      Customer: {job.customer?.name ?? "Unknown"}
-                    </p>
+            {recentJobsWithCustomers.map(
+              (
+                job: import("@/lib/firestore").Job & {
+                  customer?: { name: string };
+                }
+              ) => (
+                <Card
+                  key={job.id}
+                  className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200"
+                >
+                  <div className="flex items-start justify-between mb-4">
+                    <div className="flex-1">
+                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                        {job.description || "Job Request"}
+                      </h3>
+                      <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                        Customer: {job.customer?.name ?? "Unknown"}
+                      </p>
+                    </div>
+                    <span
+                      className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
+                        job.status === "PENDING"
+                          ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
+                          : job.status === "ACCEPTED"
+                          ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
+                          : job.status === "COMPLETED"
+                          ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
+                          : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
+                      }`}
+                    >
+                      {job.status}
+                    </span>
                   </div>
-                  <span
-                    className={`px-3 py-1 rounded-full text-xs font-medium whitespace-nowrap ${
-                      job.status === "PENDING"
-                        ? "bg-yellow-100 text-yellow-800 dark:bg-yellow-900/30 dark:text-yellow-300 border border-yellow-200 dark:border-yellow-800"
-                        : job.status === "ACCEPTED"
-                        ? "bg-blue-100 text-blue-800 dark:bg-blue-900/30 dark:text-blue-300 border border-blue-200 dark:border-blue-800"
-                        : job.status === "COMPLETED"
-                        ? "bg-green-100 text-green-800 dark:bg-green-900/30 dark:text-green-300 border border-green-200 dark:border-green-800"
-                        : "bg-gray-100 text-gray-800 dark:bg-gray-800 dark:text-gray-300"
-                    }`}
-                  >
-                    {job.status}
-                  </span>
-                </div>
 
-                <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
-                  <div className="flex items-center">
-                    <MapPin className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span className="truncate">{job.location}</span>
+                  <div className="space-y-2 text-sm text-gray-500 dark:text-gray-400">
+                    <div className="flex items-center">
+                      <MapPin className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                      <span className="truncate">{job.location}</span>
+                    </div>
+                    <div className="flex items-center">
+                      <Clock className="h-4 w-4 mr-2 flex-shrink-0 text-blue-600 dark:text-blue-400" />
+                      <span>
+                        {(() => {
+                          let dateObj: Date;
+                          if (
+                            typeof job.time === "string" ||
+                            job.time instanceof Date
+                          ) {
+                            dateObj = new Date(job.time);
+                          } else if (
+                            job.time &&
+                            typeof job.time.toDate === "function"
+                          ) {
+                            dateObj = job.time.toDate();
+                          } else if (
+                            job.time &&
+                            job.time.seconds !== undefined &&
+                            job.time.nanoseconds !== undefined
+                          ) {
+                            dateObj = new Date(
+                              job.time.seconds * 1000 +
+                                job.time.nanoseconds / 1e6
+                            );
+                          } else {
+                            dateObj = new Date(0);
+                          }
+                          return `${dateObj.toLocaleDateString()} at ${dateObj.toLocaleTimeString(
+                            [],
+                            { hour: "2-digit", minute: "2-digit" }
+                          )}`;
+                        })()}
+                      </span>
+                    </div>
                   </div>
-                  <div className="flex items-center">
-                    <Clock className="h-4 w-4 mr-2 flex-shrink-0" />
-                    <span>
-                      {(() => {
-                        let dateObj: Date;
-                        if (typeof job.time === 'string' || job.time instanceof Date) {
-                          dateObj = new Date(job.time);
-                        } else if (job.time && typeof job.time.toDate === 'function') {
-                          dateObj = job.time.toDate();
-                        } else if (job.time && job.time.seconds !== undefined && job.time.nanoseconds !== undefined) {
-                          dateObj = new Date(job.time.seconds * 1000 + job.time.nanoseconds / 1e6);
-                        } else {
-                          dateObj = new Date(0);
-                        }
-                        return `${dateObj.toLocaleDateString()} at ${dateObj.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}`;
-                      })()}
-                    </span>
-                  </div>
-                </div>
 
-                <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Job Charge
-                    </span>
-                    <span className="text-xl font-bold text-gray-900 dark:text-white">
-                      ₹{job.charge.toFixed(2)}
-                    </span>
+                  <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-700">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium text-gray-600 dark:text-gray-400">
+                        Job Charge
+                      </span>
+                      <span className="text-xl font-bold text-gray-900 dark:text-white">
+                        ₹{job.charge.toFixed(2)}
+                      </span>
+                    </div>
                   </div>
-                </div>
-              </Card>
-            ))}
+                </Card>
+              )
+            )}
           </div>
         )}
       </div>
     </div>
   );
 }
-

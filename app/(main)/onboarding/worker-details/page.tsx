@@ -17,7 +17,6 @@ import {
   User,
   Wrench,
   MapPin,
-  
   Camera,
   CheckCircle,
   Plus,
@@ -639,7 +638,7 @@ export default function WorkerDetailsPage() {
                                         : "text-gray-500 dark:text-gray-400"
                                     }`}
                                   >
-                                    {level.description}
+                                    {level.range} years
                                   </div>
                                   {isSelected && (
                                     <CheckCircle className="h-4 w-4 text-blue-600 dark:text-blue-400 mt-1" />
@@ -1208,8 +1207,8 @@ export default function WorkerDetailsPage() {
                           />
 
                           <p className="text-xs text-center text-gray-500 dark:text-gray-400 bg-[#303030] dark:bg-[#303030] p-3 rounded-lg">
-                            Upload a clear, professional photo to increase
-                            your booking chances by 3x
+                            Upload a clear, professional photo to increase your
+                            booking chances by 3x
                           </p>
                         </motion.div>
 
@@ -1220,8 +1219,8 @@ export default function WorkerDetailsPage() {
                           className="bg-green-50/50 dark:bg-green-950/20 p-5 md:p-6 rounded-xl border border-green-200/50 dark:border-green-400/20"
                         >
                           <h3 className="font-semibold text-green-900 dark:text-green-100 mb-3 flex items-center gap-2">
-                            <span className="text-xl">🎉</span> You&apos;re
-                            almost done!
+                            <span className="text-xl"></span> You&apos;re almost
+                            done!
                           </h3>
                           <p className="text-sm text-green-800 dark:text-green-200 mb-4">
                             Your profile is looking great. Next, you&apos;ll be

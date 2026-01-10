@@ -31,7 +31,7 @@ import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import Script from "next/script";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
-import { useUserProfile } from '@/hooks/use-user-profile';
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { useRealtimeJobs } from "@/hooks/use-realtime-jobs";
 
 // Extend Window interface for Razorpay
@@ -79,12 +79,13 @@ export default function CustomerBookingsPage() {
   );
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
+  const [reviewedJobs, setReviewedJobs] = useState<Set<string>>(new Set());
 
   // Real-time Firestore listener - instant updates when bookings change!
   const { jobs, loading, error } = useRealtimeJobs({
     userId: userProfile?.id || null,
-    role: 'customer',
-    enabled: !!userProfile?.id
+    role: "customer",
+    enabled: !!userProfile?.id,
   });
 
   // Fallback to API if Firestore fails
@@ -98,25 +99,25 @@ export default function CustomerBookingsPage() {
 
   const loadFromAPI = async () => {
     try {
-      const res = await fetch("/api/customer/jobs", { 
+      const res = await fetch("/api/customer/jobs", {
         cache: "no-store",
-        credentials: "include"
+        credentials: "include",
       });
-      
+
       if (!res.ok) throw new Error(`Failed to load jobs: ${res.status}`);
-      
+
       const data = await res.json();
       setApiJobs(data.jobs || []);
       console.log(`[Bookings API] Loaded ${data.jobs?.length || 0} jobs`);
     } catch (e) {
-      console.error('[Bookings API] Load error:', e);
+      console.error("[Bookings API] Load error:", e);
     }
   };
 
   // If Firestore has an error, activate API fallback
   useEffect(() => {
     if (error && !fallbackActive) {
-      console.warn('[Bookings] Firestore error, falling back to API polling');
+      console.warn("[Bookings] Firestore error, falling back to API polling");
       setFallbackActive(true);
       loadFromAPI();
     }
@@ -125,8 +126,13 @@ export default function CustomerBookingsPage() {
   // Use API polling as fallback only if Firestore fails
   useAutoRefresh(loadFromAPI, { interval: 30000, enabled: fallbackActive });
 
-  // Use either realtime jobs or API jobs
-  const displayJobs = fallbackActive ? apiJobs : jobs;
+  // Use either realtime jobs or API jobs, mark reviewed jobs
+  const displayJobs = (fallbackActive ? apiJobs : jobs).map((job) => {
+    if (reviewedJobs.has(job.id)) {
+      return { ...job, review: { id: "pending", rating: 5, comment: null } };
+    }
+    return job;
+  });
 
   // Filter and search logic
   const ongoing = displayJobs.filter(
@@ -184,17 +190,17 @@ export default function CustomerBookingsPage() {
   // Handle test mode payment (dummy payment)
   const handleTestPayment = async (job: Job) => {
     setPaymentProcessing(true);
-    
+
     toast.info("TEST MODE: Simulating payment...");
-    
+
     // Simulate payment delay
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
+    await new Promise((resolve) => setTimeout(resolve, 2000));
+
     try {
       // Generate dummy payment credentials
       const dummyPaymentId = `test_pay_${Date.now()}`;
       const dummySignature = `test_sig_${Date.now()}`;
-      
+
       const verifyRes = await fetch(`/api/jobs/${job.id}`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -438,12 +444,13 @@ export default function CustomerBookingsPage() {
                   Test Payment Mode Active
                 </p>
                 <p className="text-xs text-amber-700 dark:text-amber-300 mt-1">
-                  You're using dummy payments. No real money will be charged. Perfect for testing!
+                  You're using dummy payments. No real money will be charged.
+                  Perfect for testing!
                 </p>
               </div>
             </motion.div>
           )}
-          
+
           {/* Header */}
           <div className="mb-8">
             <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">
@@ -477,7 +484,7 @@ export default function CustomerBookingsPage() {
             </div>
 
             {/* Search */}
-              <div className="relative w-full sm:w-80">
+            <div className="relative w-full sm:w-80">
               <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-4 w-4" />
               <Input
                 placeholder="Search bookings..."
@@ -971,8 +978,13 @@ export default function CustomerBookingsPage() {
           onOpenChange={setReviewOpen}
           jobId={reviewJobId}
           onSubmitted={() => {
-            // Real-time listener will update automatically
+            // Immediately mark job as reviewed in local state
+            if (reviewJobId) {
+              setReviewedJobs((prev) => new Set(prev).add(reviewJobId));
+            }
             toast.success("Review submitted successfully!");
+            setReviewOpen(false);
+            setReviewJobId(null);
           }}
         />
       </main>
