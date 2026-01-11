@@ -82,22 +82,55 @@ const categories = [
 
 import DashboardBgEffect from "@/components/DashboardBgEffect";
 
+// Helper to validate if a string is a valid URL
+function isValidUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== "string") return false;
+  try {
+    new URL(url);
+    return url.startsWith("http://") || url.startsWith("https://");
+  } catch {
+    return false;
+  }
+}
+
 export default async function CustomerDashboardPage() {
   // Fetch workers from Firestore
   const workersSnapshot = await adminDb
     .collection(COLLECTIONS.USERS)
     .where("role", "==", "WORKER")
-    .limit(50) // Get more initially, then sort and limit in-memory
+    .limit(50)
     .get();
+
+  // Fetch worker profiles for all workers
+  const workerProfilesRef = adminDb.collection(COLLECTIONS.WORKER_PROFILES);
+  const userIds = workersSnapshot.docs.map((doc) => doc.id);
+
+  // Firestore doesn't support 'in' queries with more than 10 items, so we batch
+  const workerProfilesMap = new Map();
+  for (let i = 0; i < userIds.length; i += 10) {
+    const batch = userIds.slice(i, i + 10);
+    if (batch.length > 0) {
+      const profilesQuery = await workerProfilesRef
+        .where("userId", "in", batch)
+        .get();
+      profilesQuery.docs.forEach((doc) => {
+        workerProfilesMap.set(doc.data().userId, {
+          id: doc.id,
+          ...doc.data(),
+        });
+      });
+    }
+  }
 
   // Sort by createdAt and take first 6 in-memory to avoid composite index
   const workersWithoutRatings = workersSnapshot.docs
     .map((doc) => {
       const data = doc.data();
+      const workerProfile = workerProfilesMap.get(doc.id) || null;
       return {
         id: doc.id,
         name: data.name || null,
-        workerProfile: data.workerProfile || null,
+        workerProfile,
         createdAt: data.createdAt,
       };
     })
@@ -227,8 +260,7 @@ export default async function CustomerDashboardPage() {
                 <div className="flex items-start gap-4 mb-4">
                   {/* Profile Image */}
                   <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 flex-shrink-0">
-                    {worker.workerProfile?.profilePic && 
-                     worker.workerProfile.profilePic.startsWith('http') ? (
+                    {isValidUrl(worker.workerProfile?.profilePic) ? (
                       <Image
                         src={worker.workerProfile.profilePic}
                         alt={worker.name ?? "Worker"}
