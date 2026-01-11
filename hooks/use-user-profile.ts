@@ -35,15 +35,12 @@ export function useUserProfile() {
         setLoading(true);
         setError(null);
         
-        // Get the Firebase ID token
-        const token = await user.getIdToken();
-        
         const response = await fetch('/api/user/profile', {
           method: 'GET',
           headers: {
             'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`,
           },
+          credentials: 'include', // Important: include cookies in request
         });
         
         if (!response.ok) {
