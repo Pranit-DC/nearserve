@@ -41,6 +41,7 @@ export async function PUT(req: NextRequest) {
       state,
       postalCode,
       country,
+      profilePic,
     } = body;
 
     // Validate required fields
@@ -104,6 +105,7 @@ export async function PUT(req: NextRequest) {
       state: state || null,
       postalCode: postalCode || null,
       country: country || null,
+      profilePic: profilePic || null,
       updatedAt: FieldValue.serverTimestamp(),
     });
 

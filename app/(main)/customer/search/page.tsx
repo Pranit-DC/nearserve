@@ -1,6 +1,7 @@
 "use client";
 
 import dynamic from "next/dynamic";
+import Image from "next/image";
 import { useEffect, useMemo, useState, useRef, Suspense } from "react";
 import { createPortal } from "react-dom";
 import { useSearchParams, useRouter } from "next/navigation";
@@ -39,6 +40,10 @@ type Worker = {
   role: string;
   // distance may be provided by the API (DB-side Haversine) as distanceKm or distance_km
   distanceKm?: number | null;
+  rating?: {
+    avgRating: number;
+    totalReviews: number;
+  } | null;
   workerProfile: {
     skilledIn: string[] | null;
     city: string | null;
@@ -84,6 +89,18 @@ const SORT_OPTIONS = [
 function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  
+  // Helper to validate if a string is a valid URL
+  const isValidUrl = (url: string | null | undefined): boolean => {
+    if (!url || typeof url !== 'string') return false;
+    try {
+      new URL(url);
+      return url.startsWith('http://') || url.startsWith('https://');
+    } catch {
+      return false;
+    }
+  };
+  
   const initialCategory = useMemo(() => {
     const raw = searchParams.get("category");
     if (!raw) return "All";
@@ -615,15 +632,43 @@ function SearchPageContent() {
                             >
                               <div className="bg-white dark:bg-[#171717] border border-gray-200 dark:border-[#232323] rounded-2xl shadow-md dark:shadow-lg hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-200 p-5 sm:p-6">
                                 <div className="flex items-center gap-4 mb-2">
-                                  <div className="h-14 w-14 rounded-full bg-gradient-to-br from-gray-300 via-gray-400 to-gray-500 dark:from-[#232323] dark:to-[#353535] flex items-center justify-center text-xl font-bold text-white border-4 border-white dark:border-[#232323] shadow">
-                                    {initial}
+                                  <div className="relative h-14 w-14 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-xl font-bold text-white border-4 border-white dark:border-[#232323] shadow flex-shrink-0">
+                                    {isValidUrl(worker.workerProfile?.profilePic) ? (
+                                      <Image
+                                        src={worker.workerProfile.profilePic}
+                                        alt={name}
+                                        width={56}
+                                        height={56}
+                                        className="object-cover w-full h-full"
+                                        onError={(e) => {
+                                          const target = e.target as HTMLImageElement;
+                                          target.style.display = 'none';
+                                        }}
+                                      />
+                                    ) : (
+                                      initial
+                                    )}
                                   </div>
                                   <div className="flex-1 min-w-0">
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                                       {name}
                                     </h3>
-                                    <div className="text-sm text-gray-500 dark:text-gray-400">
-                                      {worker.workerProfile?.yearsExperience ?? 0} years experience
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                      <span>{worker.workerProfile?.yearsExperience ?? 0} years experience</span>
+                                      {worker.rating && worker.rating.totalReviews > 0 && (
+                                        <>
+                                          <span>•</span>
+                                          <div className="flex items-center gap-1">
+                                            <FiStar className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                                            <span className="font-medium text-gray-900 dark:text-white">
+                                              {worker.rating.avgRating.toFixed(1)}
+                                            </span>
+                                            <span className="text-gray-500 dark:text-gray-400">
+                                              ({worker.rating.totalReviews})
+                                            </span>
+                                          </div>
+                                        </>
+                                      )}
                                     </div>
                                   </div>
                                   <div className="hidden sm:block text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300">

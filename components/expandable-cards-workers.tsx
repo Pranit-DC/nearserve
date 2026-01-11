@@ -5,6 +5,7 @@ import { AnimatePresence, motion } from "motion/react";
 import { useOutsideClick } from "@/hooks/use-outside-click";
 import Link from "next/link";
 import BookWorkerButton from "@/components/book-worker-button";
+import { FiStar } from "react-icons/fi";
 
 type WorkerLite = {
   id: string;
@@ -19,6 +20,10 @@ type WorkerLite = {
     minimumFee?: number | null;
   } | null;
   distanceKm?: number | null;
+  rating?: {
+    avgRating: number;
+    totalReviews: number;
+  } | null;
 };
 
 export default function ExpandableCardsWorkers({
@@ -92,6 +97,12 @@ export default function ExpandableCardsWorkers({
                       <div className="text-xs text-gray-500 mt-1">
                         {w.workerProfile?.yearsExperience ?? 0} yrs
                       </div>
+                      {w.rating && w.rating.totalReviews > 0 && (
+                        <div className="flex items-center gap-1 text-xs text-yellow-600 dark:text-yellow-400 mt-1">
+                          <FiStar className="h-3 w-3 fill-current" />
+                          <span className="font-medium">{w.rating.avgRating.toFixed(1)}</span>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
