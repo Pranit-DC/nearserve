@@ -3,6 +3,7 @@ import { adminDb } from "@/lib/firebase-admin";
 import { COLLECTIONS } from "@/lib/firestore";
 import { distanceKm } from "@/lib/location";
 import { serializeFirestoreData } from "@/lib/firestore-serialization";
+import { getWorkerRating } from "@/lib/reviews";
 
 type SearchParams = {
   q?: string | null;
@@ -153,23 +154,46 @@ export async function GET(req: NextRequest) {
       return categoryOk && keywordOk;
     });
 
-    // If requested sort=nearest and distances were computed, sort by distance (nulls last)
-    let result = filtered;
-    if (
-      sort === "nearest" &&
-      typeof lat === "number" &&
-      typeof lng === "number"
-    ) {
-      result = filtered.sort((a, b) => {
-        const da =
-          a.distanceKm == null ? Number.POSITIVE_INFINITY : a.distanceKm;
-        const db =
-          b.distanceKm == null ? Number.POSITIVE_INFINITY : b.distanceKm;
+    // Fetch ratings for all workers before sorting
+    const workersWithRatings = await Promise.all(
+      filtered.map(async (w) => {
+        const rating = await getWorkerRating(w.id);
+        return { ...w, rating };
+      })
+    );
+
+    // Apply sorting based on sort parameter
+    let result = workersWithRatings;
+    
+    if (sort === "nearest" && typeof lat === "number" && typeof lng === "number") {
+      // Sort by distance (nulls last)
+      result = workersWithRatings.sort((a, b) => {
+        const da = a.distanceKm == null ? Number.POSITIVE_INFINITY : a.distanceKm;
+        const db = b.distanceKm == null ? Number.POSITIVE_INFINITY : b.distanceKm;
         return da - db;
+      });
+    } else if (sort === "rating") {
+      // Sort by highest rating (workers with more reviews get priority in ties)
+      result = workersWithRatings.sort((a, b) => {
+        const ratingA = a.rating?.avgRating ?? 0;
+        const ratingB = b.rating?.avgRating ?? 0;
+        if (ratingB !== ratingA) {
+          return ratingB - ratingA; // Higher rating first
+        }
+        // Tie-breaker: more reviews
+        return (b.rating?.totalReviews ?? 0) - (a.rating?.totalReviews ?? 0);
+      });
+    } else if (sort === "experience") {
+      // Sort by most experienced
+      result = workersWithRatings.sort((a, b) => {
+        const expA = a.workerProfile?.yearsExperience ?? 0;
+        const expB = b.workerProfile?.yearsExperience ?? 0;
+        return expB - expA; // Higher experience first
       });
     }
 
     result = result.slice(0, limit);
+
     return NextResponse.json({ count: result.length, workers: serializeFirestoreData(result) });
   } catch (err) {
     console.error("/api/workers error", err);

@@ -35,6 +35,7 @@ export default function CustomerDetailsPage() {
   } = useForm<CustomerFormData>({
     resolver: zodResolver(customerFormSchema),
     defaultValues: {
+      phone: "",
       address: "",
       city: "",
       state: "",
@@ -155,6 +156,27 @@ export default function CustomerDetailsPage() {
                       transition={{ delay: 0.1 }}
                       className="space-y-4"
                     >
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
+                          Phone Number
+                        </label>
+                        <Input
+                          placeholder="10-digit mobile number"
+                          {...register("phone")}
+                          maxLength={10}
+                          className="h-11 md:h-12 border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800/50 focus:border-emerald-500 dark:focus:border-emerald-500 transition-all"
+                          onChange={(e) => {
+                            const value = e.target.value.replace(/\D/g, "");
+                            setValue("phone", value);
+                          }}
+                        />
+                        {errors.phone && (
+                          <p className="text-red-500 text-sm mt-2">
+                            {errors.phone.message}
+                          </p>
+                        )}
+                      </div>
+
                       <div>
                         <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300 mb-2">
                           Full Address

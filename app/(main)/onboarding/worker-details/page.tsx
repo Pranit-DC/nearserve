@@ -36,6 +36,7 @@ import { TypewriterEffect } from "@/components/ui/typewriter-effect";
 import ClickSpark from "@/components/ClickSpark";
 
 interface WorkerFormData {
+  phone: string;
   aadharNumber: string;
   qualification: string;
   certificates: string[];
@@ -155,6 +156,7 @@ export default function WorkerDetailsPage() {
     watch,
   } = useForm<WorkerFormData>({
     defaultValues: {
+      phone: "",
       skilledIn: [],
       qualification: "",
       certificates: [],
@@ -285,6 +287,14 @@ export default function WorkerDetailsPage() {
   const nextStep = async () => {
     // Custom validation for step 1
     if (currentStep === 1) {
+      const phone = watch("phone");
+      const phoneDigits = phone?.replace(/\D/g, "") || "";
+
+      if (phoneDigits.length !== 10 || !phone?.match(/^[6-9]\d{9}$/)) {
+        toast.error("Phone number must be a valid 10-digit mobile number starting with 6-9");
+        return;
+      }
+
       const aadhar = watch("aadharNumber");
       const digitsOnly = aadhar?.replace(/\D/g, "") || "";
 
@@ -334,7 +344,7 @@ export default function WorkerDetailsPage() {
   const getFieldsForStep = (step: number): (keyof WorkerFormData)[] => {
     switch (step) {
       case 1:
-        return ["aadharNumber", "qualification", "yearsExperience", "bio"];
+        return ["phone", "aadharNumber", "qualification", "yearsExperience", "bio"];
       case 2:
         return ["skilledIn"];
       case 3:
@@ -501,6 +511,39 @@ export default function WorkerDetailsPage() {
                           <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}
+                            transition={{ delay: 0.05 }}
+                            className="space-y-2"
+                          >
+                            <label className="block text-sm font-semibold text-gray-700 dark:text-gray-300">
+                              Phone Number
+                            </label>
+                            <Input
+                              placeholder="10-digit mobile number"
+                              {...register("phone")}
+                              maxLength={10}
+                              className="h-11 md:h-12 border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                              onChange={(e) => {
+                                const value = e.target.value.replace(/\D/g, "");
+                                setValue("phone", value);
+                              }}
+                            />
+                            {errors.phone && (
+                              <p className="text-red-500 text-xs md:text-sm mt-1">
+                                {errors.phone.message}
+                              </p>
+                            )}
+                            {watch("phone") &&
+                              watch("phone").length === 10 && (
+                                <p className="text-green-600 dark:text-green-400 text-xs flex items-center gap-1">
+                                  <CheckCircle className="h-3 w-3" />
+                                  Valid phone number
+                                </p>
+                              )}
+                          </motion.div>
+
+                          <motion.div
+                            initial={{ opacity: 0, y: 20 }}
+                            animate={{ opacity: 1, y: 0 }}
                             transition={{ delay: 0.1 }}
                             className="space-y-2"
                           >
@@ -528,7 +571,9 @@ export default function WorkerDetailsPage() {
                                 </p>
                               )}
                           </motion.div>
+                        </div>
 
+                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6">
                           <motion.div
                             initial={{ opacity: 0, y: 20 }}
                             animate={{ opacity: 1, y: 0 }}

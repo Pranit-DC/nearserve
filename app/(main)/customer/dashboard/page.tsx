@@ -1,10 +1,12 @@
 import Link from "next/link";
+import Image from "next/image";
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import BookWorkerButton from "@/components/book-worker-button";
 import { adminDb, COLLECTIONS } from "@/lib/firebase-admin";
 import { serializeFirestoreData } from "@/lib/firestore-serialization";
 import { CustomerDashboardStats } from "@/components/customer-dashboard-stats";
+import { getWorkerRating } from "@/lib/reviews";
 import {
   Wrench,
   Plug,
@@ -17,6 +19,7 @@ import {
   ArrowRight,
   MapPin,
 } from "lucide-react";
+import { FiStar, FiUser } from "react-icons/fi";
 
 const categories = [
   {
@@ -79,34 +82,75 @@ const categories = [
 
 import DashboardBgEffect from "@/components/DashboardBgEffect";
 
+// Helper to validate if a string is a valid URL
+function isValidUrl(url: string | null | undefined): boolean {
+  if (!url || typeof url !== "string") return false;
+  try {
+    new URL(url);
+    return url.startsWith("http://") || url.startsWith("https://");
+  } catch {
+    return false;
+  }
+}
+
 export default async function CustomerDashboardPage() {
   // Fetch workers from Firestore
   const workersSnapshot = await adminDb
     .collection(COLLECTIONS.USERS)
     .where("role", "==", "WORKER")
-    .limit(50) // Get more initially, then sort and limit in-memory
+    .limit(50)
     .get();
 
-  // Sort by createdAt and take first 6 in-memory to avoid composite index
-  const workers = serializeFirestoreData(
-    workersSnapshot.docs
-      .map((doc) => {
-        const data = doc.data();
-        return {
+  // Fetch worker profiles for all workers
+  const workerProfilesRef = adminDb.collection(COLLECTIONS.WORKER_PROFILES);
+  const userIds = workersSnapshot.docs.map((doc) => doc.id);
+
+  // Firestore doesn't support 'in' queries with more than 10 items, so we batch
+  const workerProfilesMap = new Map();
+  for (let i = 0; i < userIds.length; i += 10) {
+    const batch = userIds.slice(i, i + 10);
+    if (batch.length > 0) {
+      const profilesQuery = await workerProfilesRef
+        .where("userId", "in", batch)
+        .get();
+      profilesQuery.docs.forEach((doc) => {
+        workerProfilesMap.set(doc.data().userId, {
           id: doc.id,
-          name: data.name || null,
-          workerProfile: data.workerProfile || null,
-          createdAt: data.createdAt,
-        };
+          ...doc.data(),
+        });
+      });
+    }
+  }
+
+  // Sort by createdAt and take first 6 in-memory to avoid composite index
+  const workersWithoutRatings = workersSnapshot.docs
+    .map((doc) => {
+      const data = doc.data();
+      const workerProfile = workerProfilesMap.get(doc.id) || null;
+      return {
+        id: doc.id,
+        name: data.name || null,
+        workerProfile,
+        createdAt: data.createdAt,
+      };
+    })
+    .sort((a, b) => {
+      // Sort by createdAt descending
+      const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return bTime - aTime;
+    })
+    .slice(0, 6)
+    .map(({ createdAt, ...worker }) => worker); // Remove createdAt from final result
+
+  // Fetch ratings for all workers
+  const workers = serializeFirestoreData(
+    await Promise.all(
+      workersWithoutRatings.map(async (worker) => {
+        const rating = await getWorkerRating(worker.id);
+        return { ...worker, rating };
       })
-      .sort((a, b) => {
-        // Sort by createdAt descending
-        const aTime = a.createdAt ? new Date(a.createdAt).getTime() : 0;
-        const bTime = b.createdAt ? new Date(b.createdAt).getTime() : 0;
-        return bTime - aTime;
-      })
-      .slice(0, 6)
-      .map(({ createdAt, ...worker }) => worker) // Remove createdAt from final result
+    )
   );
 
   return (
@@ -213,7 +257,23 @@ export default async function CustomerDashboardPage() {
                 key={worker.id}
                 className="p-6 border border-gray-200 dark:border-gray-800 bg-white dark:bg-[#181818] hover:shadow-lg hover:shadow-gray-900/5 dark:hover:shadow-black/20 transition-all duration-200"
               >
-                <div className="flex items-start justify-between mb-4">
+                <div className="flex items-start gap-4 mb-4">
+                  {/* Profile Image */}
+                  <div className="relative w-16 h-16 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 flex-shrink-0">
+                    {isValidUrl(worker.workerProfile?.profilePic) ? (
+                      <Image
+                        src={worker.workerProfile.profilePic}
+                        alt={worker.name ?? "Worker"}
+                        width={64}
+                        height={64}
+                        className="object-cover w-full h-full"
+                      />
+                    ) : (
+                      <div className="w-full h-full flex items-center justify-center text-white text-xl font-bold">
+                        {worker.name?.charAt(0)?.toUpperCase() ?? "W"}
+                      </div>
+                    )}
+                  </div>
                   <div className="flex-1 min-w-0">
                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                       {worker.name ?? "Professional"}
@@ -222,15 +282,31 @@ export default async function CustomerDashboardPage() {
                       {worker.workerProfile?.qualification ||
                         "Skilled Professional"}
                     </p>
-                    <div className="flex items-center text-sm text-gray-500 dark:text-gray-400 mt-2">
-                      <MapPin className="h-4 w-4 mr-1" />
-                      <span className="truncate">
-                        {worker.workerProfile?.city || "Location not specified"}
-                      </span>
-                      <span className="mx-2">•</span>
+                    <div className="flex items-center flex-wrap gap-x-2 gap-y-1 text-sm text-gray-500 dark:text-gray-400 mt-2">
+                      <div className="flex items-center">
+                        <MapPin className="h-4 w-4 mr-1" />
+                        <span className="truncate">
+                          {worker.workerProfile?.city || "Location not specified"}
+                        </span>
+                      </div>
+                      <span>•</span>
                       <span>
                         {worker.workerProfile?.yearsExperience ?? 0}+ years
                       </span>
+                      {worker.rating && worker.rating.totalReviews > 0 && (
+                        <>
+                          <span>•</span>
+                          <div className="flex items-center gap-1">
+                            <FiStar className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                            <span className="font-medium text-gray-900 dark:text-white">
+                              {worker.rating.avgRating.toFixed(1)}
+                            </span>
+                            <span className="text-gray-500 dark:text-gray-400">
+                              ({worker.rating.totalReviews})
+                            </span>
+                          </div>
+                        </>
+                      )}
                     </div>
                   </div>
                 </div>

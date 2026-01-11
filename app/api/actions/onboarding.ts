@@ -8,6 +8,7 @@ import { FieldValue } from "firebase-admin/firestore";
 import { serializeFirestoreData } from "@/lib/firestore-serialization";
 
 export type WorkerFormData = {
+  phone: string;
   skilledIn: string[];
   qualification?: string;
   certificates?: string[];
@@ -26,6 +27,7 @@ export type WorkerFormData = {
 };
 
 export type CustomerFormData = {
+  phone: string;
   address: string;
   city: string;
   state: string;
@@ -72,19 +74,23 @@ export async function setUserRole(
 
   try {
     if (role === "CUSTOMER") {
+      const phone = formData.get("phone")?.toString();
       const address = formData.get("address")?.toString();
       const city = formData.get("city")?.toString();
       const state = formData.get("state")?.toString();
       const country = formData.get("country")?.toString();
       const postalCode = formData.get("postalCode")?.toString();
 
-      if (!address || !city || !state || !country || !postalCode) {
+      if (!phone || !address || !city || !state || !country || !postalCode) {
         throw new Error("Missing required fields for customer");
       }
 
-      // Update user role
-      await userDoc.ref.update({ role: "CUSTOMER" });
-      console.log('✅ Updated user role to CUSTOMER');
+      // Update user role and phone
+      await userDoc.ref.update({ 
+        role: "CUSTOMER",
+        phone: phone,
+      });
+      console.log('✅ Updated user role to CUSTOMER with phone:', phone);
 
       // Create or update customer profile
       const customerProfilesRef = adminDb.collection(COLLECTIONS.CUSTOMER_PROFILES);
@@ -120,7 +126,9 @@ export async function setUserRole(
     if (role === "WORKER") {
       console.log("Processing WORKER role");
 
+      const phone = formData.get("phone")?.toString();
       const skilledInRaw = formData.get("skilledIn")?.toString();
+      console.log("phone:", phone);
       console.log("skilledInRaw:", skilledInRaw);
 
       let skilledIn: string[] = [];
@@ -196,6 +204,7 @@ export async function setUserRole(
       }
 
       if (
+        !phone ||
         !skilledIn.length ||
         !aadharNumber ||
         !hourlyRate ||
@@ -261,9 +270,12 @@ export async function setUserRole(
         updatedAt: FieldValue.serverTimestamp() as any,
       };
 
-      // Update user role
-      await userDoc.ref.update({ role: "WORKER" });
-      console.log('✅ Updated user role to WORKER');
+      // Update user role and phone
+      await userDoc.ref.update({ 
+        role: "WORKER",
+        phone: phone,
+      });
+      console.log('✅ Updated user role to WORKER with phone:', phone);
 
       // Create or update worker profile
       const existingWorkerQuery = await workerProfilesRef.where('userId', '==', userId).limit(1).get();

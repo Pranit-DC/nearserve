@@ -5,6 +5,7 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import Image from "next/image";
 import BookWorkerButton from "@/components/book-worker-button";
 import OpenBookFromQuery from "@/components/open-book-from-query";
 import {
@@ -14,7 +15,9 @@ import {
   FiMail,
   FiPhone,
   FiAward,
+  FiStar,
 } from "react-icons/fi";
+import { getWorkerRating } from "@/lib/reviews";
 
 export const dynamic = "force-dynamic";
 
@@ -103,12 +106,16 @@ export default async function WorkerOrSpecialityPage({
       workerProfile = workerProfileQuery.docs[0].data();
     }
 
+    // Fetch worker rating
+    const rating = await getWorkerRating(slug);
+
     const worker = serializeFirestoreData({
       id: workerDoc.id,
       name: workerData?.name || "Unknown",
       email: workerData?.email || "",
       phone: workerData?.phone || "",
       workerProfile,
+      rating,
     });
 
     if (!worker.workerProfile) {
@@ -168,14 +175,24 @@ export default async function WorkerOrSpecialityPage({
                   {/* Profile Picture */}
                   <div className="relative inline-block mb-4">
                     <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden flex items-center justify-center border-2 sm:border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-gray-900">
-                      <div className="text-blue-500 dark:text-blue-400 text-lg sm:text-2xl lg:text-4xl font-bold">
-                        {worker.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)}
-                      </div>
+                      {wp.profilePic && wp.profilePic.startsWith('http') ? (
+                        <Image
+                          src={wp.profilePic}
+                          alt={worker.name}
+                          width={128}
+                          height={128}
+                          className="object-cover w-full h-full"
+                        />
+                      ) : (
+                        <div className="text-blue-500 dark:text-blue-400 text-lg sm:text-2xl lg:text-4xl font-bold">
+                          {worker.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2)}
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -224,6 +241,22 @@ export default async function WorkerOrSpecialityPage({
 
                   {/* Quick Stats */}
                   <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                    {worker.rating && worker.rating.totalReviews > 0 && (
+                      <div className="flex items-center justify-between text-xs sm:text-sm mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+                        <span className="text-gray-600 dark:text-gray-400">
+                          Rating
+                        </span>
+                        <div className="flex items-center gap-1">
+                          <FiStar className="h-4 w-4 fill-yellow-400 text-yellow-400" />
+                          <span className="text-gray-900 dark:text-white font-semibold">
+                            {worker.rating.avgRating.toFixed(1)}
+                          </span>
+                          <span className="text-gray-500 dark:text-gray-400 text-xs">
+                            ({worker.rating.totalReviews} review{worker.rating.totalReviews !== 1 ? 's' : ''})
+                          </span>
+                        </div>
+                      </div>
+                    )}
                     <div className="flex items-center justify-between text-xs sm:text-sm">
                       <span className="text-gray-600 dark:text-gray-400">
                         Experience
@@ -423,11 +456,19 @@ export default async function WorkerOrSpecialityPage({
     };
   });
 
-  const workers = serializeFirestoreData(
-    workersRaw.filter((w) =>
-      flattenStrings(w.workerProfile?.skilledIn).includes(normalized)
-    )
+  const filteredWorkers = workersRaw.filter((w) =>
+    flattenStrings(w.workerProfile?.skilledIn).includes(normalized)
   );
+
+  // Fetch ratings for all workers
+  const workersWithRatings = await Promise.all(
+    filteredWorkers.map(async (w) => {
+      const rating = await getWorkerRating(w.id);
+      return { ...w, rating };
+    })
+  );
+
+  const workers = serializeFirestoreData(workersWithRatings);
 
   return (
     <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-black dark:to-gray-800">
@@ -492,6 +533,17 @@ export default async function WorkerOrSpecialityPage({
                           {w.workerProfile?.city || "City"}
                         </span>
                       </div>
+                      {w.rating && w.rating.totalReviews > 0 && (
+                        <div className="flex items-center gap-1 text-xs">
+                          <FiStar className="h-3 w-3 fill-yellow-400 text-yellow-400" />
+                          <span className="font-medium text-gray-900 dark:text-white">
+                            {w.rating.avgRating.toFixed(1)}
+                          </span>
+                          <span className="text-gray-500 dark:text-gray-400">
+                            ({w.rating.totalReviews})
+                          </span>
+                        </div>
+                      )}
                       <div className="text-xs text-gray-500 dark:text-gray-500 truncate">
                         {(w.workerProfile?.skilledIn || [])
                           .slice(0, 3)

@@ -2,6 +2,7 @@ import { z } from "zod";
 
 // ----------------- Customer Schema -----------------
 export const customerFormSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, "Phone must be a valid 10-digit mobile number"),
   address: z.string().min(3, "Address is required"),
   city: z.string().min(2, "City is required"),
   state: z.string().min(2, "State is required"),
@@ -13,6 +14,7 @@ export const customerFormSchema = z.object({
 
 // ----------------- Worker Schema -----------------
 export const workerFormSchema = z.object({
+  phone: z.string().regex(/^[6-9]\d{9}$/, "Phone must be a valid 10-digit mobile number"),
   aadharNumber: z
     .string()
     .regex(/^\d{12}$/, "Aadhar must be a 12 digit number"),

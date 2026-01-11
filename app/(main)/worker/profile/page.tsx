@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useRef } from "react";
 import { useAuth } from "@/contexts/AuthContext";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
@@ -12,6 +12,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { FileDropzone } from "@/components/ui/file-dropzone";
 import StaggeredDropDown from "@/components/ui/staggered-dropdown";
 import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 import {
   FiUser,
   FiMapPin,
@@ -133,6 +134,9 @@ export default function WorkerProfilePage() {
   const [customSkill, setCustomSkill] = useState("");
   const [customQualification, setCustomQualification] = useState("");
   const [fetchingLocation, setFetchingLocation] = useState(false);
+  const [uploadingProfilePic, setUploadingProfilePic] = useState(false);
+  const [profilePicFile, setProfilePicFile] = useState<File | null>(null);
+  const profilePicInputRef = useRef<HTMLInputElement>(null);
   const [reviews, setReviews] = useState<
     {
       id: string;
@@ -364,6 +368,7 @@ export default function WorkerProfilePage() {
           state: editedProfile.state,
           postalCode: editedProfile.postalCode,
           country: editedProfile.country,
+          profilePic: editedProfile.profilePic,
         }),
       });
 
@@ -398,22 +403,98 @@ export default function WorkerProfilePage() {
       setEditedProfile(data.workerProfile);
     }
     setIsEditing(false);
+    setProfilePicFile(null);
+  };
+
+  const handleProfilePicChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (file.size > 5 * 1024 * 1024) {
+      toast.error("Image size must be less than 5MB");
+      return;
+    }
+
+    setUploadingProfilePic(true);
+    try {
+      // Upload to Cloudinary
+      const formData = new FormData();
+      formData.append("file", file);
+      formData.append("type", "profile");
+
+      const uploadResponse = await fetch("/api/upload", {
+        method: "POST",
+        body: formData,
+      });
+
+      if (!uploadResponse.ok) {
+        throw new Error("Failed to upload image");
+      }
+
+      const uploadData = await uploadResponse.json();
+      
+      // Update profile with new image URL
+      setEditedProfile({
+        ...editedProfile,
+        profilePic: uploadData.url,
+      });
+
+      toast.success("Profile picture uploaded successfully!");
+    } catch (error) {
+      console.error("Error uploading profile picture:", error);
+      toast.error("Failed to upload profile picture");
+    } finally {
+      setUploadingProfilePic(false);
+    }
   };
 
   const handleAddProject = async () => {
     if (!newWork.title.trim() || newWork.images.length === 0) {
-      alert("Please enter a project title and select an image");
+      toast.error("Please enter a project title and select an image");
       return;
     }
 
     setUploadingProject(true);
     try {
-      // TODO: Implement actual file upload and project creation API
-      // For now, just show a message
-      console.log("Adding project:", newWork);
+      // Upload images first
+      const uploadedImageUrls: string[] = [];
+      
+      for (const imageFile of newWork.images) {
+        const formData = new FormData();
+        formData.append("file", imageFile);
+        formData.append("type", "work");
 
-      // Simulate upload
-      await new Promise((resolve) => setTimeout(resolve, 1000));
+        const uploadResponse = await fetch("/api/upload", {
+          method: "POST",
+          body: formData,
+        });
+
+        if (!uploadResponse.ok) {
+          throw new Error("Failed to upload image");
+        }
+
+        const uploadData = await uploadResponse.json();
+        uploadedImageUrls.push(uploadData.url);
+      }
+
+      // Create portfolio item with uploaded image URLs
+      const response = await fetch("/api/worker/portfolio", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          title: newWork.title,
+          description: newWork.description,
+          images: uploadedImageUrls,
+          location: newWork.location,
+        }),
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to add portfolio item");
+      }
 
       // Reset form
       setNewWork({
@@ -427,14 +508,41 @@ export default function WorkerProfilePage() {
       // Reload profile to show new project
       await loadProfile();
 
-      alert(
-        "Project added successfully! Note: Full implementation requires file upload API."
-      );
+      toast.success("Portfolio item added successfully!");
     } catch (error) {
       console.error("Error adding project:", error);
-      alert("Failed to add project");
+      toast.error(
+        error instanceof Error ? error.message : "Failed to add portfolio item"
+      );
     } finally {
       setUploadingProject(false);
+    }
+  };
+
+  const handleDeleteProject = async (workId: string) => {
+    if (!confirm("Are you sure you want to delete this portfolio item?")) {
+      return;
+    }
+
+    try {
+      const response = await fetch(`/api/worker/portfolio?id=${workId}`, {
+        method: "DELETE",
+      });
+
+      if (!response.ok) {
+        const error = await response.json();
+        throw new Error(error.error || "Failed to delete portfolio item");
+      }
+
+      // Reload profile to reflect deletion
+      await loadProfile();
+
+      toast.success("Portfolio item deleted successfully!");
+    } catch (error) {
+      console.error("Error deleting project:", error);
+      toast.error(
+        error instanceof Error ? error.message : "Failed to delete portfolio item"
+      );
     }
   };
 
@@ -596,9 +704,28 @@ export default function WorkerProfilePage() {
                     )}
                   </div>
                   {isEditing && (
-                    <button className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-full flex items-center justify-center text-white shadow-lg transition-colors">
-                      <FiCamera className="h-5 w-5" />
-                    </button>
+                    <>
+                      <input
+                        ref={profilePicInputRef}
+                        type="file"
+                        accept="image/*"
+                        onChange={handleProfilePicChange}
+                        className="hidden"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => profilePicInputRef.current?.click()}
+                        disabled={uploadingProfilePic}
+                        className="absolute bottom-0 right-0 w-10 h-10 bg-blue-600 hover:bg-blue-700 disabled:bg-blue-400 rounded-full flex items-center justify-center text-white shadow-lg transition-colors"
+                        title="Change profile picture"
+                      >
+                        {uploadingProfilePic ? (
+                          <div className="animate-spin h-5 w-5 border-2 border-white border-t-transparent rounded-full" />
+                        ) : (
+                          <FiCamera className="h-5 w-5" />
+                        )}
+                      </button>
+                    </>
                   )}
                 </div>
 
@@ -1316,6 +1443,15 @@ export default function WorkerProfilePage() {
                               transition={{ delay: index * 0.1 }}
                               className="group relative rounded-lg overflow-hidden border border-gray-200 dark:border-gray-700 hover:shadow-lg transition-all"
                             >
+                              {/* Delete button (visible on hover) */}
+                              <button
+                                onClick={() => handleDeleteProject(work.id)}
+                                className="absolute top-2 right-2 z-10 p-2 bg-red-500 hover:bg-red-600 text-white rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                                title="Delete project"
+                              >
+                                <FiX className="h-4 w-4" />
+                              </button>
+                              
                               {imageUrl ? (
                                 <div className="aspect-video relative bg-gray-100 dark:bg-gray-700">
                                   <Image
