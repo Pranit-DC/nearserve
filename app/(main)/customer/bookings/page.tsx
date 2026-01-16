@@ -594,7 +594,12 @@ export default function CustomerBookingsPage() {
                               Date & Time
                             </p>
                             <p className="text-xs">
-                              {new Date(j.time).toLocaleString()}
+                              {(() => {
+                                let d = j.time;
+                                if (d && typeof d === 'object' && typeof d.toDate === 'function') d = d.toDate();
+                                else d = new Date(d);
+                                return d && !isNaN(d.getTime()) ? d.toLocaleString() : "—";
+                              })()}
                             </p>
                           </div>
                         </div>
@@ -811,7 +816,12 @@ export default function CustomerBookingsPage() {
                               Date & Time
                             </p>
                             <p className="text-xs">
-                              {new Date(j.time).toLocaleString()}
+                              {(() => {
+                                let d = j.time;
+                                if (d && typeof d === 'object' && typeof d.toDate === 'function') d = d.toDate();
+                                else d = new Date(d);
+                                return d && !isNaN(d.getTime()) ? d.toLocaleString() : "—";
+                              })()}
                             </p>
                           </div>
                         </div>

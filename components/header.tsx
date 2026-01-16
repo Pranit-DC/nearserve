@@ -69,6 +69,15 @@ export function Header() {
 
     baseItems.push({ name: "Pricing", link: "/pricing" });
 
+    // Contextual Help link: prefer role-specific help when available
+    let helpLink = "/help";
+    if (userProfile) {
+      if (userProfile.role === "WORKER") helpLink = "/worker/help";
+      else if (userProfile.role === "CUSTOMER") helpLink = "/customer/help";
+    }
+
+    baseItems.push({ name: "Help", link: helpLink });
+
     return baseItems;
   };
 

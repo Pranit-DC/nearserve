@@ -73,7 +73,7 @@ export default function WorkerHelpPage() {
   ];
 
   return (
-    <div className="min-h-screen space-y-8 bg-white dark:bg-[#212121] px-4 sm:px-6 lg:px-8 py-6 pt-30">
+    <div className="min-h-screen space-y-8 bg-white dark:bg-[#212121] px-4 sm:px-6 lg:px-8 py-6 pt-30 rounded-b-[3rem] overflow-hidden">
       {/* Header Section */}
       <div className="space-y-2 text-center pt-4">
         <div className="flex justify-center mb-2">
