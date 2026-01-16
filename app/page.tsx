@@ -60,7 +60,7 @@ export default function Home() {
 
   return (
     <div className="relative bg-slate-900">
-      <div className="bg-white dark:bg-[#0B0F14] text-foreground pb-20 rounded-b-[3rem] relative z-10">
+      <div className="bg-white dark:bg-[#0B0F14] text-foreground pb-0 rounded-b-[3rem] relative z-10">
         {/* Hero Section with Premium Hero */}
         <PremiumHero />
 
