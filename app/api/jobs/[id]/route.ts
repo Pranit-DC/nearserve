@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminAuth, adminDb } from "@/lib/firebase-admin";
-import { COLLECTIONS, JobLog, Transaction } from "@/lib/firestore";
+import { COLLECTIONS, JobLog, Transaction, TransactionType } from "@/lib/firestore";
 import { cookies } from "next/headers";
 import { FieldValue } from "firebase-admin/firestore";
 import {
@@ -543,7 +543,7 @@ export async function POST(
     if (!jobDoc.exists)
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
-    const job = { id: jobDoc.id, ...jobDoc.data() as { customerId?: string; status?: string; razorpayOrderId?: string; charge?: number; [key: string]: any } };
+    const job = { id: jobDoc.id, ...jobDoc.data() as { customerId?: string; status?: string; razorpayOrderId?: string; charge?: number; amount?: number; type?: import("@/lib/firestore").TransactionType; [key: string]: any } };
 
     // Authorization: Only customer can verify payment
     if (user.role !== "CUSTOMER" || job.customerId !== user.id) {
@@ -598,7 +598,7 @@ export async function POST(
       userId: job.customerId,
       jobId: job.id,
       amount: job.charge,
-      type: "PAYMENT",
+      type: TransactionType.PAYMENT,
       createdAt: FieldValue.serverTimestamp() as any,
       updatedAt: FieldValue.serverTimestamp() as any,
     };
