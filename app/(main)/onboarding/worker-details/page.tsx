@@ -595,7 +595,7 @@ export default function WorkerDetailsPage() {
                             <StaggeredDropDown
                               items={qualificationOptions}
                               selected={selectedQualification}
-                              onSelect={(value) => {
+                              onSelectAction={(value) => {
                                 if (value === "other") {
                                   setSelectedQualification("");
                                 } else {

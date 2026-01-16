@@ -329,7 +329,7 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
                 <StaggeredDropDown
                   items={languages}
                   selected={currentLang}
-                  onSelect={changeLanguage}
+                  onSelectAction={changeLanguage}
                   label="Language"
                 />
               </div>
@@ -339,7 +339,7 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
               <StaggeredDropDown
                 items={languages}
                 selected={currentLang}
-                onSelect={changeLanguage}
+                onSelectAction={changeLanguage}
                 label=""
                 isCollapsed={true}
               />

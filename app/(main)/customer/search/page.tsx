@@ -508,7 +508,7 @@ function SearchPageContent() {
                 <StaggeredDropDown
                   items={SORT_OPTIONS}
                   selected={sortBy}
-                  onSelect={(v) => setSortBy(v)}
+                  onSelectAction={(v) => setSortBy(v)}
                 />
                 <span className="text-xs text-gray-500 ml-auto sm:ml-0">
                   {workers.length} workers found
@@ -633,7 +633,7 @@ function SearchPageContent() {
                               <div className="bg-white dark:bg-[#171717] border border-gray-200 dark:border-[#232323] rounded-2xl shadow-md dark:shadow-lg hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-200 p-5 sm:p-6">
                                 <div className="flex items-center gap-4 mb-2">
                                   <div className="relative h-14 w-14 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-xl font-bold text-white border-4 border-white dark:border-[#232323] shadow flex-shrink-0">
-                                    {isValidUrl(worker.workerProfile?.profilePic) ? (
+                                    {isValidUrl(worker.workerProfile?.profilePic) && worker.workerProfile?.profilePic ? (
                                       <Image
                                         src={worker.workerProfile.profilePic}
                                         alt={name}

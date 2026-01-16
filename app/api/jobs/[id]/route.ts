@@ -49,7 +49,7 @@ export async function PATCH(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const userDoc = userQuery.docs[0];
-    const user = { id: userDoc.id, ...userDoc.data() };
+    const user = { id: userDoc.id, ...userDoc.data() as { role?: string; [key: string]: any } };
 
     // Get job
     const resolvedParams = await params;
@@ -58,7 +58,7 @@ export async function PATCH(
     if (!jobDoc.exists)
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
-    const job = { id: jobDoc.id, ...jobDoc.data() };
+    const job = { id: jobDoc.id, ...jobDoc.data() as { customerId?: string; workerId?: string; status?: string; description?: string; date?: any; workerMarkedComplete?: boolean; charge?: number; razorpayOrderId?: string; [key: string]: any } };
 
     // Fetch customer and worker info
     const customerDoc = job.customerId ? await usersRef.doc(job.customerId).get() : null;
@@ -113,9 +113,9 @@ export async function PATCH(
         console.log(`[NOTIFICATION] Worker accepted job, notifying customer ${job.customerId}`);
         
         // Create in-app notification
-        await notifyCustomerJobAcceptedInApp(job.customerId, {
+        await notifyCustomerJobAcceptedInApp(job.customerId || "", {
           workerName: workerDoc?.data()?.name || 'Worker',
-          serviceName: job.description,
+          serviceName: job.description || "",
           date: job.date?.toDate?.()?.toLocaleDateString() || 'Soon',
           jobId: job.id,
         });
@@ -123,7 +123,7 @@ export async function PATCH(
         
         // Send push notification
         const pushResult = await sendPushNotification({
-          userId: job.customerId,
+          userId: job.customerId || "",
           title: '✅ Job Accepted',
           message: `${workerDoc?.data()?.name || 'Worker'} has accepted your ${job.description} request`,
           type: 'JOB_ACCEPTED',
@@ -220,16 +220,16 @@ export async function PATCH(
 
       // Create in-app notification for customer
       try {
-        await notifyCustomerJobStarted(job.customerId, {
+        await notifyCustomerJobStarted(job.customerId || "", {
           workerName: workerDoc?.data()?.name || 'Worker',
-          serviceName: job.description,
+          serviceName: job.description || "",
           jobId: job.id,
         });
         console.log(`[Notification] Created in-app notification for customer ${job.customerId} - job started`);
         
         // Send push notification
         await sendPushNotification({
-          userId: job.customerId,
+          userId: job.customerId || "",
           title: '🚀 Job Started',
           message: `${workerDoc?.data()?.name || 'Worker'} has started working on your ${job.description}`,
           type: 'JOB_STARTED',
@@ -300,16 +300,16 @@ export async function PATCH(
 
       // Notify customer that worker has completed the work
       try {
-        await notifyCustomerJobCompleted(job.customerId, {
+        await notifyCustomerJobCompleted(job.customerId || "", {
           workerName: workerDoc?.data()?.name || 'Worker',
-          serviceName: job.description,
+          serviceName: job.description || "",
           jobId: job.id,
         });
         console.log(`[Notification] Created in-app notification for customer ${job.customerId} - worker completed work`);
         
         // Send push notification to customer
         await sendPushNotification({
-          userId: job.customerId,
+          userId: job.customerId || "",
           title: '✅ Work Completed',
           message: `${workerDoc?.data()?.name || 'Worker'} has completed your ${job.description}. Please confirm and pay ₹${job.charge}`,
           type: 'JOB_COMPLETED',
@@ -361,7 +361,7 @@ export async function PATCH(
           requiresPayment: true,
           razorpayOrder: {
             orderId: job.razorpayOrderId,
-            amount: job.charge * 100, // Convert to paise
+            amount: (job.charge || 0) * 100, // Convert to paise
             currency: "INR",
             keyId: process.env.RAZORPAY_KEY_ID,
           },
@@ -373,7 +373,7 @@ export async function PATCH(
       // Create Razorpay order
       const razorpayOrder = await createRazorpayOrder(
         job.id,
-        job.charge,
+        job.charge || 0,
         jobWithRelations.customer?.email,
         jobWithRelations.customer?.phone
       );
@@ -534,7 +534,7 @@ export async function POST(
       return NextResponse.json({ error: "User not found" }, { status: 404 });
 
     const userDoc = userQuery.docs[0];
-    const user = { id: userDoc.id, ...userDoc.data() };
+    const user = { id: userDoc.id, ...userDoc.data() as { role?: string; [key: string]: any } };
 
     // Get job
     const resolvedParams = await params;
@@ -543,7 +543,7 @@ export async function POST(
     if (!jobDoc.exists)
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
-    const job = { id: jobDoc.id, ...jobDoc.data() };
+    const job = { id: jobDoc.id, ...jobDoc.data() as { customerId?: string; status?: string; razorpayOrderId?: string; charge?: number; [key: string]: any } };
 
     // Authorization: Only customer can verify payment
     if (user.role !== "CUSTOMER" || job.customerId !== user.id) {

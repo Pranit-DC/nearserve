@@ -343,7 +343,7 @@ export function CustomerSidebar({
                 <StaggeredDropDown
                   items={languages}
                   selected={currentLang}
-                  onSelect={changeLanguage}
+                  onSelectAction={changeLanguage}
                   label="Language"
                 />
               </div>
@@ -353,7 +353,7 @@ export function CustomerSidebar({
               <StaggeredDropDown
                 items={languages}
                 selected={currentLang}
-                onSelect={changeLanguage}
+                onSelectAction={changeLanguage}
                 label=""
                 isCollapsed={true}
               />

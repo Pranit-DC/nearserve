@@ -187,7 +187,7 @@ export default async function WorkerOrSpecialityPage({
                         <div className="text-blue-500 dark:text-blue-400 text-lg sm:text-2xl lg:text-4xl font-bold">
                           {worker.name
                             .split(" ")
-                            .map((n) => n[0])
+                            .map((n: string) => n[0])
                             .join("")
                             .toUpperCase()
                             .slice(0, 2)}
@@ -340,7 +340,7 @@ export default async function WorkerOrSpecialityPage({
                       Professional Skills
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {(wp.skilledIn || []).map((skill, i) => (
+                      {(wp.skilledIn || []).map((skill: string, i: number) => (
                         <Badge
                           key={i}
                           className="bg-blue-100 text-blue-700 dark:bg-blue-900 dark:text-blue-300 text-xs"
@@ -360,7 +360,7 @@ export default async function WorkerOrSpecialityPage({
                       Service Areas
                     </label>
                     <div className="flex flex-wrap gap-2">
-                      {(wp.availableAreas || []).map((area, i) => (
+                      {(wp.availableAreas || []).map((area: string, i: number) => (
                         <Badge
                           key={i}
                           variant="outline"
@@ -499,7 +499,7 @@ export default async function WorkerOrSpecialityPage({
           </Card>
         ) : (
           <div className="grid gap-4 sm:gap-6 md:grid-cols-2 lg:grid-cols-3">
-            {workers.map((w) => (
+            {workers.map((w: any) => (
               <Card
                 key={w.id}
                 className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-2 border-gray-200/60 dark:border-[#2c2c2c] shadow-xl hover:shadow-2xl transition-all rounded-2xl"
@@ -509,7 +509,7 @@ export default async function WorkerOrSpecialityPage({
                     <div className="text-blue-600 dark:text-blue-400 text-lg sm:text-xl font-bold">
                       {(w.name ?? "U")
                         .split(" ")
-                        .map((n) => n[0])
+                        .map((n: string) => n[0])
                         .join("")
                         .toUpperCase()
                         .slice(0, 2)}

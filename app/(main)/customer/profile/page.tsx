@@ -388,45 +388,53 @@ export default function CustomerProfilePage() {
                 {/* Profile Picture */}
                 <div className="relative inline-block mb-4">
                   <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden flex items-center justify-center border-2 sm:border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-[#171717]">
-                    {data?.imageUrl ? (
-                      <Image
-                        src={data.imageUrl}
-                        alt={data.name}
-                        width={128}
-                        height={128}
-                        className="object-cover w-full h-full"
-                        onError={(e) => {
-                          // Show initials avatar on error
-                          const target = e.currentTarget;
-                          target.style.display = "none";
-                          const parent = target.parentElement;
-                          if (
-                            parent &&
-                            !parent.querySelector(".initials-avatar")
-                          ) {
-                            const initialsDiv = document.createElement("div");
-                            initialsDiv.className =
-                              "initials-avatar text-blue-500 dark:text-blue-400 text-lg sm:text-2xl lg:text-4xl font-bold flex items-center justify-center w-full h-full";
-                            initialsDiv.textContent = data.name
-                              .split(" ")
-                              .map((n: string) => n[0])
-                              .join("")
-                              .toUpperCase()
-                              .slice(0, 2);
-                            parent.appendChild(initialsDiv);
-                          }
-                        }}
-                      />
-                    ) : (
-                      <div className="text-blue-500 dark:text-blue-400 text-lg sm:text-2xl lg:text-4xl font-bold">
-                        {data.name
-                          .split(" ")
-                          .map((n) => n[0])
-                          .join("")
-                          .toUpperCase()
-                          .slice(0, 2)}
-                      </div>
-                    )}
+                    {(() => {
+                      // Try to get profile picture from available properties
+                      const photoURL = (data as any)?.photoURL || (data as any)?.profilePic || null;
+                      if (photoURL) {
+                        return (
+                          <Image
+                            src={photoURL}
+                            alt={data.name}
+                            width={128}
+                            height={128}
+                            className="object-cover w-full h-full"
+                            onError={(e) => {
+                              // Show initials avatar on error
+                              const target = e.currentTarget;
+                              target.style.display = "none";
+                              const parent = target.parentElement;
+                              if (
+                                parent &&
+                                !parent.querySelector(".initials-avatar")
+                              ) {
+                                const initialsDiv = document.createElement("div");
+                                initialsDiv.className =
+                                  "initials-avatar text-blue-500 dark:text-blue-400 text-lg sm:text-2xl lg:text-4xl font-bold flex items-center justify-center w-full h-full";
+                                initialsDiv.textContent = data.name
+                                  .split(" ")
+                                  .map((n: string) => n[0])
+                                  .join("")
+                                  .toUpperCase()
+                                  .slice(0, 2);
+                                parent.appendChild(initialsDiv);
+                              }
+                            }}
+                          />
+                        );
+                      }
+                      // Fallback to initials avatar
+                      return (
+                        <div className="text-blue-500 dark:text-blue-400 text-lg sm:text-2xl lg:text-4xl font-bold">
+                          {data.name
+                            .split(" ")
+                            .map((n) => n[0])
+                            .join("")
+                            .toUpperCase()
+                            .slice(0, 2)}
+                        </div>
+                      );
+                    })()}
                   </div>
                 </div>
 

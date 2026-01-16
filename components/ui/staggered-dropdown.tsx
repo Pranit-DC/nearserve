@@ -53,21 +53,18 @@ export default function StaggeredDropDown({
   items,
   selected,
   onSelectAction,
-  onSelect,
   label,
   isCollapsed = false,
 }: {
   items: { value: string; label: string }[];
   selected: string;
-  // Accept either a client callback (`onSelect`) or a Server Action (`onSelectAction`).
+  // Server Action callback for selecting an item
   onSelectAction?: (value: string) => void;
-  onSelect?: (value: string) => void;
   label?: string;
   isCollapsed?: boolean;
 }) {
   const [open, setOpen] = useState(false);
   const handleSelect = (v: string) => {
-    if (onSelect) return onSelect(v);
     if (onSelectAction) return onSelectAction(v);
     return;
   };
