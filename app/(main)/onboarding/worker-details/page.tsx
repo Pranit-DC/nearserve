@@ -291,7 +291,9 @@ export default function WorkerDetailsPage() {
       const phoneDigits = phone?.replace(/\D/g, "") || "";
 
       if (phoneDigits.length !== 10 || !phone?.match(/^[6-9]\d{9}$/)) {
-        toast.error("Phone number must be a valid 10-digit mobile number starting with 6-9");
+        toast.error(
+          "Phone number must be a valid 10-digit mobile number starting with 6-9"
+        );
         return;
       }
 
@@ -344,7 +346,13 @@ export default function WorkerDetailsPage() {
   const getFieldsForStep = (step: number): (keyof WorkerFormData)[] => {
     switch (step) {
       case 1:
-        return ["phone", "aadharNumber", "qualification", "yearsExperience", "bio"];
+        return [
+          "phone",
+          "aadharNumber",
+          "qualification",
+          "yearsExperience",
+          "bio",
+        ];
       case 2:
         return ["skilledIn"];
       case 3:
@@ -532,13 +540,12 @@ export default function WorkerDetailsPage() {
                                 {errors.phone.message}
                               </p>
                             )}
-                            {watch("phone") &&
-                              watch("phone").length === 10 && (
-                                <p className="text-green-600 dark:text-green-400 text-xs flex items-center gap-1">
-                                  <CheckCircle className="h-3 w-3" />
-                                  Valid phone number
-                                </p>
-                              )}
+                            {watch("phone") && watch("phone").length === 10 && (
+                              <p className="text-green-600 dark:text-green-400 text-xs flex items-center gap-1">
+                                <CheckCircle className="h-3 w-3" />
+                                Valid phone number
+                              </p>
+                            )}
                           </motion.div>
 
                           <motion.div
@@ -874,7 +881,7 @@ export default function WorkerDetailsPage() {
                             <motion.p
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4 p-3 bg-[#303030] dark:bg-[#303030] rounded-lg"
+                              className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4 p-3 bg-gray-100 dark:bg-[#303030] rounded-lg border border-gray-200 dark:border-[#2c2c2c]"
                             >
                               Select at least one skill to continue
                             </motion.p>
@@ -1023,12 +1030,12 @@ export default function WorkerDetailsPage() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
-                          className="bg-[#303030] dark:bg-[#303030] p-4 md:p-5 rounded-xl border border-[#2c2c2c]"
+                          className="bg-blue-50/50 dark:bg-[#303030] p-4 md:p-5 rounded-xl border border-blue-200/50 dark:border-[#2c2c2c]"
                         >
-                          <h3 className="font-semibold text-gray-300 mb-3 flex items-center gap-2">
+                          <h3 className="font-semibold text-blue-900 dark:text-gray-300 mb-3 flex items-center gap-2">
                             Pricing Tips
                           </h3>
-                          <ul className="text-sm text-gray-400 space-y-2">
+                          <ul className="text-sm text-blue-800 dark:text-gray-400 space-y-2">
                             <li className="flex items-start gap-2">
                               <span className="text-blue-500 dark:text-blue-400 mt-0.5">
                                 •
@@ -1251,7 +1258,7 @@ export default function WorkerDetailsPage() {
                             )}
                           />
 
-                          <p className="text-xs text-center text-gray-500 dark:text-gray-400 bg-[#303030] dark:bg-[#303030] p-3 rounded-lg">
+                          <p className="text-xs text-center text-gray-600 dark:text-gray-400 bg-blue-50/50 dark:bg-[#303030] p-3 rounded-lg border border-blue-200/50 dark:border-[#2c2c2c]">
                             Upload a clear, professional photo to increase your
                             booking chances by 3x
                           </p>
