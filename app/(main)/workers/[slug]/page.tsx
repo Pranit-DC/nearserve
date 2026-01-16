@@ -141,7 +141,7 @@ export default async function WorkerOrSpecialityPage({
     }
     const wp = worker.workerProfile;
     return (
-      <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-black dark:to-gray-800">
+      <main className="min-h-screen bg-gray-50 dark:bg-[#212121]">
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
           {/* Header */}
           <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:items-start justify-between gap-4">
@@ -170,12 +170,12 @@ export default async function WorkerOrSpecialityPage({
           <div className="grid gap-4 sm:gap-6 lg:grid-cols-3">
             {/* Left Sidebar - Worker Profile Card */}
             <div className="lg:col-span-1">
-              <Card className="p-4 sm:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/20 shadow-xl lg:sticky lg:top-6">
+              <Card className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-2 border-gray-200/60 dark:border-[#2c2c2c] shadow-xl rounded-2xl lg:sticky lg:top-6">
                 <div className="text-center">
                   {/* Profile Picture */}
                   <div className="relative inline-block mb-4">
-                    <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden flex items-center justify-center border-2 sm:border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-gray-900">
-                      {wp.profilePic && wp.profilePic.startsWith('http') ? (
+                    <div className="w-20 h-20 sm:w-24 sm:h-24 lg:w-32 lg:h-32 rounded-full overflow-hidden flex items-center justify-center border-2 sm:border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-[#303030]">
+                      {wp.profilePic && wp.profilePic.startsWith("http") ? (
                         <Image
                           src={wp.profilePic}
                           alt={worker.name}
@@ -209,7 +209,7 @@ export default async function WorkerOrSpecialityPage({
                   {/* Contact Info */}
                   <div className="space-y-2 sm:space-y-3 mt-4 sm:mt-6 text-left">
                     <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-[#303030] flex items-center justify-center flex-shrink-0">
                         <FiMail className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
                       </div>
                       <span className="text-gray-700 dark:text-gray-300 truncate min-w-0">
@@ -220,7 +220,7 @@ export default async function WorkerOrSpecialityPage({
                     {worker.phone &&
                       !String(worker.phone).startsWith("no-phone-") && (
                         <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                          <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-[#303030] flex items-center justify-center flex-shrink-0">
                             <FiPhone className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
                           </div>
                           <span className="text-gray-700 dark:text-gray-300">
@@ -230,7 +230,7 @@ export default async function WorkerOrSpecialityPage({
                       )}
 
                     <div className="flex items-center gap-2 sm:gap-3 text-xs sm:text-sm">
-                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-gray-700 flex items-center justify-center flex-shrink-0">
+                      <div className="w-6 h-6 sm:w-8 sm:h-8 rounded-lg bg-gray-100 dark:bg-[#303030] flex items-center justify-center flex-shrink-0">
                         <FiMapPin className="h-3 w-3 sm:h-4 sm:w-4 text-gray-600 dark:text-gray-400" />
                       </div>
                       <span className="text-gray-700 dark:text-gray-300">
@@ -240,9 +240,9 @@ export default async function WorkerOrSpecialityPage({
                   </div>
 
                   {/* Quick Stats */}
-                  <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-gray-700 space-y-2">
+                  <div className="mt-4 sm:mt-6 pt-4 sm:pt-6 border-t border-gray-200 dark:border-[#2c2c2c] space-y-2">
                     {worker.rating && worker.rating.totalReviews > 0 && (
-                      <div className="flex items-center justify-between text-xs sm:text-sm mb-2 pb-2 border-b border-gray-200 dark:border-gray-700">
+                      <div className="flex items-center justify-between text-xs sm:text-sm mb-2 pb-2 border-b border-gray-200 dark:border-[#2c2c2c]">
                         <span className="text-gray-600 dark:text-gray-400">
                           Rating
                         </span>
@@ -252,7 +252,8 @@ export default async function WorkerOrSpecialityPage({
                             {worker.rating.avgRating.toFixed(1)}
                           </span>
                           <span className="text-gray-500 dark:text-gray-400 text-xs">
-                            ({worker.rating.totalReviews} review{worker.rating.totalReviews !== 1 ? 's' : ''})
+                            ({worker.rating.totalReviews} review
+                            {worker.rating.totalReviews !== 1 ? "s" : ""})
                           </span>
                         </div>
                       </div>
@@ -281,7 +282,7 @@ export default async function WorkerOrSpecialityPage({
             {/* Right Content - Details */}
             <div className="lg:col-span-2 space-y-4 sm:space-y-6">
               {/* Professional Information */}
-              <Card className="p-4 sm:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/20 shadow-xl">
+              <Card className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-2 border-gray-200/60 dark:border-[#2c2c2c] shadow-xl rounded-2xl">
                 <div className="flex items-center gap-2 mb-4">
                   <FiBriefcase className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
@@ -326,7 +327,7 @@ export default async function WorkerOrSpecialityPage({
                 </div>
               </Card>
               {/* Skills & Services */}
-              <Card className="p-4 sm:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/20 shadow-xl">
+              <Card className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-2 border-gray-200/60 dark:border-[#2c2c2c] shadow-xl rounded-2xl">
                 <div className="flex items-center gap-2 mb-4">
                   <FiAward className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
@@ -379,7 +380,7 @@ export default async function WorkerOrSpecialityPage({
               </Card>
 
               {/* Location & Contact */}
-              <Card className="p-4 sm:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/20 shadow-xl">
+              <Card className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-2 border-gray-200/60 dark:border-[#2c2c2c] shadow-xl rounded-2xl">
                 <div className="flex items-center gap-2 mb-4">
                   <FiMapPin className="h-4 w-4 sm:h-5 sm:w-5 text-blue-600 dark:text-blue-400" />
                   <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
@@ -471,7 +472,7 @@ export default async function WorkerOrSpecialityPage({
   const workers = serializeFirestoreData(workersWithRatings);
 
   return (
-    <main className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-purple-50 dark:from-gray-900 dark:via-black dark:to-gray-800">
+    <main className="min-h-screen bg-gray-50 dark:bg-[#212121]">
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-4 sm:py-6 lg:py-8">
         {/* Header */}
         <div className="mb-6 sm:mb-8">
@@ -486,7 +487,7 @@ export default async function WorkerOrSpecialityPage({
         </div>
 
         {workers.length === 0 ? (
-          <Card className="p-8 sm:p-12 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/20 shadow-xl text-center">
+          <Card className="p-8 sm:p-12 bg-white dark:bg-[#181818] border-2 border-gray-200/60 dark:border-[#2c2c2c] shadow-xl rounded-2xl text-center">
             <FiUser className="h-12 w-12 sm:h-16 sm:w-16 text-gray-300 dark:text-gray-600 mx-auto mb-4" />
             <h3 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-2">
               No Workers Found
@@ -501,10 +502,10 @@ export default async function WorkerOrSpecialityPage({
             {workers.map((w) => (
               <Card
                 key={w.id}
-                className="p-4 sm:p-6 bg-white/80 dark:bg-gray-800/80 backdrop-blur-sm border border-gray-200/20 shadow-xl hover:shadow-2xl transition-shadow"
+                className="p-4 sm:p-6 bg-white dark:bg-[#181818] border-2 border-gray-200/60 dark:border-[#2c2c2c] shadow-xl hover:shadow-2xl transition-all rounded-2xl"
               >
                 <div className="flex items-start gap-4">
-                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-100 dark:bg-blue-900 flex items-center justify-center flex-shrink-0">
+                  <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-full bg-blue-100 dark:bg-blue-900/30 flex items-center justify-center flex-shrink-0">
                     <div className="text-blue-600 dark:text-blue-400 text-lg sm:text-xl font-bold">
                       {(w.name ?? "U")
                         .split(" ")
