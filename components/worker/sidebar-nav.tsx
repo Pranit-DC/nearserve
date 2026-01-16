@@ -377,22 +377,20 @@ export function WorkerSidebar({ onMobileClose, open = true, setOpen }: WorkerSid
             </DialogTrigger>
             <DialogContent>
               <DialogHeader>
-                <DialogTitle>Sign Out</DialogTitle>
-                <DialogDescription>
-                  Are you sure you want to sign out?
-                </DialogDescription>
+                <DialogTitle className="text-blue-600 dark:text-blue-400 font-semibold">Sign Out</DialogTitle>
               </DialogHeader>
-              <DialogFooter>
+              <div className="py-4 text-gray-700 dark:text-gray-300 text-base">Are you sure you want to sign out?</div>
+              <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-[#232323]">
                 <DialogClose asChild>
-                  <button className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600">Cancel</button>
+                  <button className="flex-1 px-4 py-3 rounded-xl bg-gray-900 dark:bg-[#232323] text-gray-100 dark:text-gray-300 hover:bg-gray-800 dark:hover:bg-[#303030] transition-colors text-lg font-medium">Cancel</button>
                 </DialogClose>
                 <button
-                  className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+                  className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors text-lg"
                   onClick={async () => {
                     await signOut();
                   }}
                 >Sign Out</button>
-              </DialogFooter>
+              </div>
             </DialogContent>
           </Dialog>
         </div>

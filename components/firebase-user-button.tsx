@@ -134,20 +134,20 @@ export function FirebaseUserButton() {
 
       {/* Sign Out Confirmation Dialog is now outside the popup menu for robust async handling */}
       <Dialog open={showSignOutConfirm} onOpenChange={setShowSignOutConfirm}>
-        <DialogContent>
+        <DialogContent className="bg-white dark:bg-[#181818] rounded-2xl border border-gray-200 dark:border-[#232323] shadow-2xl">
           <DialogHeader>
-            <DialogTitle>Sign Out</DialogTitle>
+            <DialogTitle className="text-blue-600 dark:text-blue-400 font-semibold">Sign Out</DialogTitle>
           </DialogHeader>
-          <div className="py-2">Are you sure you want to sign out?</div>
-          <DialogFooter>
+          <div className="py-4 text-gray-700 dark:text-gray-300 text-base">Are you sure you want to sign out?</div>
+          <div className="flex gap-4 pt-6 border-t border-gray-200 dark:border-[#232323]">
             <button
-              className="px-4 py-2 rounded bg-gray-200 dark:bg-gray-700 text-gray-800 dark:text-gray-200 hover:bg-gray-300 dark:hover:bg-gray-600"
+              className="flex-1 px-4 py-3 rounded-xl bg-gray-900 dark:bg-[#232323] text-gray-100 dark:text-gray-300 hover:bg-gray-800 dark:hover:bg-[#303030] transition-colors text-lg font-medium"
               onClick={() => setShowSignOutConfirm(false)}
             >
               Cancel
             </button>
             <button
-              className="px-4 py-2 rounded bg-red-600 text-white hover:bg-red-700"
+              className="flex-1 px-4 py-3 rounded-xl bg-blue-600 hover:bg-blue-700 text-white font-semibold transition-colors text-lg"
               onClick={async () => {
                 await signOut();
                 setShowSignOutConfirm(false);
@@ -155,7 +155,7 @@ export function FirebaseUserButton() {
             >
               Sign Out
             </button>
-          </DialogFooter>
+          </div>
         </DialogContent>
       </Dialog>
     </div>
