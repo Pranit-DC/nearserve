@@ -15,7 +15,7 @@ export default function CustomerLayout({
   const [desktopSidebarOpen, setDesktopSidebarOpen] = useState(true);
 
   return (
-    <div className="min-h-screen bg-gray-50 dark:bg-black">
+    <div className="min-h-screen bg-gray-50 dark:bg-[#212121]">
       {/* Fixed Sidebar for desktop */}
       <div className="hidden lg:block">
         <CustomerSidebar
@@ -41,7 +41,7 @@ export default function CustomerLayout({
       <div className="lg:hidden fixed top-4 left-4 z-30">
         <button
           onClick={() => setSidebarOpen(true)}
-          className="p-2 rounded-md bg-white dark:bg-gray-800 shadow-lg border border-gray-200 dark:border-gray-700"
+          className="p-2 rounded-md bg-white dark:bg-[#181818] shadow-lg border border-gray-200 dark:border-[#2c2c2c]"
         >
           <svg
             className="h-6 w-6 text-gray-600 dark:text-gray-400"
@@ -61,7 +61,7 @@ export default function CustomerLayout({
 
       {/* Main content with conditional margin based on sidebar state */}
       <main
-        className={`min-h-screen bg-gray-50 dark:bg-black transition-all duration-300 ${
+        className={`min-h-screen bg-gray-50 dark:bg-[#212121] transition-all duration-300 ${
           desktopSidebarOpen ? "lg:ml-64" : "lg:ml-16"
         }`}
       >

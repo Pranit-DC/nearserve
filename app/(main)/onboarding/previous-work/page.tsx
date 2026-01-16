@@ -204,569 +204,567 @@ export default function PreviousWorkPage() {
   };
 
   return (
-    <div className="min-h-screen bg-white dark:bg-[#212121]">
-      <div className="container mx-auto px-4 py-8">
-        <div className="max-w-6xl mx-auto">
-          {/* Header */}
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="mb-8"
+    <div>
+      <div className="max-w-6xl mx-auto">
+        {/* Header */}
+        <motion.div
+          initial={{ opacity: 0, y: -20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mb-8"
+        >
+          <Button
+            variant="ghost"
+            onClick={() => router.push("/onboarding/worker-details")}
+            className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-6"
           >
-            <Button
-              variant="ghost"
-              onClick={() => router.push("/onboarding/worker-details")}
-              className="text-gray-600 hover:text-gray-900 dark:text-gray-400 dark:hover:text-gray-100 mb-6"
-            >
-              <ArrowLeft className="h-4 w-4 mr-2" />
-              Back to Details
-            </Button>
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Back to Details
+          </Button>
 
+          <div className="text-center">
+            <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">
+              Portfolio & Previous Work
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 text-lg">
+              Showcase your expertise to build trust with customers
+            </p>
+          </div>
+        </motion.div>
+
+        {/* Stats and Actions */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+          className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 bg-blue-50/50 dark:bg-[#181818] rounded-xl border border-blue-200/50 dark:border-[#2c2c2c]"
+        >
+          <div className="flex items-center space-x-6 mb-4 md:mb-0">
             <div className="text-center">
-              <h1 className="text-3xl font-semibold text-gray-900 dark:text-white mb-2">
-                Portfolio & Previous Work
-              </h1>
-              <p className="text-gray-600 dark:text-gray-400 text-lg">
-                Showcase your expertise to build trust with customers
-              </p>
+              <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+                {previousWorks.length}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Projects
+              </div>
             </div>
-          </motion.div>
+            <div className="text-center">
+              <div className="text-2xl font-semibold text-gray-900 dark:text-white">
+                {previousWorks.reduce(
+                  (acc, work) => acc + work.images.length,
+                  0
+                )}
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">
+                Photos
+              </div>
+            </div>
+          </div>
 
-          {/* Stats and Actions */}
+          <div className="flex items-center space-x-4">
+            {/* View Mode Toggle */}
+            <div className="flex items-center bg-white dark:bg-[#303030] rounded-lg p-1 border border-gray-200 dark:border-[#2c2c2c]">
+              <Button
+                variant={viewMode === "grid" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("grid")}
+                className="h-8 px-3"
+              >
+                <Grid3X3 className="h-4 w-4" />
+              </Button>
+              <Button
+                variant={viewMode === "list" ? "default" : "ghost"}
+                size="sm"
+                onClick={() => setViewMode("list")}
+                className="h-8 px-3"
+              >
+                <List className="h-4 w-4" />
+              </Button>
+            </div>
+
+            {/* Add Work Button */}
+            <Button
+              onClick={() => setShowAddForm(true)}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              <Plus className="h-4 w-4 mr-2" />
+              Add Project
+            </Button>
+          </div>
+        </motion.div>
+
+        {/* Category Filter */}
+        {previousWorks.length > 0 && (
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-            className="flex flex-col md:flex-row justify-between items-center mb-8 p-6 bg-gray-50 dark:bg-gray-800/50 rounded-xl"
+            transition={{ delay: 0.2 }}
+            className="mb-6"
           >
-            <div className="flex items-center space-x-6 mb-4 md:mb-0">
-              <div className="text-center">
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {previousWorks.length}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Projects
-                </div>
-              </div>
-              <div className="text-center">
-                <div className="text-2xl font-semibold text-gray-900 dark:text-white">
-                  {previousWorks.reduce(
-                    (acc, work) => acc + work.images.length,
-                    0
-                  )}
-                </div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Photos
-                </div>
-              </div>
+            <div className="flex flex-wrap gap-2">
+              <Badge
+                variant={selectedCategory === "All" ? "default" : "outline"}
+                className="cursor-pointer"
+                onClick={() => setSelectedCategory("All")}
+              >
+                All ({previousWorks.length})
+              </Badge>
+              {[...new Set(previousWorks.map((work) => work.category))].map(
+                (category) => {
+                  const count = previousWorks.filter(
+                    (work) => work.category === category
+                  ).length;
+                  return (
+                    <Badge
+                      key={category}
+                      variant={
+                        selectedCategory === category ? "default" : "outline"
+                      }
+                      className="cursor-pointer"
+                      onClick={() => setSelectedCategory(category)}
+                    >
+                      {category} ({count})
+                    </Badge>
+                  );
+                }
+              )}
             </div>
+          </motion.div>
+        )}
 
-            <div className="flex items-center space-x-4">
-              {/* View Mode Toggle */}
-              <div className="flex items-center bg-white dark:bg-gray-800 rounded-lg p-1 border border-gray-200 dark:border-gray-700">
-                <Button
-                  variant={viewMode === "grid" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("grid")}
-                  className="h-8 px-3"
-                >
-                  <Grid3X3 className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant={viewMode === "list" ? "default" : "ghost"}
-                  size="sm"
-                  onClick={() => setViewMode("list")}
-                  className="h-8 px-3"
-                >
-                  <List className="h-4 w-4" />
-                </Button>
-              </div>
+        {/* Add Work Form */}
+        <AnimatePresence>
+          {showAddForm && (
+            <motion.div
+              initial={{ opacity: 0, scale: 0.95 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.95 }}
+              className="mb-8"
+            >
+              <Card className="border-2 border-gray-200/60 dark:border-[#2c2c2c] bg-white/80 dark:bg-[#181818] backdrop-blur-sm shadow-xl">
+                <CardContent className="p-6">
+                  <div className="flex justify-between items-center mb-6">
+                    <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
+                      Add New Project
+                    </h3>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => setShowAddForm(false)}
+                    >
+                      <X className="h-4 w-4" />
+                    </Button>
+                  </div>
 
-              {/* Add Work Button */}
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {/* Basic Info */}
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Project Title *
+                        </label>
+                        <Input
+                          placeholder="e.g., Kitchen Renovation, Bathroom Plumbing"
+                          value={newWork.title}
+                          onChange={(e) =>
+                            setNewWork({ ...newWork, title: e.target.value })
+                          }
+                          className="border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Category
+                        </label>
+                        <select
+                          value={newWork.category}
+                          onChange={(e) =>
+                            setNewWork({
+                              ...newWork,
+                              category: e.target.value,
+                            })
+                          }
+                          className="w-full p-2 border border-gray-200 dark:border-[#2c2c2c] rounded-md bg-white dark:bg-[#303030] text-gray-900 dark:text-white focus:border-blue-500 dark:focus:border-blue-500 focus:outline-none transition-all"
+                        >
+                          <option value="">Select category</option>
+                          {workCategories.map((category) => (
+                            <option key={category} value={category}>
+                              {category}
+                            </option>
+                          ))}
+                        </select>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Complexity Level
+                        </label>
+                        <div className="grid grid-cols-2 gap-2">
+                          {complexityLevels.map((level) => (
+                            <div
+                              key={level.level}
+                              className={`p-3 rounded-lg border cursor-pointer transition-all ${
+                                newWork.complexity === level.level
+                                  ? "border-blue-500 bg-blue-50 dark:bg-blue-950/40 shadow-sm"
+                                  : "border-gray-200 dark:border-[#2c2c2c] hover:border-blue-300 dark:hover:border-blue-600"
+                              }`}
+                              onClick={() =>
+                                setNewWork({
+                                  ...newWork,
+                                  complexity: level.level,
+                                })
+                              }
+                            >
+                              <div className="text-sm font-medium text-gray-900 dark:text-white">
+                                {level.level}
+                              </div>
+                              <div className="text-xs text-gray-500 dark:text-gray-400">
+                                {level.description}
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Date Completed
+                          </label>
+                          <Input
+                            type="date"
+                            value={newWork.dateCompleted}
+                            onChange={(e) =>
+                              setNewWork({
+                                ...newWork,
+                                dateCompleted: e.target.value,
+                              })
+                            }
+                            className="border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                          />
+                        </div>
+                        <div>
+                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                            Duration
+                          </label>
+                          <Input
+                            placeholder="e.g., 2 days, 1 week"
+                            value={newWork.duration}
+                            onChange={(e) =>
+                              setNewWork({
+                                ...newWork,
+                                duration: e.target.value,
+                              })
+                            }
+                            className="border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Images and Details */}
+                    <div className="space-y-4">
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Project Image *
+                        </label>
+                        <FileDropzone
+                          accept="image/*"
+                          maxSize={5 * 1024 * 1024}
+                          onChange={(file) =>
+                            setNewWork({
+                              ...newWork,
+                              images: file ? [file] : [],
+                            })
+                          }
+                        />
+                        <p className="text-xs text-gray-500 mt-1">
+                          Upload an image to showcase your work
+                        </p>
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Description
+                        </label>
+                        <Textarea
+                          placeholder="Describe the work you did, challenges faced, materials used..."
+                          value={newWork.description}
+                          onChange={(e) =>
+                            setNewWork({
+                              ...newWork,
+                              description: e.target.value,
+                            })
+                          }
+                          className="border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all min-h-24"
+                        />
+                      </div>
+
+                      <div>
+                        <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                          Cost Range (Optional)
+                        </label>
+                        <Input
+                          placeholder="e.g., ₹5,000 - ₹10,000"
+                          value={newWork.costRange}
+                          onChange={(e) =>
+                            setNewWork({
+                              ...newWork,
+                              costRange: e.target.value,
+                            })
+                          }
+                          className="border-gray-200 dark:border-[#2c2c2c] bg-white dark:bg-[#303030] focus:border-blue-500 dark:focus:border-blue-500 transition-all"
+                        />
+                      </div>
+                    </div>
+                  </div>
+
+                  <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-[#2c2c2c]">
+                    <Button
+                      variant="outline"
+                      onClick={() => setShowAddForm(false)}
+                    >
+                      Cancel
+                    </Button>
+                    <Button
+                      onClick={addWork}
+                      disabled={
+                        !newWork.title.trim() || newWork.images.length === 0
+                      }
+                      className="bg-blue-600 hover:bg-blue-700 text-white"
+                    >
+                      Add Project
+                    </Button>
+                  </div>
+                </CardContent>
+              </Card>
+            </motion.div>
+          )}
+        </AnimatePresence>
+
+        {/* Portfolio Grid */}
+        {filteredWorks.length > 0 ? (
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="mb-8"
+          >
+            <div
+              className={`grid gap-6 ${
+                viewMode === "grid"
+                  ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
+                  : "grid-cols-1"
+              }`}
+            >
+              {filteredWorks.map((work, index) => (
+                <motion.div
+                  key={work.id}
+                  initial={{ opacity: 0, y: 20 }}
+                  animate={{ opacity: 1, y: 0 }}
+                  transition={{ delay: index * 0.1 }}
+                  className="group"
+                >
+                  <Card className="border-2 border-gray-200/60 dark:border-[#2c2c2c] bg-white/80 dark:bg-[#181818] backdrop-blur-sm hover:shadow-xl hover:shadow-blue-500/10 dark:hover:shadow-blue-500/5 transition-all duration-300">
+                    <CardContent className="p-0">
+                      {/* Image */}
+                      <div className="relative">
+                        {work.images.length > 0 && (
+                          <WorkPreviewImage
+                            src={getImageUrl(work.images[0])}
+                            alt={work.title}
+                            className="w-full h-48 object-cover rounded-t-lg"
+                            onClick={() =>
+                              setLightboxImage(getImageUrl(work.images[0]))
+                            }
+                          />
+                        )}
+
+                        {/* Action Buttons */}
+                        <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
+                            onClick={() => setEditingWork(work)}
+                          >
+                            <Edit className="h-4 w-4 text-gray-600" />
+                          </Button>
+                          <Button
+                            variant="ghost"
+                            size="sm"
+                            className="h-8 w-8 p-0 bg-white/80 hover:bg-white text-red-600 hover:text-red-700"
+                            onClick={() => removeWork(work.id)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+
+                        {/* Image Count Badge */}
+                        {work.images.length > 1 && (
+                          <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
+                            +{work.images.length - 1} more
+                          </div>
+                        )}
+                      </div>
+
+                      {/* Content */}
+                      <div className="p-4">
+                        <div className="flex justify-between items-start mb-2">
+                          <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
+                            {work.title}
+                          </h4>
+                          {work.category && (
+                            <Badge variant="outline" className="text-xs">
+                              {work.category}
+                            </Badge>
+                          )}
+                        </div>
+
+                        {work.description && (
+                          <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
+                            {work.description}
+                          </p>
+                        )}
+
+                        {/* Metadata */}
+                        <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
+                          {work.dateCompleted && (
+                            <div className="flex items-center">
+                              <Calendar className="h-3 w-3 mr-1" />
+                              {new Date(
+                                work.dateCompleted
+                              ).toLocaleDateString()}
+                            </div>
+                          )}
+                          {work.duration && (
+                            <div className="flex items-center">
+                              <Clock className="h-3 w-3 mr-1" />
+                              {work.duration}
+                            </div>
+                          )}
+                          {work.costRange && (
+                            <div className="flex items-center">
+                              <FaRupeeSign className="h-3 w-3 mr-1" />
+                              {work.costRange}
+                            </div>
+                          )}
+                        </div>
+
+                        {/* Complexity Badge */}
+                        <div className="mt-3">
+                          <Badge
+                            variant="outline"
+                            className={
+                              complexityLevels.find(
+                                (level) => level.level === work.complexity
+                              )?.color
+                            }
+                          >
+                            {work.complexity}
+                          </Badge>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </motion.div>
+              ))}
+            </div>
+          </motion.div>
+        ) : (
+          /* Empty State */
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-center py-12"
+          >
+            <div className="bg-blue-50/50 dark:bg-[#181818] rounded-xl p-8 max-w-md mx-auto border-2 border-blue-200/50 dark:border-[#2c2c2c]">
+              <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
+              <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
+                No Projects Yet
+              </h3>
+              <p className="text-gray-600 dark:text-gray-400 mb-6">
+                Add your first project to start building your portfolio and
+                attract more customers.
+              </p>
               <Button
                 onClick={() => setShowAddForm(true)}
                 className="bg-blue-600 hover:bg-blue-700 text-white"
               >
                 <Plus className="h-4 w-4 mr-2" />
-                Add Project
+                Add Your First Project
               </Button>
             </div>
           </motion.div>
+        )}
 
-          {/* Category Filter */}
-          {previousWorks.length > 0 && (
+        {/* Lightbox */}
+        <AnimatePresence>
+          {lightboxImage && (
             <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.2 }}
-              className="mb-6"
+              initial={{ opacity: 0 }}
+              animate={{ opacity: 1 }}
+              exit={{ opacity: 0 }}
+              className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
+              onClick={() => setLightboxImage(null)}
             >
-              <div className="flex flex-wrap gap-2">
-                <Badge
-                  variant={selectedCategory === "All" ? "default" : "outline"}
-                  className="cursor-pointer"
-                  onClick={() => setSelectedCategory("All")}
-                >
-                  All ({previousWorks.length})
-                </Badge>
-                {[...new Set(previousWorks.map((work) => work.category))].map(
-                  (category) => {
-                    const count = previousWorks.filter(
-                      (work) => work.category === category
-                    ).length;
-                    return (
-                      <Badge
-                        key={category}
-                        variant={
-                          selectedCategory === category ? "default" : "outline"
-                        }
-                        className="cursor-pointer"
-                        onClick={() => setSelectedCategory(category)}
-                      >
-                        {category} ({count})
-                      </Badge>
-                    );
-                  }
-                )}
-              </div>
-            </motion.div>
-          )}
-
-          {/* Add Work Form */}
-          <AnimatePresence>
-            {showAddForm && (
               <motion.div
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                exit={{ opacity: 0, scale: 0.95 }}
-                className="mb-8"
+                initial={{ scale: 0.8 }}
+                animate={{ scale: 1 }}
+                exit={{ scale: 0.8 }}
+                className="relative max-w-4xl max-h-full"
+                onClick={(e) => e.stopPropagation()}
               >
-                <Card className="border border-gray-200 dark:border-[#2c2c2c] dark:bg-[#181818]">
-                  <CardContent className="p-6">
-                    <div className="flex justify-between items-center mb-6">
-                      <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                        Add New Project
-                      </h3>
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setShowAddForm(false)}
-                      >
-                        <X className="h-4 w-4" />
-                      </Button>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                      {/* Basic Info */}
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Project Title *
-                          </label>
-                          <Input
-                            placeholder="e.g., Kitchen Renovation, Bathroom Plumbing"
-                            value={newWork.title}
-                            onChange={(e) =>
-                              setNewWork({ ...newWork, title: e.target.value })
-                            }
-                            className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Category
-                          </label>
-                          <select
-                            value={newWork.category}
-                            onChange={(e) =>
-                              setNewWork({
-                                ...newWork,
-                                category: e.target.value,
-                              })
-                            }
-                            className="w-full p-2 border border-gray-200 dark:border-gray-600 rounded-md bg-gray-50 dark:bg-gray-700 text-gray-900 dark:text-white"
-                          >
-                            <option value="">Select category</option>
-                            {workCategories.map((category) => (
-                              <option key={category} value={category}>
-                                {category}
-                              </option>
-                            ))}
-                          </select>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Complexity Level
-                          </label>
-                          <div className="grid grid-cols-2 gap-2">
-                            {complexityLevels.map((level) => (
-                              <div
-                                key={level.level}
-                                className={`p-3 rounded-lg border cursor-pointer transition-all ${
-                                  newWork.complexity === level.level
-                                    ? "border-blue-500 bg-blue-50 dark:bg-blue-900/20"
-                                    : "border-gray-200 dark:border-gray-700 hover:border-gray-300"
-                                }`}
-                                onClick={() =>
-                                  setNewWork({
-                                    ...newWork,
-                                    complexity: level.level,
-                                  })
-                                }
-                              >
-                                <div className="text-sm font-medium text-gray-900 dark:text-white">
-                                  {level.level}
-                                </div>
-                                <div className="text-xs text-gray-500 dark:text-gray-400">
-                                  {level.description}
-                                </div>
-                              </div>
-                            ))}
-                          </div>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-4">
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              Date Completed
-                            </label>
-                            <Input
-                              type="date"
-                              value={newWork.dateCompleted}
-                              onChange={(e) =>
-                                setNewWork({
-                                  ...newWork,
-                                  dateCompleted: e.target.value,
-                                })
-                              }
-                              className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                            />
-                          </div>
-                          <div>
-                            <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                              Duration
-                            </label>
-                            <Input
-                              placeholder="e.g., 2 days, 1 week"
-                              value={newWork.duration}
-                              onChange={(e) =>
-                                setNewWork({
-                                  ...newWork,
-                                  duration: e.target.value,
-                                })
-                              }
-                              className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                            />
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Images and Details */}
-                      <div className="space-y-4">
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Project Image *
-                          </label>
-                          <FileDropzone
-                            accept="image/*"
-                            maxSize={5 * 1024 * 1024}
-                            onChange={(file) =>
-                              setNewWork({
-                                ...newWork,
-                                images: file ? [file] : [],
-                              })
-                            }
-                          />
-                          <p className="text-xs text-gray-500 mt-1">
-                            Upload an image to showcase your work
-                          </p>
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Description
-                          </label>
-                          <Textarea
-                            placeholder="Describe the work you did, challenges faced, materials used..."
-                            value={newWork.description}
-                            onChange={(e) =>
-                              setNewWork({
-                                ...newWork,
-                                description: e.target.value,
-                              })
-                            }
-                            className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600 min-h-24"
-                          />
-                        </div>
-
-                        <div>
-                          <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
-                            Cost Range (Optional)
-                          </label>
-                          <Input
-                            placeholder="e.g., ₹5,000 - ₹10,000"
-                            value={newWork.costRange}
-                            onChange={(e) =>
-                              setNewWork({
-                                ...newWork,
-                                costRange: e.target.value,
-                              })
-                            }
-                            className="bg-gray-50 dark:bg-gray-700 border-gray-200 dark:border-gray-600"
-                          />
-                        </div>
-                      </div>
-                    </div>
-
-                    <div className="flex justify-end space-x-3 mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-                      <Button
-                        variant="outline"
-                        onClick={() => setShowAddForm(false)}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        onClick={addWork}
-                        disabled={
-                          !newWork.title.trim() || newWork.images.length === 0
-                        }
-                        className="bg-blue-600 hover:bg-blue-700 text-white"
-                      >
-                        Add Project
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Portfolio Grid */}
-          {filteredWorks.length > 0 ? (
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="mb-8"
-            >
-              <div
-                className={`grid gap-6 ${
-                  viewMode === "grid"
-                    ? "grid-cols-1 md:grid-cols-2 lg:grid-cols-3"
-                    : "grid-cols-1"
-                }`}
-              >
-                {filteredWorks.map((work, index) => (
-                  <motion.div
-                    key={work.id}
-                    initial={{ opacity: 0, y: 20 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    transition={{ delay: index * 0.1 }}
-                    className="group"
-                  >
-                    <Card className="border border-gray-200 dark:border-[#2c2c2c] dark:bg-[#181818] hover:shadow-lg transition-all duration-300">
-                      <CardContent className="p-0">
-                        {/* Image */}
-                        <div className="relative">
-                          {work.images.length > 0 && (
-                            <WorkPreviewImage
-                              src={getImageUrl(work.images[0])}
-                              alt={work.title}
-                              className="w-full h-48 object-cover rounded-t-lg"
-                              onClick={() =>
-                                setLightboxImage(getImageUrl(work.images[0]))
-                              }
-                            />
-                          )}
-
-                          {/* Action Buttons */}
-                          <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 bg-white/80 hover:bg-white"
-                              onClick={() => setEditingWork(work)}
-                            >
-                              <Edit className="h-4 w-4 text-gray-600" />
-                            </Button>
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="h-8 w-8 p-0 bg-white/80 hover:bg-white text-red-600 hover:text-red-700"
-                              onClick={() => removeWork(work.id)}
-                            >
-                              <Trash2 className="h-4 w-4" />
-                            </Button>
-                          </div>
-
-                          {/* Image Count Badge */}
-                          {work.images.length > 1 && (
-                            <div className="absolute bottom-2 right-2 bg-black/70 text-white px-2 py-1 rounded-full text-xs">
-                              +{work.images.length - 1} more
-                            </div>
-                          )}
-                        </div>
-
-                        {/* Content */}
-                        <div className="p-4">
-                          <div className="flex justify-between items-start mb-2">
-                            <h4 className="font-semibold text-gray-900 dark:text-white text-lg">
-                              {work.title}
-                            </h4>
-                            {work.category && (
-                              <Badge variant="outline" className="text-xs">
-                                {work.category}
-                              </Badge>
-                            )}
-                          </div>
-
-                          {work.description && (
-                            <p className="text-gray-600 dark:text-gray-400 text-sm mb-3 line-clamp-2">
-                              {work.description}
-                            </p>
-                          )}
-
-                          {/* Metadata */}
-                          <div className="flex flex-wrap gap-2 text-xs text-gray-500 dark:text-gray-400">
-                            {work.dateCompleted && (
-                              <div className="flex items-center">
-                                <Calendar className="h-3 w-3 mr-1" />
-                                {new Date(
-                                  work.dateCompleted
-                                ).toLocaleDateString()}
-                              </div>
-                            )}
-                            {work.duration && (
-                              <div className="flex items-center">
-                                <Clock className="h-3 w-3 mr-1" />
-                                {work.duration}
-                              </div>
-                            )}
-                            {work.costRange && (
-                              <div className="flex items-center">
-                                <FaRupeeSign className="h-3 w-3 mr-1" />
-                                {work.costRange}
-                              </div>
-                            )}
-                          </div>
-
-                          {/* Complexity Badge */}
-                          <div className="mt-3">
-                            <Badge
-                              variant="outline"
-                              className={
-                                complexityLevels.find(
-                                  (level) => level.level === work.complexity
-                                )?.color
-                              }
-                            >
-                              {work.complexity}
-                            </Badge>
-                          </div>
-                        </div>
-                      </CardContent>
-                    </Card>
-                  </motion.div>
-                ))}
-              </div>
-            </motion.div>
-          ) : (
-            /* Empty State */
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.3 }}
-              className="text-center py-12"
-            >
-              <div className="bg-gray-50 dark:bg-gray-800/50 rounded-xl p-8 max-w-md mx-auto">
-                <Camera className="h-16 w-16 text-gray-400 mx-auto mb-4" />
-                <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-2">
-                  No Projects Yet
-                </h3>
-                <p className="text-gray-600 dark:text-gray-400 mb-6">
-                  Add your first project to start building your portfolio and
-                  attract more customers.
-                </p>
+                <Image
+                  src={lightboxImage}
+                  alt="Project preview"
+                  width={800}
+                  height={600}
+                  className="rounded-lg max-h-screen object-contain"
+                />
                 <Button
-                  onClick={() => setShowAddForm(true)}
-                  className="bg-blue-600 hover:bg-blue-700 text-white"
+                  variant="ghost"
+                  size="sm"
+                  className="absolute top-2 right-2 text-white hover:bg-white/20"
+                  onClick={() => setLightboxImage(null)}
                 >
-                  <Plus className="h-4 w-4 mr-2" />
-                  Add Your First Project
+                  <X className="h-4 w-4" />
                 </Button>
-              </div>
+              </motion.div>
             </motion.div>
           )}
+        </AnimatePresence>
 
-          {/* Lightbox */}
-          <AnimatePresence>
-            {lightboxImage && (
-              <motion.div
-                initial={{ opacity: 0 }}
-                animate={{ opacity: 1 }}
-                exit={{ opacity: 0 }}
-                className="fixed inset-0 bg-black/80 flex items-center justify-center z-50 p-4"
-                onClick={() => setLightboxImage(null)}
-              >
-                <motion.div
-                  initial={{ scale: 0.8 }}
-                  animate={{ scale: 1 }}
-                  exit={{ scale: 0.8 }}
-                  className="relative max-w-4xl max-h-full"
-                  onClick={(e) => e.stopPropagation()}
-                >
-                  <Image
-                    src={lightboxImage}
-                    alt="Project preview"
-                    width={800}
-                    height={600}
-                    className="rounded-lg max-h-screen object-contain"
-                  />
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    className="absolute top-2 right-2 text-white hover:bg-white/20"
-                    onClick={() => setLightboxImage(null)}
-                  >
-                    <X className="h-4 w-4" />
-                  </Button>
-                </motion.div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-
-          {/* Action Buttons */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-            className="flex flex-col sm:flex-row gap-4 justify-between"
+        {/* Action Buttons */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.4 }}
+          className="flex flex-col sm:flex-row gap-4 justify-between"
+        >
+          <Button
+            variant="outline"
+            onClick={handleSkip}
+            className="border-gray-200 dark:border-[#2c2c2c] hover:bg-gray-50 dark:hover:bg-[#303030]"
           >
-            <Button
-              variant="outline"
-              onClick={handleSkip}
-              className="border-gray-200 dark:border-gray-700"
-            >
-              Skip for Now
-            </Button>
+            Skip for Now
+          </Button>
 
-            <ClickSpark sparkColor="#60a5fa" sparkCount={12} sparkRadius={25}>
-              <Button
-                onClick={handleContinue}
-                className="bg-blue-600 hover:bg-blue-700 text-white"
-              >
-                Continue to Preview
-                {previousWorks.length > 0 && (
-                  <span className="ml-2 bg-blue-700 text-white px-2 py-0.5 rounded-full text-xs">
-                    {previousWorks.length}
-                  </span>
-                )}
-              </Button>
-            </ClickSpark>
-          </motion.div>
-        </div>
+          <ClickSpark sparkColor="#60a5fa" sparkCount={12} sparkRadius={25}>
+            <Button
+              onClick={handleContinue}
+              className="bg-blue-600 hover:bg-blue-700 text-white"
+            >
+              Continue to Preview
+              {previousWorks.length > 0 && (
+                <span className="ml-2 bg-blue-700 text-white px-2 py-0.5 rounded-full text-xs">
+                  {previousWorks.length}
+                </span>
+              )}
+            </Button>
+          </ClickSpark>
+        </motion.div>
       </div>
     </div>
   );
