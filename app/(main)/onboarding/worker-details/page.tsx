@@ -881,7 +881,7 @@ export default function WorkerDetailsPage() {
                             <motion.p
                               initial={{ opacity: 0 }}
                               animate={{ opacity: 1 }}
-                              className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4 p-3 bg-gray-100 dark:bg-[#303030] rounded-lg border border-gray-200 dark:border-[#2c2c2c]"
+                              className="text-xs text-center text-gray-500 dark:text-gray-400 mt-4 p-3 bg-[#303030] dark:bg-[#303030] rounded-lg"
                             >
                               Select at least one skill to continue
                             </motion.p>
@@ -1030,12 +1030,12 @@ export default function WorkerDetailsPage() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.3 }}
-                          className="bg-blue-50/50 dark:bg-[#303030] p-4 md:p-5 rounded-xl border border-blue-200/50 dark:border-[#2c2c2c]"
+                          className="bg-[#303030] dark:bg-[#303030] p-4 md:p-5 rounded-xl border border-[#2c2c2c]"
                         >
-                          <h3 className="font-semibold text-blue-900 dark:text-gray-300 mb-3 flex items-center gap-2">
+                          <h3 className="font-semibold text-gray-300 mb-3 flex items-center gap-2">
                             Pricing Tips
                           </h3>
-                          <ul className="text-sm text-blue-800 dark:text-gray-400 space-y-2">
+                          <ul className="text-sm text-gray-400 space-y-2">
                             <li className="flex items-start gap-2">
                               <span className="text-blue-500 dark:text-blue-400 mt-0.5">
                                 •
@@ -1258,7 +1258,7 @@ export default function WorkerDetailsPage() {
                             )}
                           />
 
-                          <p className="text-xs text-center text-gray-600 dark:text-gray-400 bg-blue-50/50 dark:bg-[#303030] p-3 rounded-lg border border-blue-200/50 dark:border-[#2c2c2c]">
+                          <p className="text-xs text-center text-gray-500 dark:text-gray-400 bg-[#303030] dark:bg-[#303030] p-3 rounded-lg">
                             Upload a clear, professional photo to increase your
                             booking chances by 3x
                           </p>
@@ -1268,32 +1268,32 @@ export default function WorkerDetailsPage() {
                           initial={{ opacity: 0, y: 20 }}
                           animate={{ opacity: 1, y: 0 }}
                           transition={{ delay: 0.2 }}
-                          className="bg-green-50/50 dark:bg-green-950/20 p-5 md:p-6 rounded-xl border border-green-200/50 dark:border-green-400/20"
+                          className="bg-blue-50/50 dark:bg-[#303030] p-5 md:p-6 rounded-xl border border-blue-200/50 dark:border-[#2c2c2c]"
                         >
-                          <h3 className="font-semibold text-green-900 dark:text-green-100 mb-3 flex items-center gap-2">
-                            <span className="text-xl"></span> You&apos;re almost
-                            done!
+                          <h3 className="font-semibold text-blue-900 dark:text-gray-300 mb-3 flex items-center gap-2">
+                            <Sparkles className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                            You&apos;re almost done!
                           </h3>
-                          <p className="text-sm text-green-800 dark:text-green-200 mb-4">
+                          <p className="text-sm text-blue-800 dark:text-gray-400 mb-4">
                             Your profile is looking great. Next, you&apos;ll be
                             able to showcase your previous work and start
                             receiving job requests.
                           </p>
-                          <ul className="text-sm text-green-700 dark:text-green-300 space-y-2">
+                          <ul className="text-sm text-blue-700 dark:text-gray-400 space-y-2">
                             <li className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <CheckCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                               <span>Personal information completed</span>
                             </li>
                             <li className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <CheckCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                               <span>Skills and services added</span>
                             </li>
                             <li className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <CheckCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                               <span>Pricing configured</span>
                             </li>
                             <li className="flex items-center gap-2">
-                              <CheckCircle className="h-4 w-4 text-green-600 dark:text-green-400" />
+                              <CheckCircle className="h-4 w-4 text-blue-600 dark:text-blue-400" />
                               <span>Location details provided</span>
                             </li>
                           </ul>
@@ -1304,13 +1304,13 @@ export default function WorkerDetailsPage() {
                 </AnimatePresence>
 
                 {/* Navigation Buttons */}
-                <div className="flex justify-between items-center mt-6 md:mt-8 pt-6 border-t border-gray-200 dark:border-gray-700">
+                <div className="flex justify-between items-center mt-6 md:mt-8 pt-6 border-t border-gray-200 dark:border-[#2c2c2c]">
                   <Button
                     type="button"
                     variant="outline"
                     onClick={prevStep}
                     disabled={isFirstStep}
-                    className="border-gray-200 dark:border-gray-700 h-11 md:h-12 px-4 md:px-6"
+                    className="border-gray-200 dark:border-[#2c2c2c] h-11 md:h-12 px-4 md:px-6"
                   >
                     <ArrowLeft className="h-4 w-4 mr-2" />
                     <span className="hidden sm:inline">Previous</span>
@@ -1327,7 +1327,7 @@ export default function WorkerDetailsPage() {
                         type="button"
                         onClick={handleSubmit(onSubmit)}
                         disabled={isLoading}
-                        className="bg-blue-600 hover:bg-blue-700 text-white h-11 md:h-12 px-6 md:px-8 shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20"
+                        className="bg-blue-600 hover:bg-blue-700 text-white h-11 md:h-12 px-6 md:px-8 shadow-lg shadow-blue-500/30 dark:shadow-blue-500/20 ml-4"
                       >
                         {isLoading ? (
                           <Loader2 className="animate-spin h-4 w-4 mr-2" />
