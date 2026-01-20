@@ -17,6 +17,8 @@ import { FaRupeeSign } from "react-icons/fa";
 
 import DashboardBgEffect from "@/components/DashboardBgEffect";
 
+export const dynamic = "force-dynamic";
+
 export default async function WorkerDashboardPage() {
   const worker = await checkUser();
   if (!worker || worker.role !== "WORKER") {

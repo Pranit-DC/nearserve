@@ -64,7 +64,7 @@ export async function protectApiRoute(
   requiredRole?: UserRole
 ): Promise<{ user: any; response?: NextResponse }> {
   try {
-    const user = await getCurrentUserFromRequest(request);
+    const user: { id: string; role?: string; [key: string]: any } | null = await getCurrentUserFromRequest(request);
 
     if (!user) {
       return {

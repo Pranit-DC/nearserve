@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { adminDb } from "@/lib/firebase-admin";
-import { COLLECTIONS, Job, JobLog } from "@/lib/firestore";
+import { COLLECTIONS, Job, JobLog, JobStatus, PaymentStatus } from "@/lib/firestore";
 import { protectCustomerApi } from "@/lib/api-auth";
 import { calculateFees } from "@/lib/razorpay-service";
 import { FieldValue } from "firebase-admin/firestore";
@@ -76,14 +76,14 @@ export async function POST(req: NextRequest) {
       workerId: workerId,
       description,
       details: details || null,
-      date: date,
-      time: time,
+      date: FieldValue.serverTimestamp() as any,
+      time: FieldValue.serverTimestamp() as any,
       location,
       charge,
-      status: "PENDING",
+      status: JobStatus.PENDING,
       platformFee,
       workerEarnings,
-      paymentStatus: "PENDING",
+      paymentStatus: PaymentStatus.PENDING,
       createdAt: FieldValue.serverTimestamp() as any,
       updatedAt: FieldValue.serverTimestamp() as any,
     };
@@ -96,7 +96,7 @@ export async function POST(req: NextRequest) {
     const logData: Partial<JobLog> = {
       jobId,
       fromStatus: null,
-      toStatus: "PENDING",
+      toStatus: JobStatus.PENDING,
       action: "JOB_CREATED",
       performedBy: customer.id,
       metadata: {

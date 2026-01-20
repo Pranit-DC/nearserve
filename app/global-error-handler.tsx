@@ -80,9 +80,9 @@ export function GlobalErrorHandler() {
     const originalAddEventListener = EventTarget.prototype.addEventListener;
     EventTarget.prototype.addEventListener = function(type, listener, options) {
       const wrappedListener = typeof listener === 'function' 
-        ? function(this: any, ...args: any[]) {
+        ? function(this: any, evt: Event) {
             try {
-              return listener.apply(this, args);
+              return listener.call(this, evt);
             } catch (error: any) {
               if (suppressError(String(error))) {
                 console.log('[Suppressed] Event listener error prevented');

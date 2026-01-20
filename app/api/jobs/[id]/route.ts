@@ -543,7 +543,7 @@ export async function POST(
     if (!jobDoc.exists)
       return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
-    const job = { id: jobDoc.id, ...jobDoc.data() as { customerId?: string; status?: string; razorpayOrderId?: string; charge?: number; amount?: number; type?: import("@/lib/firestore").TransactionType; [key: string]: any } };
+    const job: { customerId?: string; status?: string; razorpayOrderId?: string; charge?: number; amount?: number; type?: import("@/lib/firestore").TransactionType; platformFee?: number | null; workerEarnings?: number | null; workerId?: string; description?: string; id: string; [key: string]: any } = { id: jobDoc.id, ...jobDoc.data() };
 
     // Authorization: Only customer can verify payment
     if (user.role !== "CUSTOMER" || job.customerId !== user.id) {
@@ -600,7 +600,6 @@ export async function POST(
       amount: job.charge,
       type: TransactionType.PAYMENT,
       createdAt: FieldValue.serverTimestamp() as any,
-      updatedAt: FieldValue.serverTimestamp() as any,
     };
     await transactionsRef.add(transactionData);
 
@@ -624,22 +623,24 @@ export async function POST(
     // Create in-app notification for worker about payment
     try {
       const customerDoc = await usersRef.doc(job.customerId).get();
-      await notifyWorkerPaymentReceived(job.workerId, {
-        customerName: customerDoc?.data()?.name || 'Customer',
-        amount: job.workerEarnings,
-        serviceName: job.description,
-        jobId: job.id,
-      });
-      console.log(`[Notification] Created in-app notification for worker ${job.workerId} - payment received`);
-      
-      // Send push notification
-      await sendPushNotification({
-        userId: job.workerId,
-        title: '💰 Payment Received',
-        message: `You received ₹${job.workerEarnings} from ${customerDoc?.data()?.name || 'customer'} for ${job.description}`,
-        type: 'PAYMENT_RECEIVED',
-        actionUrl: `/worker/earnings`,
-      });
+      if (job.workerId && job.workerEarnings && job.description) {
+        await notifyWorkerPaymentReceived(job.workerId, {
+          customerName: customerDoc?.data()?.name || 'Customer',
+          amount: job.workerEarnings,
+          serviceName: job.description,
+          jobId: job.id,
+        });
+        console.log(`[Notification] Created in-app notification for worker ${job.workerId} - payment received`);
+        
+        // Send push notification
+        await sendPushNotification({
+          userId: job.workerId,
+          title: '💰 Payment Received',
+          message: `You received ₹${job.workerEarnings} from ${customerDoc?.data()?.name || 'customer'} for ${job.description}`,
+          type: 'PAYMENT_RECEIVED',
+          actionUrl: `/worker/earnings`,
+        });
+      }
     } catch (notifError) {
       console.error('Failed to create payment notification:', notifError);
     }

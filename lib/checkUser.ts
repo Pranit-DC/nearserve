@@ -55,7 +55,7 @@ export const checkUser = async () => {
 
     // Return existing user with profiles
     const userDoc = userQuery.docs[0];
-    const userData = { id: userDoc.id, ...userDoc.data() };
+    const userData: { id: string; role?: string; [key: string]: any } = { id: userDoc.id, ...userDoc.data() };
     
     // Fetch worker profile if user is a worker
     let workerProfile = null;

@@ -1046,7 +1046,7 @@ export default function WorkerProfilePage() {
                           <StaggeredDropDown
                             items={qualificationOptions}
                             selected={editedProfile.qualification || ""}
-                            onSelect={handleQualificationChange}
+                            onSelectAction={handleQualificationChange}
                             label={
                               editedProfile.qualification ||
                               "Select qualification"

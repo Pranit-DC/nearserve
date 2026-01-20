@@ -39,7 +39,7 @@ export default function AuthRedirect() {
     async function handleRedirect() {
       if (!isLoaded) return;
 
-      console.log("🔄 Auth redirect - User loaded:", isLoaded, "User:", user?.id);
+      console.log("🔄 Auth redirect - User loaded:", isLoaded, "User:", user?.uid);
 
       if (!user) {
         console.log("❌ No user, redirecting to sign-in");

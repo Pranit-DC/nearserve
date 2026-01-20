@@ -56,7 +56,6 @@ export async function POST(req: NextRequest) {
       rating,
       comment: comment || null,
       createdAt: FieldValue.serverTimestamp() as any,
-      updatedAt: FieldValue.serverTimestamp() as any,
     };
 
     const reviewRef = await reviewsRef.add(reviewData);
