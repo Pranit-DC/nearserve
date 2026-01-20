@@ -1,23 +1,10 @@
-import { PrismaClient } from "@prisma/client";
-
 /**
- * Returns a singleton instance of the PrismaClient.
- *
- * The singleton instance is stored in a global variable, so that subsequent
- * calls to this function will return the same instance.
- *
- * The singleton instance is created on the first call to this function, and
- * will be reused on subsequent calls.
+ * This file is deprecated and no longer used.
+ * The project uses Firestore (Firebase) instead of Prisma for data persistence.
+ * Keeping this file for reference only - it can be safely deleted.
  */
-const prismaClientSinglton = () => {
-  return new PrismaClient();
-};
 
-// type safety
-type prismaClientSinglton = ReturnType<typeof prismaClientSinglton>;
-
-const globalForPrisma = globalThis as unknown as {
-  prisma: PrismaClient | undefined;
+export {};
 };
 
 const prisma = globalForPrisma.prisma ?? prismaClientSinglton();
