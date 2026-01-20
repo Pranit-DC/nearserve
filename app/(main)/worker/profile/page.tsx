@@ -118,7 +118,7 @@ export default function WorkerProfilePage() {
   const [isEditing, setIsEditing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [editedProfile, setEditedProfile] = useState<Partial<WorkerProfile>>(
-    {}
+    {},
   );
   const [activeTab, setActiveTab] = useState<
     "overview" | "portfolio" | "reviews"
@@ -152,7 +152,7 @@ export default function WorkerProfilePage() {
 
   // Helper function to safely get image URL from potentially stringified JSON
   const parseImageUrl = (
-    imageField: string | null | undefined
+    imageField: string | null | undefined,
   ): string | null => {
     if (!imageField) return null;
 
@@ -162,24 +162,42 @@ export default function WorkerProfilePage() {
         const parsed = JSON.parse(imageField);
         // Handle array format: [{"preview": "blob:..."}]
         if (Array.isArray(parsed) && parsed.length > 0) {
-          return parsed[0].preview || parsed[0].url || parsed[0];
+          const firstItem = parsed[0];
+          const url = firstItem?.preview || firstItem?.url || firstItem;
+          // Ensure we return a string
+          if (typeof url === "string") {
+            const trimmed = url.trim();
+            return trimmed || null;
+          }
+          return null;
         }
         // Handle object format: {"preview": "blob:..."}
-        if (parsed.preview || parsed.url) {
-          return parsed.preview || parsed.url;
+        if (parsed && typeof parsed === "object") {
+          const url = parsed.preview || parsed.url;
+          if (typeof url === "string") {
+            const trimmed = url.trim();
+            return trimmed || null;
+          }
         }
-        return parsed;
+        // If parsed is already a string
+        if (typeof parsed === "string") {
+          const trimmed = parsed.trim();
+          return trimmed || null;
+        }
+        return null;
       }
       // It's already a plain URL string
-      return imageField;
+      return imageField.trim() || null;
     } catch {
       // If parsing fails, return the original string if it looks like a URL
+      const trimmed = imageField.trim();
       if (
-        imageField.startsWith("http://") ||
-        imageField.startsWith("https://") ||
-        imageField.startsWith("/")
+        trimmed &&
+        (trimmed.startsWith("http://") ||
+          trimmed.startsWith("https://") ||
+          trimmed.startsWith("/"))
       ) {
-        return imageField;
+        return trimmed;
       }
       return null;
     }
@@ -239,14 +257,14 @@ export default function WorkerProfilePage() {
       const position = await new Promise<GeolocationPosition>(
         (resolve, reject) => {
           navigator.geolocation.getCurrentPosition(resolve, reject);
-        }
+        },
       );
 
       const { latitude, longitude } = position.coords;
 
       // Reverse geocode to get address
       const response = await fetch(
-        `/api/reverse-geocode?lat=${latitude}&lng=${longitude}`
+        `/api/reverse-geocode?lat=${latitude}&lng=${longitude}`,
       );
 
       if (!response.ok) {
@@ -277,7 +295,7 @@ export default function WorkerProfilePage() {
         switch (error.code) {
           case error.PERMISSION_DENIED:
             alert(
-              "Location permission denied. Please enable location access in your browser settings."
+              "Location permission denied. Please enable location access in your browser settings.",
             );
             break;
           case error.POSITION_UNAVAILABLE:
@@ -299,12 +317,6 @@ export default function WorkerProfilePage() {
     loadProfile();
   }, []);
 
-  useEffect(() => {
-    if (activeTab === "reviews" && reviews.length === 0 && !reviewsLoading) {
-      loadReviews();
-    }
-  }, [activeTab, reviews.length, reviewsLoading]);
-
   const loadReviews = async () => {
     setReviewsLoading(true);
     try {
@@ -315,7 +327,7 @@ export default function WorkerProfilePage() {
         throw new Error(
           `Failed to load reviews: ${res.status} - ${
             errorData.error || res.statusText
-          }`
+          }`,
         );
       }
       const data = await res.json();
@@ -391,7 +403,7 @@ export default function WorkerProfilePage() {
       alert(
         e instanceof Error
           ? e.message
-          : "Failed to save profile. Please try again."
+          : "Failed to save profile. Please try again.",
       );
     } finally {
       setSaving(false);
@@ -406,7 +418,9 @@ export default function WorkerProfilePage() {
     setProfilePicFile(null);
   };
 
-  const handleProfilePicChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleProfilePicChange = async (
+    e: React.ChangeEvent<HTMLInputElement>,
+  ) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
@@ -432,7 +446,7 @@ export default function WorkerProfilePage() {
       }
 
       const uploadData = await uploadResponse.json();
-      
+
       // Update profile with new image URL
       setEditedProfile({
         ...editedProfile,
@@ -458,7 +472,7 @@ export default function WorkerProfilePage() {
     try {
       // Upload images first
       const uploadedImageUrls: string[] = [];
-      
+
       for (const imageFile of newWork.images) {
         const formData = new FormData();
         formData.append("file", imageFile);
@@ -512,7 +526,7 @@ export default function WorkerProfilePage() {
     } catch (error) {
       console.error("Error adding project:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to add portfolio item"
+        error instanceof Error ? error.message : "Failed to add portfolio item",
       );
     } finally {
       setUploadingProject(false);
@@ -541,7 +555,9 @@ export default function WorkerProfilePage() {
     } catch (error) {
       console.error("Error deleting project:", error);
       toast.error(
-        error instanceof Error ? error.message : "Failed to delete portfolio item"
+        error instanceof Error
+          ? error.message
+          : "Failed to delete portfolio item",
       );
     }
   };
@@ -665,7 +681,7 @@ export default function WorkerProfilePage() {
                   <div className="w-32 h-32 rounded-full overflow-hidden flex items-center justify-center border-4 border-blue-500 dark:border-blue-400 bg-blue-50 dark:bg-[#171717]">
                     {parseImageUrl(profile.profilePic) ? (
                       <Image
-                        src={parseImageUrl(profile.profilePic) || ""}
+                        src={parseImageUrl(profile.profilePic)!}
                         alt={data.name}
                         width={128}
                         height={128}
@@ -887,7 +903,7 @@ export default function WorkerProfilePage() {
                             >
                               {skill}
                               {(editedProfile.skilledIn || []).includes(
-                                skill
+                                skill,
                               ) && <FiX className="h-3 w-3 ml-1" />}
                             </Badge>
                           ))}
@@ -1030,7 +1046,7 @@ export default function WorkerProfilePage() {
                           <StaggeredDropDown
                             items={qualificationOptions}
                             selected={editedProfile.qualification || ""}
-                            onSelectAction={handleQualificationChange}
+                            onSelect={handleQualificationChange}
                             label={
                               editedProfile.qualification ||
                               "Select qualification"
@@ -1451,7 +1467,7 @@ export default function WorkerProfilePage() {
                               >
                                 <FiX className="h-4 w-4" />
                               </button>
-                              
+
                               {imageUrl ? (
                                 <div className="aspect-video relative bg-gray-100 dark:bg-gray-700">
                                   <Image
@@ -1626,7 +1642,7 @@ export default function WorkerProfilePage() {
                                   </div>
                                   <span className="text-xs text-gray-500 dark:text-gray-400 whitespace-nowrap">
                                     {new Date(
-                                      review.createdAt
+                                      review.createdAt,
                                     ).toLocaleDateString("en-IN", {
                                       day: "numeric",
                                       month: "short",
