@@ -28,14 +28,14 @@ interface HeroButtonProps {
 interface HeroProps {
   title?: string;
   description?: string;
-  mockup?: ReactNode | false;
+  mockups?: [ReactNode, ReactNode, ReactNode] | false;
   badge?: ReactNode | false;
   buttons?: HeroButtonProps[] | false;
   className?: string;
 }
 
 // Hoverable mockups: parent gets dimensions so it can receive mouse events
-function HoverableMockups({ mockup }: { mockup: ReactNode }) {
+function HoverableMockups({ mockups }: { mockups: [ReactNode, ReactNode, ReactNode] }) {
   const [isHovered, setIsHovered] = useState(false);
 
   // ---- Editable values: tweak these to change how far/fast layers move/rotate on hover ----
@@ -83,8 +83,8 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
           >
             <div className="shadow-2xl">
               <MockupFrame size="small" className="shadow-lg">
-                <Mockup type="responsive" className="bg-background/50 w-full rounded-xl border border-white/5">
-                  {mockup}
+                <Mockup type="responsive" className="bg-background/50 w-full h-full rounded-xl border border-white/5 max-w-[1248px] flex items-center justify-center" style={{ height: "500px" }}>
+                  {mockups[0]}
                 </Mockup>
               </MockupFrame>
             </div>
@@ -102,8 +102,8 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
           >
             <div className="shadow-xl">
               <MockupFrame size="small" className="shadow-lg">
-                <Mockup type="responsive" className="bg-background/70 w-full rounded-xl border border-white/10">
-                  {mockup}
+                <Mockup type="responsive" className="bg-background/70 w-full h-full rounded-xl border border-white/10 max-w-[1248px] flex items-center justify-center" style={{ height: "500px" }}>
+                  {mockups[1]}
                 </Mockup>
               </MockupFrame>
             </div>
@@ -119,8 +119,8 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
           >
             <div className="shadow-2xl">
               <MockupFrame size="small" className="shadow-xl">
-                <Mockup type="responsive" className="bg-background/95 w-full rounded-xl border border-white/20">
-                  {mockup}
+                <Mockup type="responsive" className="bg-background/95 w-full h-full rounded-xl border border-white/20 max-w-[1248px] flex items-center justify-center"style={{ height: "500px" }}>
+                  {mockups[2]}
                 </Mockup>
               </MockupFrame>
             </div>
@@ -134,16 +134,35 @@ function HoverableMockups({ mockup }: { mockup: ReactNode }) {
 export default function PremiumHero({
   title = "Find skilled workers near you, instantly",
   description = "The modern platform connecting blue-collar workers with local opportunities. Built for reliability. Designed for growth.",
-  mockup = (
+  mockups = [
     <Screenshot
-      srcLight="/customer_search.png"
-      srcDark="/customer_search_dark.png"
-      alt="NearServe dashboard screenshot"
+      key="mockup-1"
+      srcLight="/mockup_1.png"
+      srcDark="/mockup_1_dark.png"
+      alt="NearServe dashboard screenshot 1"
       width={1248}
       height={765}
       className="w-full"
-    />
-  ),
+    />,
+    <Screenshot
+      key="mockup-2"
+      srcLight="/mockup_2.png"
+      srcDark="/mockup_2_dark.png"
+      alt="NearServe dashboard screenshot 2"
+      width={1248}
+      height={765}
+      className="w-full"
+    />,
+    <Screenshot
+      key="mockup-3"
+      srcLight="/mockup_3.png"
+      srcDark="/mockup_3_dark.png"
+      alt="NearServe dashboard screenshot 3"
+      width={1248}
+      height={765}
+      className="w-full"
+    />,
+  ],
   badge = (
     <Badge variant="outline">
       <motion.span
@@ -243,13 +262,13 @@ export default function PremiumHero({
         </div>
         
         {/* Mockups - centered separately */}
-        {mockup !== false && (
+        {mockups !== false && (
           <motion.div
             initial={{ filter: 'blur(10px)', opacity: 0, y: 12 }}
             animate={{ filter: 'blur(0px)', opacity: 1, y: 0 }}
             transition={{ duration: 0.8, delay: 0.35 }}
           >
-            <HoverableMockups mockup={mockup} />
+            <HoverableMockups mockups={mockups} />
           </motion.div>
         )}
       </div>

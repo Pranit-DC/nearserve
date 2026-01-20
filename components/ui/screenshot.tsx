@@ -27,14 +27,16 @@ export default function Screenshot({
   // - Dark image is hidden by default and shown when `.dark` class is present.
   // This avoids JS-driven flashes and works with Next-Themes when it toggles
   // the `dark` class on the document root.
+  const isResponsive = className?.includes("w-full");
+  const responsiveClassName = isResponsive ? cn(className, "h-full") : className;
   return (
-    <div className={cn("relative", className)} style={{ width, height }} aria-label={alt}>
+    <div className={cn("relative", responsiveClassName)} style={isResponsive ? { aspectRatio: `${width}/${height}` } : { width, height }} aria-label={alt}>
       <Image
         src={srcLight}
         alt={alt}
         width={width}
         height={height}
-        className="block dark:hidden w-full h-full object-cover absolute inset-0"
+        className="block dark:hidden w-full h-full object-contain absolute inset-0"
         unoptimized
       />
       {srcDark && (
@@ -43,7 +45,7 @@ export default function Screenshot({
           alt={alt}
           width={width}
           height={height}
-          className="hidden dark:block w-full h-full object-cover absolute inset-0"
+          className="hidden dark:block w-full h-full object-contain absolute inset-0"
           unoptimized
         />
       )}
