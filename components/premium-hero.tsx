@@ -15,7 +15,7 @@ import Glow from "@/components/ui/glow";
 import { Mockup, MockupFrame } from "@/components/ui/mockup";
 import Screenshot from "@/components/ui/screenshot";
 import { Section } from "@/components/ui/section";
-import BlurText from "@/components/BlurText";
+import SplitText from "@/components/SplitText";
 
 interface HeroButtonProps {
   href: string;
@@ -217,12 +217,27 @@ export default function PremiumHero({
       <div className="max-w-container mx-auto flex flex-col gap-6 pt-10 sm:gap-12 px-6 sm:px-8 lg:px-12">
         <div className="flex flex-col items-start gap-5 text-left sm:gap-8 max-w-2xl">
           {badge !== false && badge}
-          <h1 className="relative z-10 inline-block text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight">
-            <BlurText text={title} className="text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight" />
-          </h1>
-          <BlurText
+          <SplitText
+            text={title}
+            tag="h1"
+            className="relative z-10 inline-block text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight"
+            splitType="words"
+            delay={40}
+            duration={1}
+            ease="power3.out"
+            textAlign="left"
+          />
+          {/* Hidden plain text fallback to help translation services that struggle with split spans */}
+          <span className="sr-only">{title}</span>
+          <SplitText
             text={description}
+            tag="p"
             className="text-lg sm:text-xl text-foreground/80 relative z-10 max-w-[600px] font-medium text-balance animate-fade-in-up delay-100 dark:text-muted-foreground/95"
+            splitType="words"
+            delay={20}
+            duration={0.9}
+            ease="power3.out"
+            textAlign="left"
           />
           {buttons !== false && buttons.length > 0 && (
             <div className="relative z-10 flex justify-start gap-4">
