@@ -28,7 +28,7 @@ PROJECT KNOWLEDGE BASE:
 2. HOW IT WORKS (USER FLOWS)
    - **For Workers:** 1. Register & create a profile with skills/experience.
      2. Set service location availability.
-     3. Apply for jobs or receive booking requests.
+     3. Receive booking requests from customers.
      4. Complete work -> Upload Proof -> Get Paid (Earnings tracked in dashboard).
    - **For Customers:**
      1. Search for workers by skill and location (GPS/Geocoding used).

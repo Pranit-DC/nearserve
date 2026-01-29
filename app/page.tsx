@@ -6,7 +6,7 @@ import { MainMenusGradientCard } from "@/components/eldoraui/animatedcard";
 import { cn } from "@/lib/utils";
 import { Skeleton } from "@/components/ui/skeleton";
 import PremiumHero from "@/components/premium-hero";
-import { InfiniteMovingCards } from "@/components/ui/infinite-moving-cards";
+import { TestimonialsColumn } from "@/components/testimonials-column";
 import ScrollText from "@/components/kokonutui/scroll-text";
 import TypewriterTitle from "@/components/kokonutui/type-writer";
 import ShimmerText from "@/components/kokonutui/shimmer-text";
@@ -57,6 +57,68 @@ export default function Home() {
   const scrollToTop = () => {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
+
+  // Testimonials data (three columns)
+  const testimonials = [
+    {
+      text: "NearServe helped me get steady local bookings — jobs are easy to manage and payments are reliable.",
+      image: "https://randomuser.me/api/portraits/women/1.jpg",
+      name: "Rajesh Kumar",
+      role: "Electrician",
+    },
+    {
+      text: "I set my availability and get booked by nearby customers. Travel time is down and earnings are up.",
+      image: "https://randomuser.me/api/portraits/men/2.jpg",
+      name: "Priya Sharma",
+      role: "Cleaner",
+    },
+    {
+      text: "Bookings show up instantly and the in-app scheduling keeps everything organized — very professional.",
+      image: "https://randomuser.me/api/portraits/women/3.jpg",
+      name: "Amit Singh",
+      role: "Plumber",
+    },
+    {
+      text: "I rely on NearServe for consistent work — customers are verified and payments clear quickly after verification.",
+      image: "https://randomuser.me/api/portraits/men/4.jpg",
+      name: "Suresh Patel",
+      role: "Carpenter",
+    },
+    {
+      text: "The earnings dashboard and payout history make it easy to track income and plan my month.",
+      image: "https://randomuser.me/api/portraits/women/5.jpg",
+      name: "Anita Khan",
+      role: "Painter",
+    },
+    {
+      text: "Great support and clear job details — I can accept bookings confidently and get to work immediately.",
+      image: "https://randomuser.me/api/portraits/women/6.jpg",
+      name: "Mohammad Ali",
+      role: "Carpenter",
+    },
+    {
+      text: "My ratings and reviews helped increase bookings — customers leave helpful feedback after each job.",
+      image: "https://randomuser.me/api/portraits/men/7.jpg",
+      name: "Raj Verma",
+      role: "Painter",
+    },
+    {
+      text: "Flexible hours and transparent fees make it easy to run my small business using NearServe.",
+      image: "https://randomuser.me/api/portraits/women/8.jpg",
+      name: "Neha Gupta",
+      role: "Electrician Assistant",
+    },
+    {
+      text: "The platform connects me to customers nearby and the verification process keeps work trustworthy.",
+      image: "https://randomuser.me/api/portraits/men/9.jpg",
+      name: "Sanjay Rao",
+      role: "Plumber",
+    },
+  ];
+
+  const firstColumn = testimonials.slice(0, 3);
+  const secondColumn = testimonials.slice(3, 6);
+  const thirdColumn = testimonials.slice(6, 9);
 
   return (
     <div className="relative bg-slate-900">
@@ -341,7 +403,7 @@ export default function Home() {
               How It Works
             </h2>
             <p className="text-xl text-gray-600 dark:text-gray-400">
-              Three simple steps to transform your career
+              Simple steps to get started and earn reliably
             </p>
           </div>
 
@@ -351,13 +413,13 @@ export default function Home() {
               <ScrollText
                 texts={[
                   "Create Profile",
-                  "Showcase Skills",
-                  "Find Local Jobs",
-                  "Apply Instantly",
-                  "Work & Deliver",
-                  "Get Paid Fast",
-                  "Build Reputation",
-                  "Grow Your Career",
+                  "Complete Onboarding",
+                  "Get Booked",
+                  "Start Work",
+                  "Submit Proof",
+                  "Payments Processed",
+                  "Receive Reviews",
+                  "Grow Reputation",
                 ]}
                 className="h-[400px]"
               />
@@ -371,12 +433,10 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Create Your Professional Profile
+                    Create Profile & Complete Onboarding
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    Sign up in minutes and showcase your skills, experience, and
-                    availability. Add photos, certifications, and set your
-                    service rates.
+                    Sign up, add skills, documents, and choose your role (worker or customer). Complete onboarding to unlock bookings and applications.
                   </p>
                 </div>
               </div>
@@ -387,12 +447,10 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Connect with Local Opportunities
+                    Get Booked
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    Our smart matching system finds jobs near you that match
-                    your skills. Browse, apply, and negotiate terms directly
-                    with customers.
+                    Customers can book verified workers instantly — manage bookings and acceptances in-app.
                   </p>
                 </div>
               </div>
@@ -403,12 +461,10 @@ export default function Home() {
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
-                    Work Smart, Get Paid Instantly
+                    Work, Submit Proof & Get Paid
                   </h3>
                   <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    Complete your work with confidence. Our secure payment
-                    system ensures you get paid immediately after job
-                    completion.
+                    Start and complete the job, submit start/completion proof for verification; payments are processed and released to workers promptly once verified. Leave and receive reviews to build trust.
                   </p>
                 </div>
               </div>
@@ -418,73 +474,28 @@ export default function Home() {
 
         {/* Testimonials Section */}
         <section className="max-w-6xl mx-auto px-6 py-20">
-          <div className="text-center mb-16">
-            <ShimmerText
-              text="What Workers Say"
-              className="text-5xl font-light mb-4"
-            />
-            <TypewriterEffect
-              words={[
-                { text: "Real" },
-                { text: "stories" },
-                { text: "from" },
-                { text: "our" },
-                {
-                  text: "community",
-                  className: "text-blue-500 dark:text-blue-400",
-                },
-              ]}
-              className="text-xl text-gray-600 dark:text-gray-400"
-              cursorClassName="bg-blue-500"
-            />
-          </div>
+          <section className="relative py-10">
+            <div className="mx-auto max-w-5xl">
+              <div className="mx-auto flex max-w-sm flex-col items-center justify-center gap-4">
+                <div className="flex justify-center">
+                  <div className="rounded-lg border px-4 py-1">Testimonials</div>
+                </div>
 
-          {/* Infinite Moving Testimonials */}
-          <div className="relative">
-            <InfiniteMovingCards
-              items={[
-                {
-                  quote:
-                    "NearServe changed my life. I found steady work and the payments are always on time.",
-                  name: "Rajesh Kumar",
-                  title: "Electrician",
-                },
-                {
-                  quote:
-                    "The platform is easy to use. I can find work near my home and get paid instantly.",
-                  name: "Priya Sharma",
-                  title: "Cleaner",
-                },
-                {
-                  quote:
-                    "Great platform for contractors. Professional, reliable, and secure payments.",
-                  name: "Amit Singh",
-                  title: "Plumber",
-                },
-                {
-                  quote:
-                    "Finding consistent work was a challenge. NearServe gave me the stability I needed.",
-                  name: "Deepak Verma",
-                  title: "Painter",
-                },
-                {
-                  quote:
-                    "Excellent support and user-friendly app. I recommend NearServe to all workers.",
-                  name: "Sunita Devi",
-                  title: "Cook",
-                },
-                {
-                  quote:
-                    "Quick payments, verified customers, and transparent pricing. Much more rewarding.",
-                  name: "Mohammad Ali",
-                  title: "Carpenter",
-                },
-              ]}
-              direction="right"
-              speed="slow"
-              pauseOnHover={true}
-            />
-          </div>
+                <h2 className="font-bold text-3xl tracking-tighter lg:text-4xl">
+                  What our users say
+                </h2>
+                <p className="text-center text-muted-foreground text-sm">
+                  See what our customers have to say about us.
+                </p>
+              </div>
+
+              <div className="mt-10 flex max-h-[740px] justify-center gap-6 overflow-hidden [mask-image:linear-gradient(to_bottom,transparent,black_25%,black_75%,transparent)]">
+                <TestimonialsColumn duration={16} testimonials={firstColumn} />
+                <TestimonialsColumn className="hidden md:block" duration={20} testimonials={secondColumn} />
+                <TestimonialsColumn className="hidden lg:block" duration={18} testimonials={thirdColumn} />
+              </div>
+            </div>
+          </section>
         </section>
 
         {/* CTA Section - Enhanced with Glow Effect */}
