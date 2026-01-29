@@ -221,12 +221,14 @@ export default function PremiumHero({
             text={title}
             tag="h1"
             className="relative z-10 inline-block text-4xl sm:text-5xl md:text-6xl font-extrabold tracking-tight leading-tight"
-            splitType="words, chars"
+            splitType="words"
             delay={40}
             duration={1}
             ease="power3.out"
             textAlign="left"
           />
+          {/* Hidden plain text fallback to help translation services that struggle with split spans */}
+          <span className="sr-only">{title}</span>
           <SplitText
             text={description}
             tag="p"

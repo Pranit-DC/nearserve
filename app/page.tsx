@@ -9,10 +9,12 @@ import PremiumHero from "@/components/premium-hero";
 import { TestimonialsColumn } from "@/components/testimonials-column";
 import ScrollText from "@/components/kokonutui/scroll-text";
 import TypewriterTitle from "@/components/kokonutui/type-writer";
+import SplitText from "@/components/SplitText";
 import ShimmerText from "@/components/kokonutui/shimmer-text";
 import { TypewriterEffect } from "@/components/ui/typewriter-effect";
 import { ContainerScroll } from "@/components/ui/container-scroll-animation";
 import CTA from "@/components/ui/cta";
+import GlassSurface from "@/components/GlassSurface";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
@@ -399,10 +401,10 @@ export default function Home() {
         {/* How It Works Section */}
         <section className="max-w-6xl mx-auto px-6 py-20">
           <div className="text-center mb-16">
-            <h2 className="text-5xl font-light text-gray-900 dark:text-white mb-4">
+            <h2 className="text-5xl font-light text-gray-900 dark:text-gray-100 mb-4">
               How It Works
             </h2>
-            <p className="text-xl text-gray-600 dark:text-gray-400">
+            <p className="text-xl text-gray-600 dark:text-gray-300">
               Simple steps to get started and earn reliably
             </p>
           </div>
@@ -427,43 +429,43 @@ export default function Home() {
 
             {/* Right side - Step Cards */}
             <div className="order-1 lg:order-2 space-y-8">
-              <div className="flex items-start gap-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-950/30 dark:to-gray-800/30 rounded-xl border border-gray-100 dark:border-gray-800/30">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start gap-6 p-6 bg-white/80 dark:bg-[#0B0F14]/80 rounded-2xl border border-gray-200 dark:border-[#111827] shadow-sm">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0 shadow">
                   <span className="text-xl font-bold text-white">1</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     Create Profile & Complete Onboarding
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
-                    Sign up, add skills, documents, and choose your role (worker or customer). Complete onboarding to unlock bookings and applications.
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
+                    Sign up, add skills, documents, and choose your role (worker or customer). Complete onboarding to unlock bookings and access to bookings.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-950/30 dark:to-gray-800/30 rounded-xl border border-gray-100 dark:border-gray-800/30">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start gap-6 p-6 bg-white/80 dark:bg-[#0B0F14]/80 rounded-2xl border border-gray-200 dark:border-[#111827] shadow-sm">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0 shadow">
                   <span className="text-xl font-bold text-white">2</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     Get Booked
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                     Customers can book verified workers instantly — manage bookings and acceptances in-app.
                   </p>
                 </div>
               </div>
 
-              <div className="flex items-start gap-6 p-6 bg-gradient-to-r from-gray-50 to-gray-100 dark:from-gray-950/30 dark:to-gray-800/30 rounded-xl border border-gray-100 dark:border-gray-800/30">
-                <div className="w-16 h-16 bg-gradient-to-br from-gray-500 to-gray-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <div className="flex items-start gap-6 p-6 bg-white/80 dark:bg-[#0B0F14]/80 rounded-2xl border border-gray-200 dark:border-[#111827] shadow-sm">
+                <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-blue-500 rounded-full flex items-center justify-center flex-shrink-0 shadow">
                   <span className="text-xl font-bold text-white">3</span>
                 </div>
                 <div>
-                  <h3 className="text-xl font-semibold text-gray-900 dark:text-white mb-2">
+                  <h3 className="text-xl font-semibold text-gray-900 dark:text-gray-100 mb-2">
                     Work, Submit Proof & Get Paid
                   </h3>
-                  <p className="text-gray-600 dark:text-gray-400 leading-relaxed">
+                  <p className="text-gray-600 dark:text-gray-300 leading-relaxed">
                     Start and complete the job, submit start/completion proof for verification; payments are processed and released to workers promptly once verified. Leave and receive reviews to build trust.
                   </p>
                 </div>
@@ -518,33 +520,15 @@ export default function Home() {
                   <h2 className="text-5xl md:text-6xl font-thin text-gray-900 dark:text-white mb-2 tracking-tight">
                     Ready to
                   </h2>
-                  <TypewriterTitle
-                    sequences={[
-                      {
-                        text: "transform your career",
-                        deleteAfter: true,
-                        pauseAfter: 2000,
-                      },
-                      {
-                        text: "unlock new opportunities",
-                        deleteAfter: true,
-                        pauseAfter: 2000,
-                      },
-                      {
-                        text: "build your future",
-                        deleteAfter: true,
-                        pauseAfter: 2000,
-                      },
-                      {
-                        text: "start earning more",
-                        deleteAfter: false,
-                        pauseAfter: 3000,
-                      },
-                    ]}
-                    typingSpeed={80}
-                    startDelay={1000}
-                    autoLoop={true}
-                    loopDelay={3000}
+                  <SplitText
+                    text="transform your career"
+                    tag="span"
+                    className="text-5xl md:text-6xl font-semibold text-gray-900 dark:text-white mb-2 tracking-tight inline-block"
+                    splitType="words, chars"
+                    delay={30}
+                    duration={1.1}
+                    ease="power3.out"
+                    textAlign="left"
                   />
                 </div>
 
@@ -582,22 +566,29 @@ export default function Home() {
             animate={{ opacity: 1, scale: 1 }}
             exit={{ opacity: 0, scale: 0 }}
             onClick={scrollToTop}
-            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 group inline-flex items-center justify-center w-14 h-14 bg-blue-600 hover:bg-blue-700 text-white rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 ease-out hover:scale-110 hover:-translate-y-1 max-sm:bottom-20"
+            className="fixed bottom-8 left-1/2 -translate-x-1/2 z-50 group inline-flex items-center justify-center w-14 h-14 rounded-full shadow-lg hover:shadow-2xl transition-all duration-300 ease-out hover:scale-110 hover:-translate-y-1 max-sm:bottom-20 bg-transparent"
             aria-label="Scroll to top"
           >
-            <svg
-              className="w-6 h-6 relative z-10 transition-transform duration-300 group-hover:-translate-y-0.5"
-              fill="none"
-              stroke="currentColor"
-              viewBox="0 0 24 24"
-              strokeWidth={2.5}
+            <GlassSurface
+              width={56}
+              height={56}
+              borderRadius={9999}
+              backgroundOpacity={0.08}
+              blur={10}
+              saturation={1.05}
+              className="w-full h-full rounded-full flex items-center justify-center p-0"
             >
-              <path
-                strokeLinecap="round"
-                strokeLinejoin="round"
-                d="M5 10l7-7m0 0l7 7m-7-7v18"
-              />
-            </svg>
+              <svg
+                className="w-6 h-6 relative z-10 text-gray-900 dark:text-white transition-transform duration-300 group-hover:-translate-y-0.5"
+                fill="none"
+                stroke="currentColor"
+                viewBox="0 0 24 24"
+                strokeWidth={2.5}
+                aria-hidden="true"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M5 10l7-7m0 0l7 7m-7-7v18" />
+              </svg>
+            </GlassSurface>
           </motion.button>
         )}
       </div>

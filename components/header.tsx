@@ -17,6 +17,8 @@ import { useTheme } from "next-themes";
 import { usePathname } from "next/navigation";
 import { Button } from "./ui/button";
 import { useUserProfile } from "@/hooks/use-user-profile";
+import StaggeredDropDown from "@/components/ui/staggered-dropdown";
+import { FiGlobe } from "react-icons/fi";
 import { AnimatedThemeToggler } from "@/components/ui/animated-theme-toggler";
 
 // Dynamic import for ProfileButton
@@ -52,6 +54,47 @@ export function Header() {
   }, [error]);
 
   const currentTheme = theme === "system" ? systemTheme : theme;
+
+  const [currentLang, setCurrentLang] = useState('en');
+
+  const languages = [
+    { value: 'en', label: 'English' },
+    { value: 'hi', label: 'हिन्दी' },
+    { value: 'mr', label: 'मराठी' },
+  ];
+
+  const changeLanguage = (langCode: string) => {
+    if (typeof document === 'undefined' || typeof window === 'undefined') return;
+    const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+    if (select) {
+      select.value = langCode;
+      select.dispatchEvent(new Event('change'));
+      setCurrentLang(langCode);
+      localStorage.setItem('preferredLanguage', langCode);
+    } else {
+      // fallback store preference and set state; some pages will initialize translator later
+      setCurrentLang(langCode);
+      localStorage.setItem('preferredLanguage', langCode);
+    }
+  };
+
+  // initialize from localStorage and attempt to sync with google translate if present
+  useEffect(() => {
+    try {
+      const stored = localStorage.getItem('preferredLanguage');
+      if (stored) setCurrentLang(stored);
+
+      const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+      if (select) {
+        const lang = stored || select.value || 'en';
+        select.value = lang;
+        select.dispatchEvent(new Event('change'));
+        setCurrentLang(lang);
+      }
+    } catch (e) {
+      // ignore in SSR or if API not present
+    }
+  }, []);
 
   // Dynamic navigation items based on user role
   const getNavItems = () => {
@@ -136,6 +179,21 @@ export function Header() {
         <div className="flex items-center space-x-3">
           {/* Animated Theme Toggler */}
           <AnimatedThemeToggler />
+
+          {/* Language Dropdown (Desktop) */}
+          <div className="hidden md:flex items-center">
+            <div className="grid h-full w-10 place-content-center text-lg text-gray-500 dark:text-gray-400">
+              <FiGlobe />
+            </div>
+            <div>
+              <StaggeredDropDown
+                items={languages}
+                selected={currentLang}
+                onSelectAction={changeLanguage}
+                label="Language"
+              />
+            </div>
+          </div>
 
           {!user && !authLoading && <ProfileButton />}
           {user && <ProfileButton />}
@@ -225,17 +283,31 @@ export function Header() {
                 <AnimatedThemeToggler />
               </div>
 
+              {/* Mobile Language Switcher */}
+              <div className="px-4 py-3">
+                <div className="flex items-center gap-3">
+                  <FiGlobe className="text-lg text-gray-500 dark:text-gray-400" />
+                  <StaggeredDropDown
+                    items={languages}
+                    selected={currentLang}
+                    onSelectAction={changeLanguage}
+                    label="Language"
+                  />
+                </div>
+              </div>
+
               {!user && !authLoading && (
                 <>
-                  <Link 
-                    href="/sign-in" 
+                  <Link
+                    href="/sign-in"
                     onClick={() => setIsOpen(false)}
                     className="w-full text-left px-4 py-3 rounded-full text-gray-700 dark:text-gray-300 hover:text-black dark:hover:text-white hover:bg-gray-100/80 dark:hover:bg-gray-800/80 transition-all duration-200 font-medium block"
                   >
                     Sign In
                   </Link>
-                  <Link 
-                    href="/sign-up" 
+
+                  <Link
+                    href="/sign-up"
                     onClick={() => setIsOpen(false)}
                     className="w-full bg-blue-500 text-white px-4 py-3 rounded-full hover:bg-blue-600 transition-all duration-200 font-medium shadow-sm block text-center"
                   >
@@ -243,6 +315,7 @@ export function Header() {
                   </Link>
                 </>
               )}
+
               {user && (
                 <div className="flex items-center space-x-3 px-4 py-3 rounded-lg bg-gray-50/80 dark:bg-gray-800/50">
                   <FirebaseUserButton />

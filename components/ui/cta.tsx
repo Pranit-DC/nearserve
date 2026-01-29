@@ -60,15 +60,15 @@ export default function CTA({
                 size="lg"
                 asChild
                 className={cn(
-                  "min-w-[200px] transition-all duration-200",
+                  "min-w-[200px] rounded-xl transform-gpu transition-transform duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
                   button.variant === "default"
-                    ? "bg-blue-600 hover:bg-blue-700 text-white hover:scale-105 hover:shadow-lg hover:shadow-blue-500/25"
-                    : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white border-gray-200 dark:border-gray-700 hover:border-gray-300 dark:hover:border-gray-600 hover:scale-105 hover:shadow-lg hover:shadow-gray-500/10"
+                    ? "bg-gradient-to-br from-blue-600 to-blue-500 text-white shadow-lg hover:scale-105 active:scale-100 hover:shadow-2xl focus-visible:ring-blue-400"
+                    : "bg-white dark:bg-gray-800 text-gray-900 dark:text-white border border-gray-200 dark:border-gray-700 hover:bg-gray-50 dark:hover:bg-gray-900 hover:scale-105 shadow-sm focus-visible:ring-blue-400"
                 )}
               >
-                <a href={button.href} className="flex items-center gap-2">
+                <a href={button.href} className="flex items-center gap-3 px-6 py-3">
                   {button.icon}
-                  {button.text}
+                  <span className="font-semibold">{button.text}</span>
                   {button.iconRight}
                 </a>
               </Button>
