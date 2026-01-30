@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, Controller } from "react-hook-form";
 import { Card, CardContent } from "@/components/ui/card";
@@ -35,6 +35,7 @@ import { formatDisplayAddress } from "@/lib/location";
 import ShimmerText from "@/components/kokonutui/shimmer-text";
 import { TypewriterEffect } from "@/components/ui/typewriter-effect";
 import ClickSpark from "@/components/ClickSpark";
+import { OnboardingSkeleton } from "@/components/ui/skeleton";
 
 interface WorkerFormData {
   phone: string;
@@ -138,6 +139,8 @@ const experienceLevels = [
 export default function WorkerDetailsPage() {
   const router = useRouter();
   const [isLoading, setIsLoading] = useState(false);
+  // skeleton: show a brief onboarding skeleton while page initializes
+  const [isPageLoading, setIsPageLoading] = useState(true);
   const [currentStep, setCurrentStep] = useState(1);
   const [selectedSkills, setSelectedSkills] = useState<string[]>([]);
   const [customSkill, setCustomSkill] = useState("");
@@ -216,6 +219,12 @@ export default function WorkerDetailsPage() {
   }
 
   const currentStepData = steps.find((step) => step.id === currentStep);
+
+  // Dismiss the skeleton quickly after mount for a smoother UX
+  useEffect(() => {
+    const t = setTimeout(() => setIsPageLoading(false), 350);
+    return () => clearTimeout(t);
+  }, []);
   const isLastStep = currentStep === steps.length;
   const isFirstStep = currentStep === 1;
 
@@ -382,6 +391,8 @@ export default function WorkerDetailsPage() {
       setIsLoading(false);
     }
   };
+
+  if (isPageLoading) return <OnboardingSkeleton />;
 
   return (
     <div className="min-h-screen bg-gray-50 dark:bg-[#212121]">

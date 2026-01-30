@@ -330,7 +330,7 @@ export default function WorkerEarningsPage() {
                                           day: "numeric",
                                           month: "short",
                                           year: "numeric",
-                                        }
+                                        },
                                       )}
                                     </span>
                                   </div>
