@@ -4,6 +4,7 @@ import { COLLECTIONS } from "@/lib/firestore";
 import { distanceKm } from "@/lib/location";
 import { serializeFirestoreData } from "@/lib/firestore-serialization";
 import { getWorkerRating } from "@/lib/reviews";
+import { getWorkerReputation, categorizeWorker, canWorkerBeBooked } from "@/lib/reputation-service";
 
 type SearchParams = {
   q?: string | null;
@@ -12,6 +13,9 @@ type SearchParams = {
   sort?: string | null;
   lat?: string | null;
   lng?: string | null;
+  minReputation?: string | null;
+  reputationFilter?: string | null;
+  bookableOnly?: string | null;
 };
 
 function flattenStringArray(values: string[] | null | undefined): string[] {
@@ -77,6 +81,9 @@ export async function GET(req: NextRequest) {
       sort: url.searchParams.get("sort"),
       lat: url.searchParams.get("lat"),
       lng: url.searchParams.get("lng"),
+      minReputation: url.searchParams.get("minReputation"),
+      reputationFilter: url.searchParams.get("reputationFilter"),
+      bookableOnly: url.searchParams.get("bookableOnly"),
     };
 
     const q = sp.q?.toLowerCase().trim() ?? "";
@@ -88,6 +95,9 @@ export async function GET(req: NextRequest) {
     const sort = (sp.sort || "relevance").toLowerCase();
     const lat = sp.lat ? parseFloat(sp.lat) : undefined;
     const lng = sp.lng ? parseFloat(sp.lng) : undefined;
+    const minReputation = sp.minReputation ? parseInt(sp.minReputation, 10) : undefined;
+    const reputationFilter = sp.reputationFilter?.toUpperCase(); // TOP_RATED, RELIABLE, etc.
+    const bookableOnly = sp.bookableOnly === 'true';
 
     // Fetch all workers with role = WORKER
     const usersRef = adminDb.collection(COLLECTIONS.USERS);
@@ -154,27 +164,67 @@ export async function GET(req: NextRequest) {
       return categoryOk && keywordOk;
     });
 
-    // Fetch ratings for all workers before sorting
-    const workersWithRatings = await Promise.all(
+    // Fetch ratings and reputation for all workers before sorting
+    const workersWithRatingsAndReputation = await Promise.all(
       filtered.map(async (w) => {
         const rating = await getWorkerRating(w.id);
-        return { ...w, rating };
+        const reputation = w.workerProfile?.reputation ?? 0;
+        
+        // Count completed jobs for this worker
+        const jobsRef = adminDb.collection(COLLECTIONS.JOBS);
+        const completedJobsQuery = await jobsRef
+          .where('workerId', '==', w.id)
+          .where('status', '==', 'COMPLETED')
+          .get();
+        const completedJobs = completedJobsQuery.size;
+
+        const category = categorizeWorker(reputation, completedJobs);
+        const bookingEligibility = await canWorkerBeBooked(w.id);
+
+        return { 
+          ...w, 
+          rating,
+          reputation,
+          completedJobs,
+          reputationCategory: category.category,
+          canBeBooked: bookingEligibility.allowed,
+          bookingRestrictionReason: bookingEligibility.reason,
+        };
       })
     );
 
+    // Apply reputation-based filters
+    let result = workersWithRatingsAndReputation.filter((w) => {
+      // Filter by minimum reputation
+      if (typeof minReputation === 'number' && w.reputation < minReputation) {
+        return false;
+      }
+
+      // Filter by reputation category
+      if (reputationFilter && w.reputationCategory !== reputationFilter) {
+        return false;
+      }
+
+      // Filter by bookability
+      if (bookableOnly && !w.canBeBooked) {
+        return false;
+      }
+
+      return true;
+    });
+
     // Apply sorting based on sort parameter
-    let result = workersWithRatings;
     
     if (sort === "nearest" && typeof lat === "number" && typeof lng === "number") {
       // Sort by distance (nulls last)
-      result = workersWithRatings.sort((a, b) => {
+      result = result.sort((a, b) => {
         const da = a.distanceKm == null ? Number.POSITIVE_INFINITY : a.distanceKm;
         const db = b.distanceKm == null ? Number.POSITIVE_INFINITY : b.distanceKm;
         return da - db;
       });
     } else if (sort === "rating") {
       // Sort by highest rating (workers with more reviews get priority in ties)
-      result = workersWithRatings.sort((a, b) => {
+      result = result.sort((a, b) => {
         const ratingA = a.rating?.avgRating ?? 0;
         const ratingB = b.rating?.avgRating ?? 0;
         if (ratingB !== ratingA) {
@@ -183,9 +233,12 @@ export async function GET(req: NextRequest) {
         // Tie-breaker: more reviews
         return (b.rating?.totalReviews ?? 0) - (a.rating?.totalReviews ?? 0);
       });
+    } else if (sort === "reputation") {
+      // Sort by highest reputation
+      result = result.sort((a, b) => b.reputation - a.reputation);
     } else if (sort === "experience") {
       // Sort by most experienced
-      result = workersWithRatings.sort((a, b) => {
+      result = result.sort((a, b) => {
         const expA = a.workerProfile?.yearsExperience ?? 0;
         const expB = b.workerProfile?.yearsExperience ?? 0;
         return expB - expA; // Higher experience first

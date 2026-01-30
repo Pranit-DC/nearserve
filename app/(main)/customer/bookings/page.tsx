@@ -53,7 +53,10 @@ type Job = {
   workerEarnings?: number | null;
   status: "PENDING" | "ACCEPTED" | "IN_PROGRESS" | "COMPLETED" | "CANCELLED";
   worker: { name: string | null };
+  workerId?: string;
   review?: { id: string; rating: number; comment: string | null } | null;
+  reputationAssessed?: boolean;
+  reputationAssessmentType?: string;
 };
 
 type Tab = "ONGOING" | "PREVIOUS";
@@ -80,6 +83,9 @@ export default function CustomerBookingsPage() {
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
   const [reviewedJobs, setReviewedJobs] = useState<Set<string>>(new Set());
+  const [assessingJobId, setAssessingJobId] = useState<string | null>(null);
+  const [workerReputations, setWorkerReputations] = useState<Record<string, any>>({});
+  const [selectedJobDescription, setSelectedJobDescription] = useState<string | undefined>();
 
   // Real-time Firestore listener - instant updates when bookings change!
   const { jobs, loading, error } = useRealtimeJobs({
@@ -91,10 +97,58 @@ export default function CustomerBookingsPage() {
   // Fallback to API if Firestore fails
   const [apiJobs, setApiJobs] = useState<Job[]>([]);
   const [fallbackActive, setFallbackActive] = useState(false);
+  const [apiRetryCount, setApiRetryCount] = useState(0);
 
-  const openReview = (jobId: string) => {
+  const openReview = (jobId: string, jobDescription?: string) => {
     setReviewJobId(jobId);
+    setSelectedJobDescription(jobDescription);
     setReviewOpen(true);
+  };
+
+  const fetchWorkerReputation = async (workerId: string) => {
+    if (workerReputations[workerId]) return; // Already cached
+    try {
+      const res = await fetch(`/api/workers/${workerId}/reputation`, {
+        cache: "no-store",
+        credentials: "include",
+      });
+      if (res.ok) {
+        const data = await res.json();
+        setWorkerReputations(prev => ({
+          ...prev,
+          [workerId]: data.reputation
+        }));
+      }
+    } catch (e) {
+      console.error("Error fetching worker reputation:", e);
+    }
+  };
+
+  const submitReputationAssessment = async (jobId: string, assessmentType: 'ON_TIME' | 'LATE' | 'NO_SHOW') => {
+    setAssessingJobId(jobId);
+    try {
+      const res = await fetch(`/api/jobs/${jobId}/assess-reputation`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include',
+        body: JSON.stringify({ assessmentType }),
+      });
+
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || 'Failed to submit assessment');
+      } else {
+        const data = await res.json();
+        toast.success(`✅ Worker assessed: ${assessmentType}`);
+        // Mark as reviewed locally
+        setReviewedJobs((prev) => new Set(prev).add(jobId));
+      }
+    } catch (error) {
+      console.error("Error submitting reputation assessment:", error);
+      toast.error("Failed to submit assessment");
+    } finally {
+      setAssessingJobId(null);
+    }
   };
 
   const loadFromAPI = async () => {
@@ -104,10 +158,19 @@ export default function CustomerBookingsPage() {
         credentials: "include",
       });
 
-      if (!res.ok) throw new Error(`Failed to load jobs: ${res.status}`);
+      if (!res.ok) {
+        // Only log error, don't throw - let fallback retry
+        console.warn(`[Bookings API] HTTP ${res.status}:`, res.statusText);
+        // Reset retry count after 3 failures
+        if (apiRetryCount > 3) {
+          console.error("[Bookings API] Max retries reached");
+        }
+        return;
+      }
 
       const data = await res.json();
       setApiJobs(data.jobs || []);
+      setApiRetryCount(0); // Reset retry count on success
       console.log(`[Bookings API] Loaded ${data.jobs?.length || 0} jobs`);
     } catch (e) {
       console.error("[Bookings API] Load error:", e);
@@ -116,12 +179,17 @@ export default function CustomerBookingsPage() {
 
   // If Firestore has an error, activate API fallback
   useEffect(() => {
-    if (error && !fallbackActive) {
+    if (error && !fallbackActive && userProfile?.id) {
       console.warn("[Bookings] Firestore error, falling back to API polling");
       setFallbackActive(true);
-      loadFromAPI();
+      setApiRetryCount(0);
+      // Delay slightly to allow session to be established
+      const timeout = setTimeout(() => {
+        loadFromAPI();
+      }, 500);
+      return () => clearTimeout(timeout);
     }
-  }, [error, fallbackActive]);
+  }, [error, fallbackActive, userProfile?.id]);
 
   // Use API polling as fallback only if Firestore fails
   useAutoRefresh(loadFromAPI, { interval: 30000, enabled: fallbackActive });
@@ -133,6 +201,15 @@ export default function CustomerBookingsPage() {
     }
     return job;
   });
+
+  // Fetch worker reputations when jobs load
+  useEffect(() => {
+    displayJobs.forEach(job => {
+      if (job.workerId && job.status === 'COMPLETED') {
+        fetchWorkerReputation(job.workerId);
+      }
+    });
+  }, [displayJobs, fetchWorkerReputation]);
 
   // Filter and search logic
   const ongoing = displayJobs.filter(
@@ -533,11 +610,15 @@ export default function CustomerBookingsPage() {
                   />
                 )}
               </motion.div>
-            ) : false ? (
-              <ScrollList
-                data={list || []}
-                itemHeight={320}
-                renderItem={(j, index) => (
+            ) : (
+              <motion.div
+                key="list"
+                initial={{ opacity: 0 }}
+                animate={{ opacity: 1 }}
+                exit={{ opacity: 0 }}
+                className="space-y-4 max-w-4xl mx-auto"
+              >
+                {list.map((j) => (
                   <Card
                     key={j.id}
                     className="p-6 hover:shadow-xl transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] w-full max-w-4xl mx-auto flex flex-col overflow-hidden"
@@ -548,6 +629,11 @@ export default function CustomerBookingsPage() {
                         <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
                           {j.description}
                         </h3>
+                        <div className="flex items-center gap-2 flex-wrap mt-2">
+                          <span className="text-xs px-3 py-1 rounded-full bg-blue-100 dark:bg-blue-900/30 text-blue-700 dark:text-blue-300 font-semibold">
+                            📋 {j.description}
+                          </span>
+                        </div>
                         <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
                           Worker: {j.worker?.name || "Worker"}
                         </p>
@@ -729,10 +815,53 @@ export default function CustomerBookingsPage() {
                         )}
                       {tab === "PREVIOUS" &&
                         j.status === "COMPLETED" &&
+                        !j.reputationAssessed && (
+                          <div className="mt-4 space-y-2">
+                            <div className="text-sm font-medium text-gray-900 dark:text-white mb-2">
+                              How was the worker?
+                            </div>
+                            <div className="grid grid-cols-3 gap-2">
+                              <Button
+                                disabled={assessingJobId === j.id}
+                                onClick={() => submitReputationAssessment(j.id, 'ON_TIME')}
+                                className="bg-green-600 hover:bg-green-700 text-white text-xs py-2"
+                              >
+                                {assessingJobId === j.id ? '...' : '✓ On Time'}
+                              </Button>
+                              <Button
+                                disabled={assessingJobId === j.id}
+                                onClick={() => submitReputationAssessment(j.id, 'LATE')}
+                                className="bg-yellow-600 hover:bg-yellow-700 text-white text-xs py-2"
+                              >
+                                {assessingJobId === j.id ? '...' : '⏱️ Late'}
+                              </Button>
+                              <Button
+                                disabled={assessingJobId === j.id}
+                                onClick={() => submitReputationAssessment(j.id, 'NO_SHOW')}
+                                className="bg-red-600 hover:bg-red-700 text-white text-xs py-2"
+                              >
+                                {assessingJobId === j.id ? '...' : '✗ No Show'}
+                              </Button>
+                            </div>
+                            <p className="text-xs text-gray-500 dark:text-gray-400 mt-2">
+                              • <strong>On Time:</strong> +1 point • <strong>Late:</strong> 0 points • <strong>No Show:</strong> -1 point
+                            </p>
+                          </div>
+                        )}
+                      {tab === "PREVIOUS" &&
+                        j.status === "COMPLETED" &&
+                        j.reputationAssessed && (
+                          <div className="mt-4 p-2 bg-gray-100 dark:bg-[#252525] rounded text-xs text-gray-600 dark:text-gray-400 flex items-center gap-2">
+                            <FiCheck className="h-4 w-4 text-green-600" />
+                            Assessment recorded: {j.reputationAssessmentType}
+                          </div>
+                        )}
+                      {tab === "PREVIOUS" &&
+                        j.status === "COMPLETED" &&
                         !j.review && (
                           <div className="mt-4">
                             <Button
-                              onClick={() => openReview(j.id)}
+                              onClick={() => openReview(j.id, j.description)}
                               className="bg-emerald-600 hover:bg-emerald-500 text-white w-full"
                             >
                               Review
@@ -754,135 +883,46 @@ export default function CustomerBookingsPage() {
                           </div>
                         )}
                     </div>
-                  </Card>
-                )}
-              />
-            ) : (
-              <div className="space-y-4">
-                {list.map((j) => (
-                  <Card
-                    key={j.id}
-                    className="p-5 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] flex flex-col h-full min-h-[300px]"
-                  >
-                    {/* Header Section */}
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                          {j.description}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          Worker: {j.worker?.name || "Worker"}
-                        </p>
-                      </div>
-                      <span
-                        className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${
-                          j.status === "ACCEPTED"
-                            ? "bg-blue-50 text-blue-700 dark:bg-[#171717] dark:text-slate-200"
-                            : j.status === "PENDING"
-                            ? "bg-orange-50 text-orange-700 dark:bg-[#171717] dark:text-slate-200"
-                            : j.status === "COMPLETED"
-                            ? "bg-green-50 text-green-700 dark:bg-[#171717] dark:text-slate-200"
-                            : j.status === "CANCELLED"
-                            ? "bg-red-50 text-red-700 dark:bg-[#171717] dark:text-slate-200"
-                            : "bg-gray-50 text-gray-700 dark:bg-[#171717] dark:text-slate-200"
-                        }`}
-                      >
-                        {j.status}
-                      </span>
-                    </div>
 
-                    {/* Details Section */}
-                    <div className="flex-1 space-y-3">
-                      {/* Time and Location Row */}
-                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-9 h-9 rounded-xl bg-blue-50 dark:bg-[#252525] flex items-center justify-center">
-                            <svg
-                              className="w-4 h-4 text-blue-600 dark:text-slate-300"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white text-xs">
-                              Date & Time
-                            </p>
-                            <p className="text-xs">
-                              {(() => {
-                                let d = j.time;
-                                if (d && typeof d === 'object' && typeof d.toDate === 'function') d = d.toDate();
-                                else d = new Date(d);
-                                return d && !isNaN(d.getTime()) ? d.toLocaleString() : "—";
-                              })()}
-                            </p>
-                          </div>
-                        </div>
-
-                        <div className="flex items-center gap-2 text-sm text-gray-600 dark:text-gray-300">
-                          <div className="w-9 h-9 rounded-xl bg-green-50 dark:bg-[#252525] flex items-center justify-center">
-                            <svg
-                              className="w-4 h-4 text-green-600 dark:text-slate-300"
-                              fill="none"
-                              stroke="currentColor"
-                              viewBox="0 0 24 24"
-                            >
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z"
-                              />
-                              <path
-                                strokeLinecap="round"
-                                strokeLinejoin="round"
-                                strokeWidth={2}
-                                d="M15 11a3 3 0 11-6 0 3 3 0 016 0z"
-                              />
-                            </svg>
-                          </div>
-                          <div>
-                            <p className="font-medium text-gray-900 dark:text-white text-xs">
-                              Location
-                            </p>
-                            <p className="text-xs">{j.location}</p>
-                          </div>
-                        </div>
-                      </div>
-
-                      {/* Charge Section */}
-                      <div className="flex items-center gap-2 p-3 bg-gray-50 dark:bg-[#181818] rounded-lg">
-                        <div className="w-9 h-9 rounded-xl bg-yellow-50 dark:bg-[#252525] flex items-center justify-center">
-                          <svg
-                            className="w-4 h-4 text-yellow-600 dark:text-yellow-400"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
+                    {/* Action Buttons Section */}
+                    <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
+                      {tab === "ONGOING" && j.status === "IN_PROGRESS" && (
+                        <div className="space-y-2">
+                          <Button
+                            disabled={acting === j.id || paymentProcessing}
+                            onClick={() => completeJob(j.id)}
+                            className="bg-purple-600 hover:bg-purple-500 text-white w-full"
                           >
-                            <path
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                              strokeWidth={2}
-                              d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1"
-                            />
-                          </svg>
+                            {acting === j.id ? (
+                              <>
+                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
+                                Initiating Payment...
+                              </>
+                            ) : (
+                              <>
+                                <FiCreditCard className="h-4 w-4 mr-2 inline" />
+                                Complete & Pay ₹{j.charge.toFixed(2)}
+                              </>
+                            )}
+                          </Button>
+                          {j.platformFee && j.workerEarnings && (
+                            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 p-2 bg-gray-50 dark:bg-[#181818] rounded">
+                              <div className="flex justify-between">
+                                <span>Worker Earnings:</span>
+                                <span className="font-medium">
+                                  ₹{j.workerEarnings.toFixed(2)}
+                                </span>
+                              </div>
+                              <div className="flex justify-between">
+                                <span>Platform Fee (10%):</span>
+                                <span className="font-medium">
+                                  ₹{j.platformFee.toFixed(2)}
+                                </span>
+                              </div>
+                            </div>
+                          )}
                         </div>
-                        <div className="flex-1">
-                          <p className="text-xs font-medium text-gray-600 dark:text-gray-400">
-                            Total Charge
-                          </p>
-                          <p className="text-lg font-bold text-gray-900 dark:text-white">
-                            ₹{j.charge.toFixed(2)}
-                          </p>
-                        </div>
-                      </div>
+                      )}
 
                       {/* Details Description */}
                       {j.details && (
@@ -954,7 +994,7 @@ export default function CustomerBookingsPage() {
                         !j.review && (
                           <div className="mt-4">
                             <Button
-                              onClick={() => openReview(j.id)}
+                              onClick={() => openReview(j.id, j.description)}
                               className="bg-emerald-600 hover:bg-emerald-500 text-white w-full"
                             >
                               Review
@@ -978,7 +1018,7 @@ export default function CustomerBookingsPage() {
                     </div>
                   </Card>
                 ))}
-              </div>
+              </motion.div>
             )}
           </AnimatePresence>
         </div>
@@ -987,6 +1027,7 @@ export default function CustomerBookingsPage() {
           open={reviewOpen}
           onOpenChange={setReviewOpen}
           jobId={reviewJobId}
+          jobDescription={selectedJobDescription}
           onSubmitted={() => {
             // Immediately mark job as reviewed in local state
             if (reviewJobId) {
@@ -995,6 +1036,7 @@ export default function CustomerBookingsPage() {
             toast.success("Review submitted successfully!");
             setReviewOpen(false);
             setReviewJobId(null);
+            setSelectedJobDescription(undefined);
           }}
         />
       </main>

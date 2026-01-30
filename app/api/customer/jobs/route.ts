@@ -9,7 +9,10 @@ export const dynamic = "force-dynamic";
 export async function GET(request: NextRequest) {
   try {
     const { user, response } = await protectCustomerApi(request);
-    if (response) return response;
+    if (response) {
+      console.warn('[Customer Jobs API] Auth failed:', response.status);
+      return response;
+    }
 
     const customer = user;
 

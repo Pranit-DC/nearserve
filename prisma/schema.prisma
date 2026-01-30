@@ -44,6 +44,7 @@ model WorkerProfile {
   country         String
   postalCode      String
   availableAreas  String[]
+  reputation      Int            @default(0)
   createdAt       DateTime       @default(now())
   updatedAt       DateTime       @updatedAt
   hourlyRate      Float?
@@ -52,6 +53,8 @@ model WorkerProfile {
   longitude       Float?
   previousWorks   PreviousWork[]
   user            User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([reputation])
 }
 
 model PreviousWork {
@@ -139,6 +142,39 @@ model Review {
   worker     User     @relation("ReviewsForWorker", fields: [workerId], references: [id])
 }
 
+model ReputationLog {
+  id          String              @id @default(uuid())
+  workerId    String
+  jobId       String?
+  change      Int
+  reason      ReputationReason
+  description String?
+  createdBy   String?
+  createdAt   DateTime            @default(now())
+  metadata    Json?
+
+  @@index([workerId, createdAt])
+  @@index([jobId])
+}
+
+model NoShowReport {
+  id          String             @id @default(uuid())
+  jobId       String             @unique
+  customerId  String
+  workerId    String
+  status      NoShowReportStatus @default(PENDING)
+  evidence    String?
+  reason      String?
+  workerReply String?
+  resolution  String?
+  createdAt   DateTime           @default(now())
+  resolvedAt  DateTime?
+  updatedAt   DateTime           @updatedAt
+
+  @@index([workerId, status])
+  @@index([customerId, status])
+  @@index([status, createdAt])
+}
 
 model JobApplication {
   id           String               @id @default(dbgenerated("(gen_random_uuid())::text"))
@@ -248,6 +284,23 @@ enum PaymentStatus {
   SUCCESS
   FAILED
   REFUNDED
+}
+
+enum ReputationReason {
+  JOB_COMPLETED
+  NO_SHOW
+  DISPUTE_RESOLVED_FAVOR_WORKER
+  DISPUTE_RESOLVED_FAVOR_CUSTOMER
+  ADMIN_OVERRIDE
+  MANUAL_ADJUSTMENT
+}
+
+enum NoShowReportStatus {
+  PENDING
+  UNDER_REVIEW
+  APPROVED
+  REJECTED
+  DISPUTED
 }
 
 model JobLog {

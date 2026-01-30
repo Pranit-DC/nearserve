@@ -13,6 +13,7 @@ import { FileDropzone } from "@/components/ui/file-dropzone";
 import StaggeredDropDown from "@/components/ui/staggered-dropdown";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import { ReputationBadge } from "@/components/reputation-badge";
 import {
   FiUser,
   FiMapPin,
@@ -149,6 +150,18 @@ export default function WorkerProfilePage() {
   >([]);
   const [reviewsLoading, setReviewsLoading] = useState(false);
   const [avgRating, setAvgRating] = useState(0);
+  const [reputation, setReputation] = useState<{
+    score: number;
+    category: string;
+    description: string;
+    isBookable: boolean;
+  } | null>(null);
+  const [reputationStats, setReputationStats] = useState<{
+    completedJobs: number;
+    totalNoShows: number;
+    successRate: string | number;
+  } | null>(null);
+  const [reputationLoading, setReputationLoading] = useState(false);
 
   // Helper function to safely get image URL from potentially stringified JSON
   const parseImageUrl = (
@@ -315,6 +328,7 @@ export default function WorkerProfilePage() {
 
   useEffect(() => {
     loadProfile();
+    loadReputation();
   }, []);
 
   const loadReviews = async () => {
@@ -357,6 +371,39 @@ export default function WorkerProfilePage() {
       setData(null);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const loadReputation = async () => {
+    setReputationLoading(true);
+    try {
+      const user = await getCurrentUser();
+      if (!user) return;
+      
+      const res = await fetch(`/api/workers/${user.id}/reputation`, {
+        cache: "no-store",
+      });
+      if (!res.ok) throw new Error("Failed to load reputation");
+      
+      const data = await res.json();
+      setReputation(data.reputation);
+      setReputationStats(data.stats);
+    } catch (e) {
+      console.error("Error loading reputation:", e);
+      // Fallback values if API fails
+      setReputation({
+        score: 0,
+        category: "NEW",
+        description: "New Worker",
+        isBookable: true,
+      });
+      setReputationStats({
+        completedJobs: 0,
+        totalNoShows: 0,
+        successRate: "N/A",
+      });
+    } finally {
+      setReputationLoading(false);
     }
   };
 
@@ -809,6 +856,45 @@ export default function WorkerProfilePage() {
                     </div>
                   </div>
                 </div>
+
+                {/* Reputation Section */}
+                {reputation && (
+                  <div className="mt-6 pt-6 border-t border-gray-200 dark:border-gray-700">
+                    <div className="text-xs font-semibold text-gray-600 dark:text-gray-400 mb-3 uppercase tracking-wider">
+                      Reputation
+                    </div>
+                    <div className="space-y-3">
+                      <ReputationBadge
+                        reputation={reputation.score}
+                        completedJobs={reputationStats?.completedJobs || 0}
+                        size="medium"
+                        showDetails={true}
+                      />
+                      {reputationStats && (
+                        <div className="space-y-2">
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600 dark:text-gray-400">Completed Jobs:</span>
+                            <span className="font-semibold text-gray-900 dark:text-white">{reputationStats.completedJobs}</span>
+                          </div>
+                          {reputationStats.totalNoShows > 0 && (
+                            <div className="flex justify-between items-center text-sm">
+                              <span className="text-gray-600 dark:text-gray-400">No-shows:</span>
+                              <span className="font-semibold text-red-600 dark:text-red-400">{reputationStats.totalNoShows}</span>
+                            </div>
+                          )}
+                          <div className="flex justify-between items-center text-sm">
+                            <span className="text-gray-600 dark:text-gray-400">Success Rate:</span>
+                            <span className="font-semibold text-green-600 dark:text-green-400">
+                              {typeof reputationStats.successRate === 'number' 
+                                ? `${reputationStats.successRate.toFixed(1)}%` 
+                                : reputationStats.successRate}
+                            </span>
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                )}
               </motion.div>
             </Card>
           </div>

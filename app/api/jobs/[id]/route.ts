@@ -645,6 +645,9 @@ export async function POST(
       console.error('Failed to create payment notification:', notifError);
     }
 
+    // NOTE: Worker reputation is now assessed by the customer after job completion
+    // See: POST /api/jobs/[id]/assess-reputation
+
     const updated = {
       ...job,
       status: "COMPLETED",

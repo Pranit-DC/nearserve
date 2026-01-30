@@ -75,6 +75,8 @@ export const COLLECTIONS = {
   REVIEWS: 'reviews',
   TRANSACTIONS: 'transactions',
   TRANSLATION_CACHE: 'translation_cache',
+  REPUTATION_LOGS: 'reputation_logs',
+  NO_SHOW_REPORTS: 'no_show_reports',
 } as const;
 
 export default adminApp;

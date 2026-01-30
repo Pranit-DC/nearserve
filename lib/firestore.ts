@@ -40,6 +40,8 @@ export const COLLECTIONS = {
   TRANSLATION_CACHE: 'translation_cache',
   NOTIFICATIONS: 'notifications',
   REFRESH_DATA: 'refresh_data', // Real-time content updates collection
+  REPUTATION_LOGS: 'reputation_logs', // Track reputation changes
+  NO_SHOW_REPORTS: 'no_show_reports', // Track no-show disputes
 } as const;
 
 // Enums (from Prisma schema)
@@ -91,6 +93,26 @@ export enum PaymentStatus {
   REFUNDED = 'REFUNDED',
 }
 
+export enum ReputationReason {
+  JOB_COMPLETED = 'JOB_COMPLETED',
+  NO_SHOW = 'NO_SHOW',
+  DISPUTE_RESOLVED_FAVOR_WORKER = 'DISPUTE_RESOLVED_FAVOR_WORKER',
+  DISPUTE_RESOLVED_FAVOR_CUSTOMER = 'DISPUTE_RESOLVED_FAVOR_CUSTOMER',
+  ADMIN_OVERRIDE = 'ADMIN_OVERRIDE',
+  MANUAL_ADJUSTMENT = 'MANUAL_ADJUSTMENT',
+  CUSTOMER_RATED_ON_TIME = 'CUSTOMER_RATED_ON_TIME',
+  CUSTOMER_RATED_LATE = 'CUSTOMER_RATED_LATE',
+  CUSTOMER_RATED_NO_SHOW = 'CUSTOMER_RATED_NO_SHOW',
+}
+
+export enum NoShowReportStatus {
+  PENDING = 'PENDING',
+  UNDER_REVIEW = 'UNDER_REVIEW',
+  APPROVED = 'APPROVED',
+  REJECTED = 'REJECTED',
+  DISPUTED = 'DISPUTED',
+}
+
 // Type definitions (mapped from Prisma models)
 export interface User {
   id: string;
@@ -119,6 +141,7 @@ export interface WorkerProfile {
   country: string;
   postalCode: string;
   availableAreas: string[];
+  reputation: number; // Worker reputation score
   latitude: number | null;
   longitude: number | null;
   hourlyRate: number | null;
@@ -176,6 +199,9 @@ export interface Job {
   startProofGpsLng: number | null;
   startedAt: Timestamp | null;
   completedAt: Timestamp | null;
+  reputationAssessed?: boolean;
+  reputationAssessmentType?: 'ON_TIME' | 'LATE' | 'NO_SHOW';
+  reputationAssessmentAt?: Timestamp;
 }
 
 export interface JobApplication {
@@ -221,6 +247,33 @@ export interface Review {
   createdAt: Timestamp;
 }
 
+export interface ReputationLog {
+  id: string;
+  workerId: string;
+  jobId: string | null;
+  change: number; // +1 for job completed, -1 for no-show, etc.
+  reason: ReputationReason;
+  description: string | null;
+  createdBy: string | null; // Admin or system
+  createdAt: Timestamp;
+  metadata: any;
+}
+
+export interface NoShowReport {
+  id: string;
+  jobId: string;
+  customerId: string;
+  workerId: string;
+  status: NoShowReportStatus;
+  evidence: string | null; // URL to evidence like photos
+  reason: string | null;
+  workerReply: string | null;
+  resolution: string | null;
+  createdAt: Timestamp;
+  resolvedAt: Timestamp | null;
+  updatedAt: Timestamp;
+}
+
 export interface Transaction {
   id: string;
   userId: string;
@@ -239,6 +292,33 @@ export interface JobLog {
   performedBy: string;
   metadata: any;
   createdAt: Timestamp;
+}
+
+export interface ReputationLog {
+  id: string;
+  workerId: string;
+  jobId: string | null;
+  change: number;
+  reason: ReputationReason;
+  description: string | null;
+  createdBy: string | null;
+  createdAt: Timestamp;
+  metadata: any;
+}
+
+export interface NoShowReport {
+  id: string;
+  jobId: string;
+  customerId: string;
+  workerId: string;
+  status: NoShowReportStatus;
+  evidence: string | null;
+  reason: string | null;
+  workerReply: string | null;
+  resolution: string | null;
+  createdAt: Timestamp;
+  resolvedAt: Timestamp | null;
+  updatedAt: Timestamp;
 }
 
 export interface TranslationCache {

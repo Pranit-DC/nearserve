@@ -41,11 +41,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       setUser(user);
       setLoading(false);
 
-      // Session cookie is managed by /api/auth/session endpoint
-      // Don't set ID token directly as cookie as it causes issuer mismatch
-      if (!user) {
+      if (user) {
+        // Immediately create/refresh session cookie when user logs in
+        try {
+          const idToken = await user.getIdToken();
+          await fetch('/api/auth/session', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ idToken }),
+          });
+          console.log('[Auth] Session established for user:', user.uid);
+        } catch (error) {
+          console.error('[Auth] Failed to establish session:', error);
+        }
+      } else {
         // Clear the session cookie when user signs out
-        await fetch('/api/auth/session', { method: 'DELETE' });
+        try {
+          await fetch('/api/auth/session', { method: 'DELETE' });
+          console.log('[Auth] Session cleared on sign out');
+        } catch (error) {
+          console.error('[Auth] Failed to clear session:', error);
+        }
       }
     });
 

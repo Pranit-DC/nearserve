@@ -9,13 +9,15 @@ import {
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { motion } from "framer-motion";
-import { FiStar } from "react-icons/fi";
+import { FiStar, FiCheck, FiClock, FiX } from "react-icons/fi";
+import { toast } from "sonner";
 
 interface ReviewDialogProps {
   open: boolean;
   onOpenChange: (v: boolean) => void;
   jobId: string | null;
   onSubmitted: () => void;
+  jobDescription?: string;
 }
 
 export function ReviewDialog({
@@ -23,14 +25,29 @@ export function ReviewDialog({
   onOpenChange,
   jobId,
   onSubmitted,
+  jobDescription,
 }: ReviewDialogProps) {
   const [rating, setRating] = useState<number>(0);
   const [comment, setComment] = useState("");
+  const [reputationAssessment, setReputationAssessment] = useState<"ON_TIME" | "LATE" | "NO_SHOW" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const stars = [1, 2, 3, 4, 5];
 
+  const getReputationPoints = (assessment: "ON_TIME" | "LATE" | "NO_SHOW" | null): number => {
+    if (!assessment) return 0;
+    return assessment === "ON_TIME" ? 1 : assessment === "LATE" ? 0 : -1;
+  };
+
+  const getReputationLabel = (assessment: "ON_TIME" | "LATE" | "NO_SHOW" | null): string => {
+    if (!assessment) return "Not selected";
+    return assessment === "ON_TIME" ? "Came on time (+1)" : assessment === "LATE" ? "Came late (0)" : "Didn't come (-1)";
+  };
+
   const submit = async () => {
-    if (!jobId || rating < 1) return;
+    if (!jobId || rating < 1 || !reputationAssessment) {
+      toast.error("Please complete all required fields");
+      return;
+    }
     setSubmitting(true);
     try {
       const res = await fetch("/api/reviews", {
@@ -42,12 +59,37 @@ export function ReviewDialog({
           comment: comment.trim() || undefined,
         }),
       });
-      if (res.ok) {
+      if (!res.ok) {
+        const data = await res.json();
+        toast.error(data.error || "Failed to submit review");
+        setSubmitting(false);
+        return;
+      }
+
+      // Submit reputation assessment separately
+      const repRes = await fetch("/api/reputation/assessment", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          jobId,
+          assessmentType: reputationAssessment,
+        }),
+      });
+
+      if (repRes.ok) {
+        toast.success("Review and reputation assessment submitted!");
         onOpenChange(false);
         setRating(0);
         setComment("");
+        setReputationAssessment(null);
         onSubmitted();
+      } else {
+        const data = await repRes.json();
+        toast.error(data.error || "Failed to submit reputation assessment");
       }
+    } catch (error) {
+      console.error("Submit error:", error);
+      toast.error("An error occurred while submitting");
     } finally {
       setSubmitting(false);
     }
@@ -58,6 +100,7 @@ export function ReviewDialog({
       onOpenChange(false);
       setRating(0);
       setComment("");
+      setReputationAssessment(null);
     }
   };
 
@@ -74,10 +117,18 @@ export function ReviewDialog({
         </DialogHeader>
 
         <div className="space-y-6 py-4">
+          {/* Service Category Display */}
+          {jobDescription && (
+            <div className="p-3 bg-gradient-to-r from-blue-500/10 to-purple-500/10 rounded-xl border border-blue-500/20">
+              <p className="text-xs font-medium text-gray-400 mb-1">Service Category</p>
+              <p className="text-sm font-semibold text-blue-400">{jobDescription}</p>
+            </div>
+          )}
+
           {/* Rating Section */}
           <div>
             <label className="text-sm font-medium text-white flex items-center gap-1 mb-3">
-              Rating
+              Quality Rating
               <span className="text-red-500">*</span>
             </label>
             <div className="flex gap-3">
@@ -122,6 +173,75 @@ export function ReviewDialog({
             )}
           </div>
 
+          {/* Reputation Assessment Section */}
+          <div className="space-y-3 p-4 bg-[#1f2937] rounded-xl border border-[#374151]">
+            <div>
+              <label className="text-sm font-medium text-white flex items-center gap-2 mb-1">
+                Worker Attendance
+                <span className="text-red-500">*</span>
+                <span className="text-xs px-2 py-0.5 rounded bg-amber-500/20 text-amber-300 font-semibold">
+                  Reputation Score
+                </span>
+              </label>
+              <p className="text-xs text-gray-400 mb-3">
+                Did the worker arrive as scheduled?
+              </p>
+            </div>
+
+            <div className="grid grid-cols-3 gap-2">
+              {[
+                { value: "ON_TIME" as const, label: "Came on time", icon: FiCheck, color: "green", points: "+1" },
+                { value: "LATE" as const, label: "Came late", icon: FiClock, color: "amber", points: "0" },
+                { value: "NO_SHOW" as const, label: "Didn't come", icon: FiX, color: "red", points: "-1" },
+              ].map(({ value, label, icon: Icon, color, points }) => (
+                <motion.button
+                  key={value}
+                  type="button"
+                  onClick={() => setReputationAssessment(value)}
+                  whileHover={{ scale: 1.02 }}
+                  whileTap={{ scale: 0.98 }}
+                  className={`p-3 rounded-lg border-2 transition-all duration-200 flex flex-col items-center gap-1 ${
+                    reputationAssessment === value
+                      ? color === "green"
+                        ? "bg-green-500/10 border-green-500 text-green-400"
+                        : color === "amber"
+                        ? "bg-amber-500/10 border-amber-500 text-amber-400"
+                        : "bg-red-500/10 border-red-500 text-red-400"
+                      : "bg-[#111827] border-[#374151] text-gray-400 hover:border-gray-500"
+                  }`}
+                  title={`${label} (${points})`}
+                >
+                  <Icon className="h-5 w-5" />
+                  <span className="text-xs font-semibold">{label}</span>
+                  <span className={`text-xs font-bold ${
+                    color === "green" ? "text-green-400" : color === "amber" ? "text-amber-400" : "text-red-400"
+                  }`}>
+                    {points}
+                  </span>
+                </motion.button>
+              ))}
+            </div>
+
+            {reputationAssessment && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-gray-300 mt-2 p-2 bg-[#111827] rounded border border-[#374151]"
+              >
+                <strong>Assessment:</strong> {getReputationLabel(reputationAssessment)}
+              </motion.div>
+            )}
+            {!reputationAssessment && (
+              <motion.div
+                initial={{ opacity: 0, y: -4 }}
+                animate={{ opacity: 1, y: 0 }}
+                className="text-sm text-red-400 mt-2"
+              >
+                Please select worker attendance
+              </motion.div>
+            )}
+          </div>
+
           {/* Comment Section */}
           <div>
             <label className="text-sm font-medium text-white block mb-2">
@@ -135,7 +255,7 @@ export function ReviewDialog({
               onChange={(e) => setComment(e.target.value)}
               placeholder="Share your feedback about the work quality, professionalism, and overall experience..."
               className="bg-[#23262F] border-[#23262F] text-white placeholder-gray-500 resize-none focus:ring-blue-500"
-              rows={4}
+              rows={3}
               maxLength={500}
             />
             <div className="text-xs text-gray-500 mt-1">
@@ -156,7 +276,7 @@ export function ReviewDialog({
           </Button>
           <Button
             onClick={submit}
-            disabled={submitting || rating < 1}
+            disabled={submitting || rating < 1 || !reputationAssessment}
             className="bg-blue-600 hover:bg-blue-700 text-white font-semibold shadow-md"
           >
             {submitting ? (

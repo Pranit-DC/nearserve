@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import Link from "next/link";
 import BookWorkerButton from "@/components/book-worker-button";
 import SkillBadge from "@/components/ui/skill-badge";
+import { ReputationBadge } from "@/components/reputation-badge";
 
 const MapPreview = dynamic(() => import("@/components/ui/map-preview"), {
   ssr: false,
@@ -43,6 +44,11 @@ type Worker = {
   rating?: {
     avgRating: number;
     totalReviews: number;
+  } | null;
+  reputation?: {
+    score: number;
+    category: string;
+    isBookable: boolean;
   } | null;
   workerProfile: {
     skilledIn: string[] | null;
@@ -653,7 +659,7 @@ function SearchPageContent() {
                                     <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
                                       {name}
                                     </h3>
-                                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400 mb-2">
                                       <span>{worker.workerProfile?.yearsExperience ?? 0} years experience</span>
                                       {worker.rating && worker.rating.totalReviews > 0 && (
                                         <>
@@ -670,6 +676,13 @@ function SearchPageContent() {
                                         </>
                                       )}
                                     </div>
+                                    {worker.reputation && (
+                                      <ReputationBadge
+                                        reputation={worker.reputation.score}
+                                        completedJobs={0}
+                                        size="small"
+                                      />
+                                    )}
                                   </div>
                                   <div className="hidden sm:block text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300">
                                     {distance}

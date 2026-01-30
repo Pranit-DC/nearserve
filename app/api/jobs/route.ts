@@ -6,6 +6,8 @@ import { calculateFees } from "@/lib/razorpay-service";
 import { FieldValue } from "firebase-admin/firestore";
 import { notifyWorkerJobCreated } from '@/lib/notification-service';
 import { sendPushNotification } from '@/lib/push-notification';
+import { canWorkerBeBooked } from "@/lib/reputation-service";
+
 export async function POST(req: NextRequest) {
   try {
     const { user, response } = await protectCustomerApi(req);
@@ -61,6 +63,19 @@ export async function POST(req: NextRequest) {
         {
           error: "Invalid worker",
           details: `User exists but has role '${workerData?.role}' instead of 'WORKER'`,
+        },
+        { status: 400 }
+      );
+    }
+
+    // Check if worker is eligible for booking based on reputation
+    const bookingEligibility = await canWorkerBeBooked(workerId);
+    if (!bookingEligibility.allowed) {
+      return NextResponse.json(
+        {
+          error: "Worker not available for booking",
+          reason: bookingEligibility.reason,
+          reputation: bookingEligibility.reputation,
         },
         { status: 400 }
       );
