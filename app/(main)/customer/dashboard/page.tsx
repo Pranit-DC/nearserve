@@ -149,8 +149,8 @@ export default async function CustomerDashboardPage() {
       workersWithoutRatings.map(async (worker) => {
         const rating = await getWorkerRating(worker.id);
         return { ...worker, rating };
-      })
-    )
+      }),
+    ),
   );
 
   return (
@@ -286,7 +286,8 @@ export default async function CustomerDashboardPage() {
                       <div className="flex items-center">
                         <MapPin className="h-4 w-4 mr-1" />
                         <span className="truncate">
-                          {worker.workerProfile?.city || "Location not specified"}
+                          {worker.workerProfile?.city ||
+                            "Location not specified"}
                         </span>
                       </div>
                       <span>•</span>
