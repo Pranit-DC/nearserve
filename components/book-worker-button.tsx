@@ -62,7 +62,7 @@ export default function BookWorkerButton({
   // Geolocation badge component
   function GeoBadge() {
     const [status, setStatus] = useState<"idle" | "loading" | "done" | "error">(
-      "idle"
+      "idle",
     );
     const [label, setLabel] = useState("Use current location");
 
@@ -84,7 +84,7 @@ export default function BookWorkerButton({
 
           try {
             const resp = await fetch(
-              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`
+              `https://nominatim.openstreetmap.org/reverse?format=jsonv2&lat=${lat}&lon=${lng}`,
             );
             if (resp.ok) {
               const data = await resp.json();
@@ -110,7 +110,7 @@ export default function BookWorkerButton({
           setLabel("Permission denied");
           console.error("Geolocation error", err);
         },
-        { enableHighAccuracy: false, timeout: 10000 }
+        { enableHighAccuracy: false, timeout: 10000 },
       );
     };
 
@@ -332,7 +332,7 @@ export default function BookWorkerButton({
       setError(
         err instanceof Error
           ? err.message
-          : "Something went wrong. Please try again."
+          : "Something went wrong. Please try again.",
       );
     } finally {
       setLoading(false);
@@ -364,6 +364,11 @@ export default function BookWorkerButton({
       return;
     }
     resetForm();
+    // Prefill proposed budget with worker's minimum fee when available
+    setBooking((prev) => ({
+      ...prev,
+      charge: minimumFee ? String(minimumFee) : "",
+    }));
     setOpen(true);
     // Prevent body scroll when modal is open
     if (typeof document !== "undefined") {
@@ -712,6 +717,17 @@ export default function BookWorkerButton({
                             <p className="text-xs text-gray-500 dark:text-gray-400 mt-1.5">
                               You can negotiate the final price with the worker
                             </p>
+
+                            {minimumFee ? (
+                              <div className="mt-3 text-xs text-gray-700 dark:text-gray-300">
+                                <span className="font-medium">
+                                  Minimum fee:
+                                </span>
+                                <span className="ml-2 text-blue-600 dark:text-blue-400 font-semibold">
+                                  ₹{minimumFee}
+                                </span>
+                              </div>
+                            ) : null}
                           </div>
 
                           {/* Review Summary */}
@@ -735,7 +751,7 @@ export default function BookWorkerButton({
                                 <span className="font-medium text-gray-900 dark:text-white">
                                   {booking.datetime
                                     ? new Date(
-                                        booking.datetime
+                                        booking.datetime,
                                       ).toLocaleString()
                                     : "Not set"}
                                 </span>
@@ -748,6 +764,18 @@ export default function BookWorkerButton({
                                   {booking.location || "Not set"}
                                 </span>
                               </div>
+
+                              {minimumFee ? (
+                                <div className="flex justify-between mt-2">
+                                  <span className="text-gray-600 dark:text-gray-400 font-semibold text-xs sm:text-sm">
+                                    Minimum Fee:
+                                  </span>
+                                  <span className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">
+                                    ₹{minimumFee}
+                                  </span>
+                                </div>
+                              ) : null}
+
                               <div className="flex justify-between pt-2 sm:pt-3 border-t border-gray-300 dark:border-gray-700">
                                 <span className="text-gray-600 dark:text-gray-400 font-semibold text-xs sm:text-sm">
                                   Proposed Price:
@@ -814,7 +842,7 @@ export default function BookWorkerButton({
               </div>
             </div>
           </>,
-          document.body
+          document.body,
         )}
     </>
   );
