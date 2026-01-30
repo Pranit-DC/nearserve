@@ -18,6 +18,7 @@ import {
   Sparkles,
   Award,
   Clock,
+  Phone,
 } from "lucide-react";
 import { setUserRole } from "@/app/api/actions/onboarding";
 import useFetch from "@/hooks/use-fetch";
@@ -184,11 +185,12 @@ type WorkerDetails = {
 };
 
 type CustomerDetails = {
-  address: string;
-  city: string;
-  state: string;
-  country: string;
-  postalCode: string;
+  phone?: string;
+  address?: string;
+  city?: string;
+  state?: string;
+  country?: string;
+  postalCode?: string;
 };
 
 type PreviousWork = {
@@ -205,11 +207,23 @@ type PreviousWork = {
   imageUrl?: string;
 };
 
+function formatPhone(phone?: string) {
+  if (!phone) return "";
+  const cleaned = String(phone).replace(/\D/g, "");
+  if (cleaned.length === 10) {
+    return `+91 ${cleaned.replace(/(\d{5})(\d{5})/, "$1 $2")}`;
+  }
+  if (cleaned.length === 12 && cleaned.startsWith("91")) {
+    return `+${cleaned.slice(0, 2)} ${cleaned.slice(2)}`;
+  }
+  return phone;
+}
+
 export default function PreviewPage() {
   const router = useRouter();
   const { user, loading: authLoading } = useAuth();
   const [workerDetails, setWorkerDetails] = useState<WorkerDetails | null>(
-    null
+    null,
   );
   const [customerDetails, setCustomerDetails] =
     useState<CustomerDetails | null>(null);
@@ -660,6 +674,23 @@ export default function PreviewPage() {
                         {customerDetails.city}, {customerDetails.state}
                       </span>
                     </motion.div>
+
+                    {customerDetails.phone && (
+                      <motion.div
+                        className="flex items-center justify-center text-gray-600 dark:text-gray-400 mb-4"
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        transition={{ delay: 0.65 }}
+                      >
+                        <Phone className="h-4 w-4 mr-2 text-blue-600" />
+                        <a
+                          href={`tel:${customerDetails.phone}`}
+                          className="text-sm md:text-base"
+                        >
+                          {formatPhone(customerDetails.phone)}
+                        </a>
+                      </motion.div>
+                    )}
                   </div>
 
                   <motion.div
