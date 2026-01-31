@@ -374,16 +374,17 @@ export default function CustomerBookingsPage() {
     }
   };
 
-  // Skeleton loader component
+  // Skeleton loader component (updated to match new responsive card)
   const SkeletonCard = () => (
-    <Card className="p-6 animate-pulse bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
-      <div className="flex items-start justify-between mb-4">
-        <div className="flex-1 space-y-2">
-          <div className="h-5 bg-gray-200 dark:bg-[#222] rounded w-3/4"></div>
-          <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-1/2"></div>
-        </div>
-        <div className="h-6 bg-gray-200 dark:bg-[#222] rounded-full w-20 ml-4"></div>
+    <Card className="relative p-6 animate-pulse bg-white dark:bg-[#181818] border border-gray-200 dark:border-[#232323]">
+      {/* desktop pill */}
+      <div className="hidden sm:block absolute top-4 right-4 h-4 w-16 rounded-full bg-gray-200 dark:bg-[#222]"></div>
+
+      <div className="mb-4">
+        <div className="h-5 bg-gray-200 dark:bg-[#222] rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-1/2"></div>
       </div>
+
       <div className="space-y-3">
         <div className="flex items-center gap-2">
           <div className="h-4 w-4 bg-gray-200 dark:bg-[#222] rounded"></div>
@@ -393,9 +394,15 @@ export default function CustomerBookingsPage() {
           <div className="h-4 w-4 bg-gray-200 dark:bg-[#222] rounded"></div>
           <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-40"></div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className="h-4 w-4 bg-gray-200 dark:bg-[#222] rounded"></div>
-          <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-24"></div>
+
+        <div className="p-3 bg-gray-50 dark:bg-[#181818] rounded">
+          <div className="h-8 bg-gray-200 dark:bg-[#222] rounded w-24 mb-2"></div>
+          <div className="h-6 bg-gray-200 dark:bg-[#222] rounded w-40"></div>
+        </div>
+
+        <div className="flex flex-col sm:flex-row items-stretch gap-2">
+          <div className="h-10 w-full sm:flex-1 rounded bg-gray-200 dark:bg-[#222]"></div>
+          <div className="h-10 w-full sm:w-56 rounded bg-gray-200 dark:bg-[#222]"></div>
         </div>
       </div>
     </Card>
@@ -810,18 +817,10 @@ export default function CustomerBookingsPage() {
                 {list.map((j) => (
                   <Card
                     key={j.id}
-                    className="p-5 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] flex flex-col h-full min-h-[300px]"
+                    className="relative p-5 hover:shadow-lg transition-all duration-200 bg-white dark:bg-[#181818] border-gray-200 dark:border-[#232323] flex flex-col h-full min-h-[300px]"
                   >
-                    {/* Header Section */}
-                    <div className="flex items-start justify-between gap-3 mb-4">
-                      <div className="flex-1">
-                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
-                          {j.description}
-                        </h3>
-                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                          Worker: {j.worker?.name || "Worker"}
-                        </p>
-                      </div>
+                    {/* Desktop status pill (absolute) */}
+                    <div className="hidden sm:block sm:absolute sm:top-4 sm:right-4">
                       <span
                         className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${
                           j.status === "ACCEPTED"
@@ -837,6 +836,37 @@ export default function CustomerBookingsPage() {
                       >
                         {j.status}
                       </span>
+                    </div>
+
+                    {/* Header Section */}
+                    <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 mb-4">
+                      <div className="flex-1 min-w-0">
+                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white line-clamp-2">
+                          {j.description}
+                        </h3>
+                        <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                          Worker: {j.worker?.name || "Worker"}
+                        </p>
+                      </div>
+
+                      {/* Mobile status inline */}
+                      <div className="sm:hidden mt-3">
+                        <span
+                          className={`text-xs px-3 py-1 rounded-full font-medium whitespace-nowrap ${
+                            j.status === "ACCEPTED"
+                              ? "bg-blue-50 text-blue-700 dark:bg-[#171717] dark:text-slate-200"
+                              : j.status === "PENDING"
+                                ? "bg-orange-50 text-orange-700 dark:bg-[#171717] dark:text-slate-200"
+                                : j.status === "COMPLETED"
+                                  ? "bg-green-50 text-green-700 dark:bg-[#171717] dark:text-slate-200"
+                                  : j.status === "CANCELLED"
+                                    ? "bg-red-50 text-red-700 dark:bg-[#171717] dark:text-slate-200"
+                                    : "bg-gray-50 text-gray-700 dark:bg-[#171717] dark:text-slate-200"
+                          }`}
+                        >
+                          {j.status}
+                        </span>
+                      </div>
                     </div>
 
                     {/* Details Section */}
@@ -955,26 +985,49 @@ export default function CustomerBookingsPage() {
                     {/* Action Buttons Section */}
                     <div className="mt-4 pt-4 border-t border-gray-200 dark:border-gray-600">
                       {tab === "ONGOING" && j.status === "IN_PROGRESS" && (
-                        <div className="space-y-2">
-                          <Button
-                            disabled={acting === j.id || paymentProcessing}
-                            onClick={() => completeJob(j.id)}
-                            className="bg-purple-600 hover:bg-purple-500 text-white w-full"
-                          >
-                            {acting === j.id ? (
-                              <>
-                                <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2 inline-block"></div>
-                                Initiating Payment...
-                              </>
-                            ) : (
-                              <>
-                                <FiCreditCard className="h-4 w-4 mr-2 inline" />
-                                Complete & Pay ₹{j.charge.toFixed(2)}
-                              </>
+                        <div className="space-y-3">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2">
+                            <Button
+                              disabled={acting === j.id || paymentProcessing}
+                              onClick={() => completeJob(j.id)}
+                              className="w-full sm:flex-1 bg-purple-600 hover:bg-purple-500 text-white inline-flex items-center justify-center gap-2"
+                            >
+                              {acting === j.id ? (
+                                <>
+                                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white inline-block"></div>
+                                  <span>Initiating Payment...</span>
+                                </>
+                              ) : (
+                                <>
+                                  <FiCreditCard className="h-4 w-4" />
+                                  <span>
+                                    Complete &amp; Pay ₹{j.charge.toFixed(2)}
+                                  </span>
+                                </>
+                              )}
+                            </Button>
+
+                            {j.platformFee && j.workerEarnings && (
+                              <div className="hidden sm:flex flex-col text-xs text-gray-500 dark:text-gray-400 p-3 bg-gray-50 dark:bg-[#181818] rounded">
+                                <div className="flex justify-between">
+                                  <span>Worker Earnings:</span>
+                                  <span className="font-medium">
+                                    ₹{j.workerEarnings.toFixed(2)}
+                                  </span>
+                                </div>
+                                <div className="flex justify-between">
+                                  <span>Platform Fee (10%):</span>
+                                  <span className="font-medium">
+                                    ₹{j.platformFee.toFixed(2)}
+                                  </span>
+                                </div>
+                              </div>
                             )}
-                          </Button>
+                          </div>
+
+                          {/* Mobile earnings block */}
                           {j.platformFee && j.workerEarnings && (
-                            <div className="text-xs text-gray-500 dark:text-gray-400 space-y-1 p-2 bg-gray-50 dark:bg-[#181818] rounded">
+                            <div className="sm:hidden text-xs text-gray-500 dark:text-gray-400 space-y-1 p-2 bg-gray-50 dark:bg-[#181818] rounded">
                               <div className="flex justify-between">
                                 <span>Worker Earnings:</span>
                                 <span className="font-medium">
@@ -991,9 +1044,10 @@ export default function CustomerBookingsPage() {
                           )}
                         </div>
                       )}
+
                       {tab === "ONGOING" &&
                         (j.status === "PENDING" || j.status === "ACCEPTED") && (
-                          <div className="bg-blue-50 dark:bg-[#171717] border border-blue-200 dark:border-[#303030] rounded-lg p-3">
+                          <div className="bg-blue-50 dark:bg-[#171717] border border-blue-200 dark:border-[#303030] rounded-lg p-3 w-full">
                             <div className="flex items-center gap-2 text-blue-700 dark:text-slate-200">
                               <FiClock className="h-5 w-5" />
                               <span className="text-sm font-medium">
@@ -1004,6 +1058,7 @@ export default function CustomerBookingsPage() {
                             </div>
                           </div>
                         )}
+
                       {tab === "PREVIOUS" &&
                         j.status === "COMPLETED" &&
                         !j.review && (
@@ -1016,6 +1071,7 @@ export default function CustomerBookingsPage() {
                             </Button>
                           </div>
                         )}
+
                       {tab === "PREVIOUS" &&
                         j.status === "COMPLETED" &&
                         j.review && (

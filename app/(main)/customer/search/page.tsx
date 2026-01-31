@@ -8,30 +8,17 @@ import { useSearchParams, useRouter } from "next/navigation";
 import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import ScrollList from "@/components/ui/scroll-list";
 // OpenStreetMapInput removed; we use a compact location dropdown instead
 import { useLocation } from "@/hooks/use-location";
 import { toast } from "sonner";
 import Link from "next/link";
 import BookWorkerButton from "@/components/book-worker-button";
-import SkillBadge from "@/components/ui/skill-badge";
 
 const MapPreview = dynamic(() => import("@/components/ui/map-preview"), {
   ssr: false,
 });
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  FiSearch,
-  FiMapPin,
-  FiStar,
-  FiClock,
-  FiUser,
-  FiGrid,
-  FiList,
-  FiTrendingUp,
-  FiCheck,
-  FiLoader,
-} from "react-icons/fi";
+import { FiSearch, FiMapPin, FiStar, FiUser, FiList } from "react-icons/fi";
 import StaggeredDropDown from "@/components/ui/staggered-dropdown";
 
 type Worker = {
@@ -89,18 +76,18 @@ const SORT_OPTIONS = [
 function SearchPageContent() {
   const searchParams = useSearchParams();
   const router = useRouter();
-  
+
   // Helper to validate if a string is a valid URL
   const isValidUrl = (url: string | null | undefined): boolean => {
-    if (!url || typeof url !== 'string') return false;
+    if (!url || typeof url !== "string") return false;
     try {
       new URL(url);
-      return url.startsWith('http://') || url.startsWith('https://');
+      return url.startsWith("http://") || url.startsWith("https://");
     } catch {
       return false;
     }
   };
-  
+
   const initialCategory = useMemo(() => {
     const raw = searchParams.get("category");
     if (!raw) return "All";
@@ -112,16 +99,13 @@ function SearchPageContent() {
   const [q, setQ] = useState("");
   const [location, setLocation] = useState("");
   const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(
-    null
+    null,
   );
   const {
     getCurrentPosition,
-    status,
-    error: locError,
     place: locPlace,
     coords: locCoords,
   } = useLocation();
-  const [isLocating, setIsLocating] = useState(false);
   const [category, setCategory] = useState<string>(initialCategory);
   const [sortBy, setSortBy] = useState("relevance");
   const [viewMode, setViewMode] = useState<ViewMode>("list");
@@ -222,7 +206,7 @@ function SearchPageContent() {
           distance?: number;
           distanceInKm?: number;
           distance_in_km?: number;
-        }
+        },
       ): Worker => ({
         ...w,
         distanceKm:
@@ -252,7 +236,7 @@ function SearchPageContent() {
       lat: coords?.lat,
       lng: coords?.lng,
     });
-  }, [category, sortBy, coords]);
+  }, [q, category, location, sortBy, coords]);
 
   // Reflect browser geolocation into input once fetched
   useEffect(() => {
@@ -262,7 +246,7 @@ function SearchPageContent() {
     if (locPlace && !location) {
       setLocation(locPlace.displayName);
     }
-  }, [locCoords, locPlace]);
+  }, [locCoords, locPlace, coords, location]);
 
   // Automatically prompt for location on page load so nearest results are possible
   useEffect(() => {
@@ -271,25 +255,18 @@ function SearchPageContent() {
       // best-effort: ask for current position once
       try {
         getCurrentPosition();
-      } catch (e) {
+      } catch {
         /* ignore */
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // stop locating spinner when location status updates or coords arrive
-  useEffect(() => {
-    // stop locating spinner when status becomes success or error
-    if (status === "success" || status === "error") setIsLocating(false);
-    if (locCoords) setIsLocating(false);
-  }, [status, locCoords]);
-
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (sortBy === "nearest" && !coords) {
       toast.info(
-        "Tip: Set a location or use 'Use my location' to get nearest results."
+        "Tip: Set a location or use 'Use my location' to get nearest results.",
       );
     }
     fetchWorkers({
@@ -312,21 +289,32 @@ function SearchPageContent() {
     }
   };
 
-  // Mobile-Responsive Skeleton Loader Component
+  // Mobile-Responsive Skeleton Loader Component (updated to match new card layout)
   const SkeletonCard = () => (
-    <Card className="border border-gray-200 dark:border-[#232323] bg-white dark:bg-[#181818] p-4 sm:p-6 animate-pulse">
-      <div className="flex items-start gap-4">
-        <div className="h-12 w-12 sm:h-16 sm:w-16 rounded-2xl bg-gray-200 dark:bg-[#222] flex-shrink-0" />
-        <div className="flex-1 space-y-3">
-          <div className="h-5 bg-gray-200 dark:bg-[#222] rounded w-3/4" />
-          <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-1/2" />
-          <div className="flex items-center gap-2">
-            <div className="h-4 w-4 bg-gray-200 dark:bg-[#222] rounded" />
-            <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-40" />
+    <Card className="relative border border-gray-200 dark:border-[#232323] bg-white dark:bg-[#181818] p-4 sm:p-6 animate-pulse">
+      {/* desktop distance pill placeholder */}
+      <div className="hidden sm:inline-flex absolute top-4 right-4 h-4 w-14 rounded-full bg-green-200 dark:bg-green-900/20" />
+
+      <div className="flex items-start gap-4 mb-3">
+        <div className="h-14 w-14 rounded-full bg-gray-200 dark:bg-[#222] flex-shrink-0" />
+        <div className="flex-1 min-w-0">
+          <div className="h-5 bg-gray-200 dark:bg-[#222] rounded w-3/4 mb-2" />
+          <div className="h-4 bg-gray-200 dark:bg-[#222] rounded w-1/2 mb-3" />
+          <div className="flex flex-wrap gap-2">
+            <div className="h-6 rounded-lg bg-gray-200 dark:bg-[#222] w-20" />
+            <div className="h-6 rounded-lg bg-gray-200 dark:bg-[#222] w-16" />
+            <div className="h-6 rounded-lg bg-gray-200 dark:bg-[#222] w-12" />
           </div>
-          <div className="flex gap-2">
-            <div className="h-8 bg-gray-200 dark:bg-[#222] rounded-lg w-16" />
-            <div className="h-8 bg-gray-200 dark:bg-[#222] rounded-lg w-20" />
+        </div>
+      </div>
+
+      <div className="border-t border-gray-100 dark:border-[#232323] my-3" />
+
+      <div className="flex flex-col sm:flex-row items-center gap-2">
+        <div className="w-full sm:w-auto">
+          <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+            <div className="w-full sm:w-auto h-10 rounded-lg border border-gray-200 dark:border-[#353535] bg-transparent" />
+            <div className="w-full sm:w-auto h-10 rounded-lg bg-blue-600 sm:ml-2" />
           </div>
         </div>
       </div>
@@ -416,7 +404,7 @@ function SearchPageContent() {
                                     lng: locCoords.lng,
                                   });
                                   setLocation(
-                                    locPlace?.displayName ?? `Current location`
+                                    locPlace?.displayName ?? `Current location`,
                                   );
                                 } else {
                                   // request location
@@ -451,7 +439,7 @@ function SearchPageContent() {
                             ))}
                           </div>
                         </div>,
-                        document.body
+                        document.body,
                       )}
                   </div>
 
@@ -607,8 +595,7 @@ function SearchPageContent() {
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                     >
-                      <div className="grid gap-5 grid-cols-1 max-w-4xl mx-auto"
-                      >
+                      <div className="grid gap-5 grid-cols-1 max-w-4xl mx-auto">
                         {workers.map((worker: Worker, index: number) => {
                           const name = worker.name ?? "Professional";
                           const initial = name.charAt(0);
@@ -630,10 +617,17 @@ function SearchPageContent() {
                               animate={{ opacity: 1, y: 0 }}
                               transition={{ delay: index * 0.06 }}
                             >
-                              <div className="bg-white dark:bg-[#171717] border border-gray-200 dark:border-[#232323] rounded-2xl shadow-md dark:shadow-lg hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-200 p-5 sm:p-6">
-                                <div className="flex items-center gap-4 mb-2">
+                              <div className="relative bg-white dark:bg-[#171717] border border-gray-200 dark:border-[#232323] rounded-2xl shadow-md dark:shadow-lg hover:shadow-xl dark:hover:shadow-2xl transition-shadow duration-200 p-5 sm:p-6">
+                                {/* Desktop distance badge */}
+                                <div className="hidden sm:absolute sm:top-4 sm:right-4 sm:inline-flex text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                                  {distance}
+                                </div>
+
+                                <div className="flex items-start gap-4 mb-3">
                                   <div className="relative h-14 w-14 rounded-full overflow-hidden bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-xl font-bold text-white border-4 border-white dark:border-[#232323] shadow flex-shrink-0">
-                                    {isValidUrl(worker.workerProfile?.profilePic) && worker.workerProfile?.profilePic ? (
+                                    {isValidUrl(
+                                      worker.workerProfile?.profilePic,
+                                    ) && worker.workerProfile?.profilePic ? (
                                       <Image
                                         src={worker.workerProfile.profilePic}
                                         alt={name}
@@ -641,75 +635,105 @@ function SearchPageContent() {
                                         height={56}
                                         className="object-cover w-full h-full"
                                         onError={(e) => {
-                                          const target = e.target as HTMLImageElement;
-                                          target.style.display = 'none';
+                                          const target =
+                                            e.target as HTMLImageElement;
+                                          target.style.display = "none";
                                         }}
                                       />
                                     ) : (
                                       initial
                                     )}
                                   </div>
+
                                   <div className="flex-1 min-w-0">
-                                    <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
-                                      {name}
-                                    </h3>
-                                    <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
-                                      <span>{worker.workerProfile?.yearsExperience ?? 0} years experience</span>
-                                      {worker.rating && worker.rating.totalReviews > 0 && (
-                                        <>
-                                          <span>•</span>
-                                          <div className="flex items-center gap-1">
-                                            <FiStar className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
-                                            <span className="font-medium text-gray-900 dark:text-white">
-                                              {worker.rating.avgRating.toFixed(1)}
-                                            </span>
-                                            <span className="text-gray-500 dark:text-gray-400">
-                                              ({worker.rating.totalReviews})
-                                            </span>
-                                          </div>
-                                        </>
+                                    <div className="flex items-start justify-between gap-3">
+                                      <div className="min-w-0">
+                                        <h3 className="text-lg font-semibold text-gray-900 dark:text-white truncate">
+                                          {name}
+                                        </h3>
+                                        <div className="flex items-center gap-2 text-sm text-gray-500 dark:text-gray-400">
+                                          <span>
+                                            {worker.workerProfile
+                                              ?.yearsExperience ?? 0}{" "}
+                                            years experience
+                                          </span>
+                                          {worker.rating &&
+                                            worker.rating.totalReviews > 0 && (
+                                              <>
+                                                <span>•</span>
+                                                <div className="flex items-center gap-1">
+                                                  <FiStar className="h-3.5 w-3.5 fill-yellow-400 text-yellow-400" />
+                                                  <span className="font-medium text-gray-900 dark:text-white">
+                                                    {worker.rating.avgRating.toFixed(
+                                                      1,
+                                                    )}
+                                                  </span>
+                                                  <span className="text-gray-500 dark:text-gray-400">
+                                                    (
+                                                    {worker.rating.totalReviews}
+                                                    )
+                                                  </span>
+                                                </div>
+                                              </>
+                                            )}
+                                        </div>
+                                      </div>
+
+                                      {/* Mobile distance badge */}
+                                      <div className="sm:hidden text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300">
+                                        {distance}
+                                      </div>
+                                    </div>
+
+                                    <div className="flex flex-wrap gap-2 mt-3">
+                                      {skills.length > 0 ? (
+                                        skills.map((s: string) => (
+                                          <span
+                                            key={s}
+                                            className="px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 dark:bg-[#232323] text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-[#353535]"
+                                          >
+                                            {s}
+                                          </span>
+                                        ))
+                                      ) : (
+                                        <span className="text-xs text-gray-500 dark:text-gray-400">
+                                          No skills listed
+                                        </span>
                                       )}
                                     </div>
                                   </div>
-                                  <div className="hidden sm:block text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300">
-                                    {distance}
-                                  </div>
                                 </div>
-                                <div className="flex flex-wrap gap-2 mb-3">
-                                  {skills.length > 0 ? (
-                                    skills.map((s: string) => (
-                                      <span key={s} className="px-2 py-1 rounded-lg text-xs font-medium bg-gray-100 dark:bg-[#232323] text-gray-800 dark:text-gray-200 border border-gray-200 dark:border-[#353535]">{s}</span>
-                                    ))
-                                  ) : (
-                                    <span className="text-xs text-gray-500 dark:text-gray-400">
-                                      No skills listed
-                                    </span>
-                                  )}
-                                </div>
+
                                 <div className="border-t border-gray-100 dark:border-[#232323] my-3" />
+
                                 <div className="flex flex-col sm:flex-row items-center justify-between gap-3">
-                                  <div className="block sm:hidden text-xs px-2 py-0.5 rounded-full font-medium whitespace-nowrap bg-green-50 text-green-800 dark:bg-green-900/20 dark:text-green-300 mb-2 sm:mb-0">
-                                    {distance}
-                                  </div>
-                                  <div className="flex items-center gap-2 w-full sm:w-auto justify-end">
-                                    <Link
-                                      href={`/workers/${worker.id}`}
-                                      className="text-xs sm:text-sm px-3 py-1.5 rounded-lg border border-gray-200 dark:border-[#353535] bg-gray-900 dark:bg-[#232323] text-white hover:bg-gray-800 dark:hover:bg-[#353535] transition-colors font-medium"
-                                    >
-                                      View
-                                    </Link>
-                                    {worker.role === "WORKER" ? (
-                                      <BookWorkerButton
-                                        workerId={worker.id}
-                                        className="px-3 py-1.5 text-xs sm:text-sm rounded-lg font-medium"
-                                        minimumFee={worker.workerProfile?.minimumFee}
-                                        workerName={worker.name}
-                                      />
-                                    ) : (
-                                      <span className="text-xs text-red-500 px-2 py-1">
-                                        Invalid role: {worker.role}
-                                      </span>
-                                    )}
+                                  <div className="w-full sm:w-auto">
+                                    <div className="flex flex-col sm:flex-row items-center gap-2 w-full sm:w-auto">
+                                      {/* View (outline) */}
+                                      <Link
+                                        href={`/workers/${worker.id}`}
+                                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 text-xs sm:text-sm px-4 py-2 rounded-lg border border-gray-200 dark:border-[#353535] bg-transparent text-gray-800 dark:text-gray-200 hover:bg-gray-50 dark:hover:bg-[#1f1f1f] transition-colors font-medium"
+                                        aria-label={`View profile of ${name}`}
+                                      >
+                                        <FiUser className="h-4 w-4 text-gray-600 dark:text-gray-300" />
+                                        <span>View</span>
+                                      </Link>
+
+                                      {worker.role === "WORKER" ? (
+                                        <BookWorkerButton
+                                          workerId={worker.id}
+                                          className="w-full sm:w-auto px-4 py-2 text-xs sm:text-sm rounded-lg font-medium bg-blue-600 hover:bg-blue-700 text-white shadow-sm sm:ml-2 inline-flex items-center justify-center gap-2"
+                                          minimumFee={
+                                            worker.workerProfile?.minimumFee
+                                          }
+                                          workerName={worker.name}
+                                        />
+                                      ) : (
+                                        <span className="text-xs text-red-500 px-2 py-1">
+                                          Invalid role: {worker.role}
+                                        </span>
+                                      )}
+                                    </div>
                                   </div>
                                 </div>
                               </div>

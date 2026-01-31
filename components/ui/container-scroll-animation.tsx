@@ -32,8 +32,8 @@ export const ContainerScroll = ({
   const [isClient, setIsClient] = React.useState(false);
 
   React.useEffect(() => {
-    if (typeof window === 'undefined') return;
-    
+    if (typeof window === "undefined") return;
+
     const checkMobile = () => {
       setIsMobile(window.innerWidth <= 768);
     };
@@ -71,13 +71,15 @@ export const ContainerScroll = ({
           {videoSrc && isClient ? (
             <>
               {/* leave a small inset so the outside frame/border remains visible */}
-              <div className="absolute inset-2 md:inset-2 rounded-2xl overflow-hidden">
+              <div
+                className={`absolute ${isMobile ? "inset-0" : "inset-2 md:inset-2"} rounded-2xl overflow-hidden bg-black`}
+              >
                 <video
                   controls
                   poster={poster}
                   preload="metadata"
                   playsInline
-                  className="w-full h-full object-cover"
+                  className={`w-full h-full ${isMobile ? "object-contain" : "object-cover"} object-center bg-black`}
                   autoPlay={autoplay}
                   muted={muted}
                   loop={loop}
