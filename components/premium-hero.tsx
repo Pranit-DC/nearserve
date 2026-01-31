@@ -38,6 +38,11 @@ interface HeroProps {
 function HoverableMockups({ mockups }: { mockups: [ReactNode, ReactNode, ReactNode] }) {
   const [isHovered, setIsHovered] = useState(false);
 
+  // Performance: Reduce animation duration and add will-change for smoother transitions
+  // Also, avoid unnecessary re-renders by memoizing handlers
+  const handleMouseEnter = () => setIsHovered(true);
+  const handleMouseLeave = () => setIsHovered(false);
+
   // ---- Editable values: tweak these to change how far/fast layers move/rotate on hover ----
   // ANIM_DURATION: animation duration in seconds (change to speed up/slow down)
   // BACK_X: horizontal translation for the back mockup (px)
@@ -45,7 +50,7 @@ function HoverableMockups({ mockups }: { mockups: [ReactNode, ReactNode, ReactNo
   // MID_ROT: rotation for the middle mockup (deg)
   // FRONT_X: horizontal translation for the front mockup (px)
   // FRONT_ROT: rotation for the front mockup (deg)
-  const ANIM_DURATION = 0.50;
+  const ANIM_DURATION = 0.32; // Faster for less lag
   const BACK_X = -120;
   const BACK_ROT = 3;
   const MID_ROT = 3;
@@ -62,10 +67,10 @@ function HoverableMockups({ mockups }: { mockups: [ReactNode, ReactNode, ReactNo
       <div
         className="relative cursor-pointer min-h-[360px] sm:min-h-[420px] lg:min-h-[520px] pointer-events-auto"
         style={{ perspective: "1500px", perspectiveOrigin: "50% 50%" }}
-        onMouseEnter={() => setIsHovered(true)}
-        onMouseLeave={() => setIsHovered(false)}
-        onPointerEnter={() => setIsHovered(true)}
-        onPointerLeave={() => setIsHovered(false)}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
+        onPointerEnter={handleMouseEnter}
+        onPointerLeave={handleMouseLeave}
       >
         <div
           className="relative mx-auto"
@@ -78,7 +83,8 @@ function HoverableMockups({ mockups }: { mockups: [ReactNode, ReactNode, ReactNo
               transformOrigin: 'center center',
               filter: 'blur(0.5px) brightness(0.90)',
               opacity: 1.0,
-              transition: `transform ${ANIM_DURATION}s ease-out`
+              transition: `transform ${ANIM_DURATION}s cubic-bezier(0.4,0,0.2,1)`,
+              willChange: 'transform',
             }}
           >
             <div className="shadow-2xl">
@@ -97,7 +103,8 @@ function HoverableMockups({ mockups }: { mockups: [ReactNode, ReactNode, ReactNo
               transformOrigin: 'center center',
               filter: 'blur(0.25px) brightness(0.95)',
               opacity: 1.0,
-              transition: `transform ${ANIM_DURATION}s ease-out`
+              transition: `transform ${ANIM_DURATION}s cubic-bezier(0.4,0,0.2,1)`,
+              willChange: 'transform',
             }}
           >
             <div className="shadow-xl">
@@ -114,7 +121,8 @@ function HoverableMockups({ mockups }: { mockups: [ReactNode, ReactNode, ReactNo
             style={{
               transform: isHovered ? `translateX(${FRONT_X}px) rotate(${FRONT_ROT}deg) scale(1)` : 'none',
               transformOrigin: 'center center',
-              transition: `transform ${ANIM_DURATION}s ease-out`
+              transition: `transform ${ANIM_DURATION}s cubic-bezier(0.4,0,0.2,1)`,
+              willChange: 'transform',
             }}
           >
             <div className="shadow-2xl">
