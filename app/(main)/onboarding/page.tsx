@@ -144,14 +144,14 @@ export default function OnboardingPage() {
 
               {/* CTA Button */}
               <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-[#303030] dark:hover:bg-[#3a3a3a] text-white transition-all duration-300 group-hover:scale-[1.02] shadow-lg shadow-blue-500/30 dark:shadow-black/30 h-12 text-base font-semibold rounded-xl"
+                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:hover:from-blue-500 dark:hover:to-blue-400 text-white transition-all duration-300 group-hover:scale-[1.02] shadow-lg shadow-blue-500/30 dark:shadow-[0_8px_30px_rgba(59,130,246,0.14)] dark:ring-1 dark:ring-blue-500/20 h-12 text-base font-semibold rounded-xl"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push("/onboarding/customer-details");
                 }}
               >
                 Get Started as Customer
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform text-white" />
               </Button>
             </CardContent>
           </Card>
@@ -216,14 +216,14 @@ export default function OnboardingPage() {
 
               {/* CTA Button */}
               <Button
-                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-[#303030] dark:hover:bg-[#3a3a3a] text-white transition-all duration-300 group-hover:scale-[1.02] shadow-lg shadow-blue-500/30 dark:shadow-black/30 h-12 text-base font-semibold rounded-xl"
+                className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-gradient-to-r dark:from-blue-600 dark:to-blue-500 dark:hover:from-blue-500 dark:hover:to-blue-400 text-white transition-all duration-300 group-hover:scale-[1.02] shadow-lg shadow-blue-500/30 dark:shadow-[0_8px_30px_rgba(59,130,246,0.14)] dark:ring-1 dark:ring-blue-500/20 h-12 text-base font-semibold rounded-xl"
                 onClick={(e) => {
                   e.stopPropagation();
                   router.push("/onboarding/worker-details");
                 }}
               >
                 Get Started as Worker
-                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform text-white" />
               </Button>
             </CardContent>
           </Card>

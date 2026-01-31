@@ -88,6 +88,20 @@ export default function CustomerBookingsPage() {
     enabled: !!userProfile?.id,
   });
 
+  // Show a brief initial skeleton immediately on page load to avoid flash
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setIsPageLoading(false), 350);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Track whether we've completed the first successful load to avoid
+  // showing the skeleton again on background refreshes.
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  useEffect(() => {
+    if (!loading) setHasLoadedOnce(true);
+  }, [loading]);
+
   // Fallback to API if Firestore fails
   const [apiJobs, setApiJobs] = useState<Job[]>([]);
   const [fallbackActive, setFallbackActive] = useState(false);
@@ -426,6 +440,33 @@ export default function CustomerBookingsPage() {
   );
 
   const list = filteredList;
+
+  if (isPageLoading || (loading && currentList.length === 0)) {
+    return (
+      <main className="min-h-screen bg-gray-50 dark:bg-[#212121]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header skeleton */}
+          <div className="mb-8">
+            <div className="h-8 bg-gray-200 dark:bg-[#232323] rounded w-48 animate-pulse mb-2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-[#232323] rounded w-80 animate-pulse"></div>
+          </div>
+
+          {/* Controls skeleton */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div className="h-10 bg-gray-200 dark:bg-[#232323] rounded w-56 animate-pulse"></div>
+            <div className="h-10 bg-gray-200 dark:bg-[#232323] rounded w-80 animate-pulse"></div>
+          </div>
+
+          {/* Grid skeleton */}
+          <div className="grid gap-5 grid-cols-1 max-w-4xl mx-auto">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <>
