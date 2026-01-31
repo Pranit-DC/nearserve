@@ -30,7 +30,7 @@ import { FaRupeeSign } from "react-icons/fa";
 import ClickSpark from "@/components/ClickSpark";
 import { toast } from "sonner";
 import { useAutoRefresh } from "@/hooks/use-auto-refresh";
-import { useUserProfile } from '@/hooks/use-user-profile';
+import { useUserProfile } from "@/hooks/use-user-profile";
 import { useRealtimeJobs } from "@/hooks/use-realtime-jobs";
 
 type Job = {
@@ -68,8 +68,8 @@ export default function WorkerJobsPage() {
   // Real-time Firestore listener - instant updates when jobs change!
   const { jobs, loading, error } = useRealtimeJobs({
     userId: userProfile?.id || null,
-    role: 'worker',
-    enabled: !!userProfile?.id
+    role: "worker",
+    enabled: !!userProfile?.id,
   });
 
   // Fallback to API if Firestore fails
@@ -78,25 +78,25 @@ export default function WorkerJobsPage() {
 
   const loadFromAPI = async () => {
     try {
-      const res = await fetch("/api/worker/jobs", { 
+      const res = await fetch("/api/worker/jobs", {
         cache: "no-store",
-        credentials: "include"
+        credentials: "include",
       });
-      
+
       if (!res.ok) throw new Error(`Failed to load jobs: ${res.status}`);
-      
+
       const data = await res.json();
       setApiJobs(data.jobs || []);
       console.log(`[Jobs API] Loaded ${data.jobs?.length || 0} jobs`);
     } catch (e) {
-      console.error('[Jobs API] Load error:', e);
+      console.error("[Jobs API] Load error:", e);
     }
   };
 
   // If Firestore has an error, activate API fallback
   useEffect(() => {
     if (error && !fallbackActive) {
-      console.warn('[Jobs] Firestore error, falling back to API polling');
+      console.warn("[Jobs] Firestore error, falling back to API polling");
       setFallbackActive(true);
       loadFromAPI();
     }
@@ -118,7 +118,7 @@ export default function WorkerJobsPage() {
       });
       if (res.ok) {
         toast.success(
-          action === "ACCEPT" ? "Job accepted successfully!" : "Job cancelled"
+          action === "ACCEPT" ? "Job accepted successfully!" : "Job cancelled",
         );
         // No need to reload - realtime listener auto-updates!
       } else {
@@ -172,7 +172,7 @@ export default function WorkerJobsPage() {
         enableHighAccuracy: true,
         timeout: 10000,
         maximumAge: 0,
-      }
+      },
     );
   };
 
@@ -181,7 +181,11 @@ export default function WorkerJobsPage() {
     const formData = new FormData();
     formData.append("file", file);
 
-    console.log("Uploading file:", { name: file.name, type: file.type, size: file.size });
+    console.log("Uploading file:", {
+      name: file.name,
+      type: file.type,
+      size: file.size,
+    });
 
     try {
       const res = await fetch("/api/upload", {
@@ -195,7 +199,7 @@ export default function WorkerJobsPage() {
         console.error("Upload failed - Status:", res.status);
         console.error("Upload failed - Status Text:", res.statusText);
         console.error("Upload failed - Response:", responseText);
-        
+
         let errorMessage = `Failed to upload photo: ${res.status}`;
         try {
           const errorData = JSON.parse(responseText);
@@ -205,7 +209,7 @@ export default function WorkerJobsPage() {
           console.error("Upload failed - Could not parse response as JSON");
           errorMessage = responseText || errorMessage;
         }
-        
+
         toast.error(errorMessage);
         throw new Error(errorMessage);
       }
@@ -215,7 +219,8 @@ export default function WorkerJobsPage() {
     } catch (error) {
       // Handle network errors
       if (error instanceof TypeError && error.message === "Failed to fetch") {
-        const errorMessage = "Network error: Unable to upload photo. Please check your connection and try again.";
+        const errorMessage =
+          "Network error: Unable to upload photo. Please check your connection and try again.";
         console.error("Network error during upload:", error);
         toast.error(errorMessage);
         throw new Error(errorMessage);
@@ -288,7 +293,9 @@ export default function WorkerJobsPage() {
       const data = await res.json();
 
       if (res.ok) {
-        toast.success("Work marked as complete! Customer has been notified to pay.");
+        toast.success(
+          "Work marked as complete! Customer has been notified to pay.",
+        );
       } else {
         toast.error(data.error || "Failed to mark work as complete");
       }
@@ -305,10 +312,10 @@ export default function WorkerJobsPage() {
     (j) =>
       j.status === "PENDING" ||
       j.status === "ACCEPTED" ||
-      j.status === "IN_PROGRESS"
+      j.status === "IN_PROGRESS",
   );
   const previousJobs = displayJobs.filter(
-    (j) => j.status === "COMPLETED" || j.status === "CANCELLED"
+    (j) => j.status === "COMPLETED" || j.status === "CANCELLED",
   );
 
   const currentList = tab === "NEW" ? newJobs : previousJobs;
@@ -316,7 +323,7 @@ export default function WorkerJobsPage() {
     (job) =>
       job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.customer?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase())
+      job.location.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   // Status configuration
@@ -425,7 +432,7 @@ export default function WorkerJobsPage() {
           initial={{ opacity: 0, scale: 0.95 }}
           animate={{ opacity: 1, scale: 1 }}
           exit={{ opacity: 0, scale: 0.95 }}
-          className="bg-white dark:bg-[#181818] rounded-2xl shadow-2xl max-w-lg w-full p-6"
+          className="bg-white dark:bg-[#181818] rounded-2xl shadow-2xl max-w-md w-full p-4 sm:p-6"
         >
           <div className="flex items-center justify-between mb-6">
             <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
@@ -444,19 +451,19 @@ export default function WorkerJobsPage() {
             </button>
           </div>
 
-          <div className="space-y-6">
+          <div className="space-y-4">
             {/* Photo Upload Section */}
             <div>
               <label className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
                 Upload Work Start Photo *
               </label>
-              <div className="border-2 border-dashed border-gray-300 dark:border-[#303030] rounded-lg p-6 text-center hover:border-gray-400 dark:hover:border-[#404040] transition-colors">
+              <div className="border-2 border-dashed border-gray-300 dark:border-[#303030] rounded-lg p-4 text-center hover:border-gray-400 dark:hover:border-[#404040] transition-colors">
                 {photoPreview ? (
-                  <div className="space-y-3">
+                  <div className="space-y-2">
                     <img
                       src={photoPreview}
                       alt="Preview"
-                      className="max-h-48 mx-auto rounded-lg"
+                      className="max-h-32 mx-auto rounded-lg"
                     />
                     <Button
                       onClick={() => {
@@ -473,8 +480,8 @@ export default function WorkerJobsPage() {
                   </div>
                 ) : (
                   <>
-                    <FiCamera className="h-12 w-12 text-gray-400 mx-auto mb-3" />
-                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-3">
+                    <FiCamera className="h-10 w-10 text-gray-400 mx-auto mb-3" />
+                    <p className="text-sm text-gray-600 dark:text-gray-400 mb-2">
                       Take a photo at the work location
                     </p>
                     <input
@@ -559,7 +566,7 @@ export default function WorkerJobsPage() {
             </div>
 
             {/* Action Buttons */}
-            <div className="flex gap-3 pt-4 border-t border-gray-200 dark:border-[#2a2a2a]">
+            <div className="flex gap-3 pt-3 border-t border-gray-200 dark:border-[#2a2a2a]">
               <Button
                 onClick={() => {
                   setStartWorkJobId(null);
@@ -575,7 +582,9 @@ export default function WorkerJobsPage() {
               </Button>
               <Button
                 onClick={() => startWork(jobId)}
-                disabled={!photoFile || !gpsCoords || acting === `${jobId}:START`}
+                disabled={
+                  !photoFile || !gpsCoords || acting === `${jobId}:START`
+                }
                 className="flex-1 bg-purple-600 hover:bg-purple-500 text-white"
               >
                 {acting === `${jobId}:START` ? (
@@ -705,14 +714,14 @@ export default function WorkerJobsPage() {
                         j.status === "ACCEPTED"
                           ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
                           : j.status === "PENDING"
-                          ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
-                          : j.status === "IN_PROGRESS"
-                          ? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300"
-                          : j.status === "COMPLETED"
-                          ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
-                          : j.status === "CANCELLED"
-                          ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
-                          : "bg-gray-50 text-gray-700 dark:bg-[#252525] dark:text-gray-300"
+                            ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
+                            : j.status === "IN_PROGRESS"
+                              ? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300"
+                              : j.status === "COMPLETED"
+                                ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
+                                : j.status === "CANCELLED"
+                                  ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
+                                  : "bg-gray-50 text-gray-700 dark:bg-[#252525] dark:text-gray-300"
                       }`}
                     >
                       {j.status}
@@ -746,9 +755,16 @@ export default function WorkerJobsPage() {
                           <p className="text-xs">
                             {(() => {
                               let d = j.time;
-                              if (d && typeof d === 'object' && typeof d.toDate === 'function') d = d.toDate();
+                              if (
+                                d &&
+                                typeof d === "object" &&
+                                typeof d.toDate === "function"
+                              )
+                                d = d.toDate();
                               else d = new Date(d);
-                              return d && !isNaN(d.getTime()) ? d.toLocaleString() : "—";
+                              return d && !isNaN(d.getTime())
+                                ? d.toLocaleString()
+                                : "—";
                             })()}
                           </p>
                         </div>
@@ -870,7 +886,9 @@ export default function WorkerJobsPage() {
                           onClick={() => act(j.id, "ACCEPT")}
                           className="bg-green-600 hover:bg-green-500 text-white flex-1"
                         >
-                          {acting === `${j.id}:ACCEPT` ? "Processing..." : "Accept"}
+                          {acting === `${j.id}:ACCEPT`
+                            ? "Processing..."
+                            : "Accept"}
                         </Button>
                       </ClickSpark>
                       <Button
@@ -878,7 +896,9 @@ export default function WorkerJobsPage() {
                         onClick={() => act(j.id, "CANCEL")}
                         className="bg-red-600 hover:bg-red-500 text-white flex-1"
                       >
-                        {acting === `${j.id}:CANCEL` ? "Processing..." : "Cancel"}
+                        {acting === `${j.id}:CANCEL`
+                          ? "Processing..."
+                          : "Cancel"}
                       </Button>
                     </div>
                   )}
@@ -963,14 +983,14 @@ export default function WorkerJobsPage() {
                         j.status === "ACCEPTED"
                           ? "bg-blue-50 text-blue-700 dark:bg-blue-900/20 dark:text-blue-300"
                           : j.status === "PENDING"
-                          ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
-                          : j.status === "IN_PROGRESS"
-                          ? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300"
-                          : j.status === "COMPLETED"
-                          ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
-                          : j.status === "CANCELLED"
-                          ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
-                          : "bg-gray-50 text-gray-700 dark:bg-[#252525] dark:text-gray-300"
+                            ? "bg-orange-50 text-orange-700 dark:bg-orange-900/20 dark:text-orange-300"
+                            : j.status === "IN_PROGRESS"
+                              ? "bg-purple-50 text-purple-700 dark:bg-purple-900/20 dark:text-purple-300"
+                              : j.status === "COMPLETED"
+                                ? "bg-green-50 text-green-700 dark:bg-green-900/20 dark:text-green-300"
+                                : j.status === "CANCELLED"
+                                  ? "bg-red-50 text-red-700 dark:bg-red-900/20 dark:text-red-300"
+                                  : "bg-gray-50 text-gray-700 dark:bg-[#252525] dark:text-gray-300"
                       }`}
                     >
                       {j.status}
@@ -1004,9 +1024,16 @@ export default function WorkerJobsPage() {
                           <p className="text-xs">
                             {(() => {
                               let d = j.time;
-                              if (d && typeof d === 'object' && typeof d.toDate === 'function') d = d.toDate();
+                              if (
+                                d &&
+                                typeof d === "object" &&
+                                typeof d.toDate === "function"
+                              )
+                                d = d.toDate();
                               else d = new Date(d);
-                              return d && !isNaN(d.getTime()) ? d.toLocaleString() : "—";
+                              return d && !isNaN(d.getTime())
+                                ? d.toLocaleString()
+                                : "—";
                             })()}
                           </p>
                         </div>
@@ -1123,14 +1150,18 @@ export default function WorkerJobsPage() {
                         onClick={() => act(j.id, "ACCEPT")}
                         className="bg-green-600 hover:bg-green-500 text-white flex-1"
                       >
-                        {acting === `${j.id}:ACCEPT` ? "Processing..." : "Accept"}
+                        {acting === `${j.id}:ACCEPT`
+                          ? "Processing..."
+                          : "Accept"}
                       </Button>
                       <Button
                         disabled={acting === `${j.id}:CANCEL`}
                         onClick={() => act(j.id, "CANCEL")}
                         className="bg-red-600 hover:bg-red-500 text-white flex-1"
                       >
-                        {acting === `${j.id}:CANCEL` ? "Processing..." : "Cancel"}
+                        {acting === `${j.id}:CANCEL`
+                          ? "Processing..."
+                          : "Cancel"}
                       </Button>
                     </div>
                   )}

@@ -75,7 +75,7 @@ export default function CustomerBookingsPage() {
   const [viewMode, setViewMode] = useState<"list">("list");
   const [paymentJobId, setPaymentJobId] = useState<string | null>(null);
   const [razorpayOrder, setRazorpayOrder] = useState<RazorpayOrder | null>(
-    null
+    null,
   );
   const [paymentProcessing, setPaymentProcessing] = useState(false);
   const [razorpayLoaded, setRazorpayLoaded] = useState(false);
@@ -87,6 +87,20 @@ export default function CustomerBookingsPage() {
     role: "customer",
     enabled: !!userProfile?.id,
   });
+
+  // Show a brief initial skeleton immediately on page load to avoid flash
+  const [isPageLoading, setIsPageLoading] = useState(true);
+  useEffect(() => {
+    const t = setTimeout(() => setIsPageLoading(false), 350);
+    return () => clearTimeout(t);
+  }, []);
+
+  // Track whether we've completed the first successful load to avoid
+  // showing the skeleton again on background refreshes.
+  const [hasLoadedOnce, setHasLoadedOnce] = useState(false);
+  useEffect(() => {
+    if (!loading) setHasLoadedOnce(true);
+  }, [loading]);
 
   // Fallback to API if Firestore fails
   const [apiJobs, setApiJobs] = useState<Job[]>([]);
@@ -139,10 +153,10 @@ export default function CustomerBookingsPage() {
     (j) =>
       j.status === "PENDING" ||
       j.status === "ACCEPTED" ||
-      j.status === "IN_PROGRESS"
+      j.status === "IN_PROGRESS",
   );
   const previous = displayJobs.filter(
-    (j) => j.status === "COMPLETED" || j.status === "CANCELLED"
+    (j) => j.status === "COMPLETED" || j.status === "CANCELLED",
   );
 
   const currentList = tab === "ONGOING" ? ongoing : previous;
@@ -150,7 +164,7 @@ export default function CustomerBookingsPage() {
     (job) =>
       job.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
       job.worker?.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      job.location.toLowerCase().includes(searchQuery.toLowerCase())
+      job.location.toLowerCase().includes(searchQuery.toLowerCase()),
   );
 
   const completeJob = async (id: string) => {
@@ -285,7 +299,7 @@ export default function CustomerBookingsPage() {
       modal: {
         ondismiss: function () {
           toast.info(
-            "Payment cancelled. You can retry by clicking the button again."
+            "Payment cancelled. You can retry by clicking the button again.",
           );
           setPaymentProcessing(false);
           // Don't clear razorpayOrder or paymentJobId - allow retry
@@ -419,6 +433,33 @@ export default function CustomerBookingsPage() {
   );
 
   const list = filteredList;
+
+  if (isPageLoading || (loading && currentList.length === 0)) {
+    return (
+      <main className="min-h-screen bg-gray-50 dark:bg-[#212121]">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 py-8">
+          {/* Header skeleton */}
+          <div className="mb-8">
+            <div className="h-8 bg-gray-200 dark:bg-[#232323] rounded w-48 animate-pulse mb-2"></div>
+            <div className="h-4 bg-gray-200 dark:bg-[#232323] rounded w-80 animate-pulse"></div>
+          </div>
+
+          {/* Controls skeleton */}
+          <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-8">
+            <div className="h-10 bg-gray-200 dark:bg-[#232323] rounded w-56 animate-pulse"></div>
+            <div className="h-10 bg-gray-200 dark:bg-[#232323] rounded w-80 animate-pulse"></div>
+          </div>
+
+          {/* Grid skeleton */}
+          <div className="grid gap-5 grid-cols-1 max-w-4xl mx-auto">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <SkeletonCard key={i} />
+            ))}
+          </div>
+        </div>
+      </main>
+    );
+  }
 
   return (
     <>
@@ -557,12 +598,12 @@ export default function CustomerBookingsPage() {
                           j.status === "ACCEPTED"
                             ? "bg-blue-50 text-blue-700 dark:bg-[#171717] dark:text-slate-200"
                             : j.status === "PENDING"
-                            ? "bg-orange-50 text-orange-700 dark:bg-[#171717] dark:text-slate-200"
-                            : j.status === "COMPLETED"
-                            ? "bg-green-50 text-green-700 dark:bg-[#171717] dark:text-slate-200"
-                            : j.status === "CANCELLED"
-                            ? "bg-red-50 text-red-700 dark:bg-[#171717] dark:text-slate-200"
-                            : "bg-gray-50 text-gray-700 dark:bg-[#171717] dark:text-slate-200"
+                              ? "bg-orange-50 text-orange-700 dark:bg-[#171717] dark:text-slate-200"
+                              : j.status === "COMPLETED"
+                                ? "bg-green-50 text-green-700 dark:bg-[#171717] dark:text-slate-200"
+                                : j.status === "CANCELLED"
+                                  ? "bg-red-50 text-red-700 dark:bg-[#171717] dark:text-slate-200"
+                                  : "bg-gray-50 text-gray-700 dark:bg-[#171717] dark:text-slate-200"
                         }`}
                       >
                         {j.status}
@@ -596,9 +637,16 @@ export default function CustomerBookingsPage() {
                             <p className="text-xs">
                               {(() => {
                                 let d = j.time;
-                                if (d && typeof d === 'object' && typeof d.toDate === 'function') d = d.toDate();
+                                if (
+                                  d &&
+                                  typeof d === "object" &&
+                                  typeof d.toDate === "function"
+                                )
+                                  d = d.toDate();
                                 else d = new Date(d);
-                                return d && !isNaN(d.getTime()) ? d.toLocaleString() : "—";
+                                return d && !isNaN(d.getTime())
+                                  ? d.toLocaleString()
+                                  : "—";
                               })()}
                             </p>
                           </div>
@@ -779,12 +827,12 @@ export default function CustomerBookingsPage() {
                           j.status === "ACCEPTED"
                             ? "bg-blue-50 text-blue-700 dark:bg-[#171717] dark:text-slate-200"
                             : j.status === "PENDING"
-                            ? "bg-orange-50 text-orange-700 dark:bg-[#171717] dark:text-slate-200"
-                            : j.status === "COMPLETED"
-                            ? "bg-green-50 text-green-700 dark:bg-[#171717] dark:text-slate-200"
-                            : j.status === "CANCELLED"
-                            ? "bg-red-50 text-red-700 dark:bg-[#171717] dark:text-slate-200"
-                            : "bg-gray-50 text-gray-700 dark:bg-[#171717] dark:text-slate-200"
+                              ? "bg-orange-50 text-orange-700 dark:bg-[#171717] dark:text-slate-200"
+                              : j.status === "COMPLETED"
+                                ? "bg-green-50 text-green-700 dark:bg-[#171717] dark:text-slate-200"
+                                : j.status === "CANCELLED"
+                                  ? "bg-red-50 text-red-700 dark:bg-[#171717] dark:text-slate-200"
+                                  : "bg-gray-50 text-gray-700 dark:bg-[#171717] dark:text-slate-200"
                         }`}
                       >
                         {j.status}
@@ -818,9 +866,16 @@ export default function CustomerBookingsPage() {
                             <p className="text-xs">
                               {(() => {
                                 let d = j.time;
-                                if (d && typeof d === 'object' && typeof d.toDate === 'function') d = d.toDate();
+                                if (
+                                  d &&
+                                  typeof d === "object" &&
+                                  typeof d.toDate === "function"
+                                )
+                                  d = d.toDate();
                                 else d = new Date(d);
-                                return d && !isNaN(d.getTime()) ? d.toLocaleString() : "—";
+                                return d && !isNaN(d.getTime())
+                                  ? d.toLocaleString()
+                                  : "—";
                               })()}
                             </p>
                           </div>
