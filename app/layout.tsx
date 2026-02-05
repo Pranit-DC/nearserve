@@ -14,7 +14,7 @@ import { HydrationErrorSuppressor } from "@/components/hydration-error-suppresso
 import { GlobalErrorHandler } from "./global-error-handler";
 import { ErrorBoundary } from "./error-boundary";
 import { FCMTokenRefresher } from "@/components/fcm-token-refresher";
-
+import GTagTracker from "@/components/GTagTracker";
 const inter = Inter({ subsets: ["latin"] });
 
 const geistSans = Geist({
@@ -40,6 +40,22 @@ export default function RootLayout({
   return (
     <html lang="en" suppressHydrationWarning>
       <head>
+        <Script
+          src={`https://www.googletagmanager.com/gtag/js?id=${process.env.NEXT_PUBLIC_GA_ID || "G-KL84SJST7M"}`}
+          strategy="afterInteractive"
+        />
+        <Script
+          id="gtag-init"
+          strategy="afterInteractive"
+          dangerouslySetInnerHTML={{
+            __html: `
+      window.dataLayer = window.dataLayer || [];
+      function gtag(){dataLayer.push(arguments);}
+      gtag('js', new Date());
+      gtag('config', '${process.env.NEXT_PUBLIC_GA_ID || "G-KL84SJST7M"}', { page_path: window.location.pathname });
+    `,
+          }}
+        />
         {/* Immediate error suppression - runs before React hydration */}
         <Script
           id="error-suppression"
@@ -79,7 +95,7 @@ export default function RootLayout({
             <AuthProvider>
               {/* Silent FCM token refresher */}
               <FCMTokenRefresher />
-              
+
               {/* Header on all pages for UI consistency */}
               <ConditionalHeader />
               <main className="min-h-screen">{children}</main>
@@ -88,16 +104,21 @@ export default function RootLayout({
               <ConditionalFooter />
               <ClientOnly>
                 <ProjectChatbot />
+                <GTagTracker />
               </ClientOnly>
-              
+
               {/* Hidden Google Translate Element for programmatic control - client side only */}
               <ClientOnly>
-                <div id="google_translate_element" style={{ display: 'none' }} suppressHydrationWarning></div>
+                <div
+                  id="google_translate_element"
+                  style={{ display: "none" }}
+                  suppressHydrationWarning
+                ></div>
               </ClientOnly>
             </AuthProvider>
           </ErrorBoundary>
         </ThemeProvider>
-        
+
         {/* Google Translate Scripts - loaded after hydration */}
         <Script
           id="google-translate-init"
