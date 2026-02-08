@@ -198,7 +198,7 @@ This project is a complete rewrite of *Rozgaarsetu*, originally developed as a c
                                                   ▼
                                  ┌──────────────────────────────────┐
                                  │         AUTHENTICATION           │
-                                 │             Clerk                │
+                                 │          Firebase-auth           │
                                  │    OAuth  ·  Email  ·  Phone     │
                                  └────────────────┬─────────────────┘
                                                   │
@@ -241,7 +241,7 @@ This project is a complete rewrite of *Rozgaarsetu*, originally developed as a c
 | PostgreSQL | 14.x or higher |
 | npm / pnpm | Latest |
 
-You will also need accounts for: **Clerk**, **Firebase**, and optionally **Razorpay**, **Cloudinary**.
+You will also need accounts for: **Firebase-auth**, **Firebase**, and optionally **Razorpay**, **Cloudinary**.
 
 <br/>
 
@@ -278,9 +278,9 @@ Create `.env.local` with the following variables:
 # Database
 DATABASE_URL="postgresql://user:password@localhost:5432/nearserve"
 
-# Clerk Authentication
-NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY=pk_test_...
-CLERK_SECRET_KEY=sk_test_...
+# Firebase-auth Authentication
+NEXT_PUBLIC_Firebase-auth_PUBLISHABLE_KEY=pk_test_...
+Firebase-auth_SECRET_KEY=sk_test_...
 
 # Firebase
 NEXT_PUBLIC_FIREBASE_API_KEY=...
