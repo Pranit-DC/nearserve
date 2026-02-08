@@ -141,7 +141,7 @@ This project is a complete rewrite of *Rozgaarsetu*, originally developed as a c
 <td>Authentication</td>
 <td>
 
-`Clerk` — OAuth, Email, Phone authentication
+`Firebase-auth`
 
 </td>
 </tr>
