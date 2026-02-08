@@ -15,17 +15,22 @@ import { getMessaging } from 'firebase-admin/messaging';
 if (!getApps().length) {
   try {
     // Service account credentials from environment
-    const serviceAccount = {
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    };
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-    initializeApp({
-      credential: cert(serviceAccount as any),
-    });
-
-    console.log('✅ [FCM Backend] Firebase Admin initialized');
+    if (!projectId || !clientEmail || !privateKey) {
+      console.warn('⚠️ [FCM Backend] Firebase credentials not fully configured - FCM will not work');
+    } else {
+      initializeApp({
+        credential: cert({
+          projectId,
+          clientEmail,
+          privateKey,
+        }),
+      });
+      console.log('✅ [FCM Backend] Firebase Admin initialized');
+    }
   } catch (error) {
     console.error('❌ [FCM Backend] Firebase Admin initialization failed:', error);
   }
