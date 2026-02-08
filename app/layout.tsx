@@ -63,6 +63,16 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
+                // Clear Google Translate cookie if user prefers English
+                try {
+                  var pref = localStorage.getItem('preferredLanguage');
+                  if (!pref || pref === 'en') {
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + location.hostname;
+                    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + location.hostname;
+                  }
+                } catch(e) {}
+                
                 var suppressError = function(str) {
                   return /hydration|removeChild|notfounderror|did not match|expected server/i.test(str);
                 };

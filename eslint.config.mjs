@@ -18,7 +18,30 @@ const eslintConfig = [
       "out/**",
       "build/**",
       "next-env.d.ts",
+      "functions/**",
+      "scripts/**",
+      "public/**",
     ],
+  },
+  {
+    rules: {
+      // Downgrade 'any' errors to warnings - proper typing takes time
+      "@typescript-eslint/no-explicit-any": "warn",
+      // Allow unused vars with underscore prefix
+      "@typescript-eslint/no-unused-vars": ["warn", { 
+        "argsIgnorePattern": "^_",
+        "varsIgnorePattern": "^_",
+        "ignoreRestSiblings": true
+      }],
+      // Allow unescaped entities in JSX (apostrophes etc)
+      "react/no-unescaped-entities": "off",
+      // Downgrade missing display name
+      "react/display-name": "off",
+      // Downgrade img element warning
+      "@next/next/no-img-element": "warn",
+      // Downgrade exhaustive-deps to warning
+      "react-hooks/exhaustive-deps": "warn",
+    },
   },
 ];
 

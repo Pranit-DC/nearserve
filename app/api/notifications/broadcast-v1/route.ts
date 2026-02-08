@@ -14,15 +14,21 @@ import { initializeApp, getApps, cert } from 'firebase-admin/app';
 // Initialize Firebase Admin if not already initialized
 if (!getApps().length) {
   try {
-    const serviceAccount = {
-      projectId: process.env.FIREBASE_PROJECT_ID,
-      clientEmail: process.env.FIREBASE_CLIENT_EMAIL,
-      privateKey: process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n'),
-    };
+    const projectId = process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID;
+    const clientEmail = process.env.FIREBASE_CLIENT_EMAIL;
+    const privateKey = process.env.FIREBASE_PRIVATE_KEY?.replace(/\\n/g, '\n');
 
-    initializeApp({
-      credential: cert(serviceAccount as any),
-    });
+    if (!projectId || !clientEmail || !privateKey) {
+      console.warn('⚠️ [Broadcast v1] Firebase credentials not fully configured');
+    } else {
+      initializeApp({
+        credential: cert({
+          projectId,
+          clientEmail,
+          privateKey,
+        }),
+      });
+    }
   } catch (error) {
     console.error('❌ [Broadcast v1] Firebase Admin init failed:', error);
   }

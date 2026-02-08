@@ -63,8 +63,26 @@ export function Header() {
     { value: 'mr', label: 'मराठी' },
   ];
 
+  // Helper to clear Google Translate cookies (resets to original language)
+  const clearGoogleTranslateCookie = () => {
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;';
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=' + window.location.hostname;
+    document.cookie = 'googtrans=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/; domain=.' + window.location.hostname;
+  };
+
   const changeLanguage = (langCode: string) => {
     if (typeof document === 'undefined' || typeof window === 'undefined') return;
+    
+    // If switching to English, clear cookies and reload to show original content
+    if (langCode === 'en') {
+      clearGoogleTranslateCookie();
+      localStorage.setItem('preferredLanguage', 'en');
+      setCurrentLang('en');
+      // Reload to reset Google Translate completely
+      window.location.reload();
+      return;
+    }
+    
     const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
     if (select) {
       select.value = langCode;
@@ -82,16 +100,30 @@ export function Header() {
   useEffect(() => {
     try {
       const stored = localStorage.getItem('preferredLanguage');
-      if (stored) setCurrentLang(stored);
-
-      const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
-      if (select) {
-        const lang = stored || select.value || 'en';
-        select.value = lang;
-        select.dispatchEvent(new Event('change'));
-        setCurrentLang(lang);
+      
+      // If preference is English, clear any lingering Google Translate cookies
+      if (!stored || stored === 'en') {
+        clearGoogleTranslateCookie();
+        setCurrentLang('en');
+        return;
       }
-    } catch (e) {
+      
+      setCurrentLang(stored);
+
+      // Wait for Google Translate to be ready, then apply saved language
+      const applyLanguage = () => {
+        const select = document.querySelector('.goog-te-combo') as HTMLSelectElement | null;
+        if (select && stored && stored !== 'en') {
+          select.value = stored;
+          select.dispatchEvent(new Event('change'));
+        }
+      };
+      
+      // Try immediately and also after a delay for slower loads
+      applyLanguage();
+      setTimeout(applyLanguage, 1000);
+      setTimeout(applyLanguage, 2000);
+    } catch (_e) {
       // ignore in SSR or if API not present
     }
   }, []);
