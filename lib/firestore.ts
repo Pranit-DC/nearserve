@@ -1,5 +1,5 @@
 // Firestore Database Collections and Schema
-// This file maps the Prisma schema to Firestore collections
+// Primary data persistence layer for the application
 
 import {
   collection,
@@ -25,7 +25,7 @@ import {
 import { db } from './firebase-client';
 import { adminDb } from './firebase-admin';
 
-// Collection names (mapped from Prisma schema)
+// Firestore collection names
 export const COLLECTIONS = {
   USERS: 'users',
   WORKER_PROFILES: 'worker_profiles',
@@ -42,7 +42,7 @@ export const COLLECTIONS = {
   REFRESH_DATA: 'refresh_data', // Real-time content updates collection
 } as const;
 
-// Enums (from Prisma schema)
+// User role enums
 export enum UserRole {
   CUSTOMER = 'CUSTOMER',
   WORKER = 'WORKER',
@@ -91,7 +91,7 @@ export enum PaymentStatus {
   REFUNDED = 'REFUNDED',
 }
 
-// Type definitions (mapped from Prisma models)
+// Type definitions for Firestore documents
 export interface User {
   id: string;
   email: string;

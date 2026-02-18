@@ -133,7 +133,7 @@ This project is a complete rewrite of *Rozgaarsetu*, originally developed as a c
 <td>Backend</td>
 <td>
 
-`Next.js API Routes` `Prisma ORM` `PostgreSQL`
+`Next.js API Routes` `Firebase Firestore`
 
 </td>
 </tr>
@@ -238,7 +238,7 @@ This project is a complete rewrite of *Rozgaarsetu*, originally developed as a c
 | Requirement | Version |
 |:------------|:--------|
 | Node.js | 18.x or higher |
-| PostgreSQL | 14.x or higher |
+
 | npm / pnpm | Latest |
 
 You will also need accounts for: **Firebase-auth**, **Firebase**, and optionally **Razorpay**, **Cloudinary**.
@@ -258,10 +258,6 @@ npm install
 # Set up environment variables
 cp .env.example .env.local
 
-# Initialize database
-npx prisma generate
-npx prisma db push
-
 # Start development server
 npm run dev
 ```
@@ -276,7 +272,7 @@ Create `.env.local` with the following variables:
 
 ```ini
 # Database
-DATABASE_URL="postgresql://user:password@localhost:5432/nearserve"
+# Firebase config is already set up in .env.local
 
 # Firebase-auth Authentication
 NEXT_PUBLIC_Firebase-auth_PUBLISHABLE_KEY=pk_test_...
@@ -328,7 +324,7 @@ nearserve/
 │   └── worker/                   # Worker-specific
 │
 ├── lib/                          # Utilities & services
-│   ├── prisma.ts                 # Database client
+
 │   ├── firebase-admin.ts         # Firebase Admin SDK
 │   ├── firebase-client.ts        # Firebase Client SDK
 │   └── razorpay-service.ts       # Payment service
@@ -337,8 +333,7 @@ nearserve/
 ├── contexts/                     # React context providers
 ├── types/                        # TypeScript definitions
 │
-└── prisma/
-    └── schema.prisma             # Database schema
+
 ```
 
 <br/>
@@ -407,8 +402,7 @@ nearserve/
 | `npm run build` | Create production build |
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
-| `npx prisma studio` | Open database GUI |
-| `npx prisma db push` | Push schema changes |
+
 
 <br/>
 
