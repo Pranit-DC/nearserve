@@ -15,11 +15,11 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-235a97?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-11-dd2c00?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com/)
-[![Firestore](https://img.shields.io/badge/Firestore-NoSQL-dd2c00?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com/firestore)
+[![Firestore](https://img.shields.io/badge/Firestore-NoSQL-dd2c00?style=for-the-badge&logo=firebase&logoColor=white)](https://cloud.google.com/firestore)
 
 <br/>
 
-**[Features](#features)** · **[Architecture](#architecture)** · **[Quick Start](#quick-start)** · **[API Docs](#api-reference)** · **[Contributing](#contributing)**
+**[Features](#features)** · **[Architecture](#architecture)** · **[Quick Start](#quick-start)** · **[API Docs](#api-reference)** · **[Development](#development-roadmap)** · **[Contributing](#contributing)**
 
 </div>
 
@@ -210,8 +210,8 @@ This project is a complete rewrite of *Rozgaarsetu*, originally developed as a c
      │                          │  │                          │  │                          │
      │  Jobs API                │  │  Firestore (Real-time)   │  │  Razorpay (Payments)     │
      │  Workers API             │  │  FCM (Push)              │  │  Cloudinary (Images)     │
-     │  Customers API           │  │  Auth                    │  │  Gemini (AI)             │
-     │  Notifications API       │  │                          │  │                          │
+     │  Customers API           │  │  Authentication          │  │  Google Gemini (AI)      │
+     │  Notifications API       │  │                          │  │  Google Maps API         │
      └──────────────────────────┘  └──────────────────────────┘  └──────────────────────────┘
 ```
 
@@ -257,25 +257,35 @@ The application will be available at `http://localhost:3000`
 
 ### Environment Configuration
 
-Create `.env.local` with the following variables:
+Copy `.env.example` to `.env.local` and configure the following:
 
 ```ini
-# Database
-# Firebase config is already set up in .env.local
+# Firebase Configuration
+NEXT_PUBLIC_FIREBASE_API_KEY=your_api_key
+NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your_auth_domain
+NEXT_PUBLIC_FIREBASE_PROJECT_ID=your_project_id
+NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your_storage_bucket
+NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your_sender_id
+NEXT_PUBLIC_FIREBASE_APP_ID=your_app_id
 
-# Firebase-auth Authentication
-NEXT_PUBLIC_Firebase-auth_PUBLISHABLE_KEY=pk_test_...
-Firebase-auth_SECRET_KEY=sk_test_...
+# Firebase Admin (Server-side)
+FIREBASE_CLIENT_EMAIL=your_admin_email
+FIREBASE_PRIVATE_KEY=your_private_key
 
-# Firebase
-NEXT_PUBLIC_FIREBASE_API_KEY=...
-NEXT_PUBLIC_FIREBASE_PROJECT_ID=...
-FIREBASE_SERVICE_ACCOUNT_KEY={"type":"service_account",...}
+# Payment Gateway (Razorpay)
+NEXT_PUBLIC_RAZORPAY_KEY_ID=rzp_test_...
+RAZORPAY_KEY_SECRET=your_secret
 
-# Optional: Payments, Storage, AI
-RAZORPAY_KEY_ID=rzp_test_...
-CLOUDINARY_CLOUD_NAME=...
-GOOGLE_GENERATIVE_AI_API_KEY=...
+# Storage (Cloudinary)
+NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloud_name
+CLOUDINARY_API_KEY=your_api_key
+CLOUDINARY_API_SECRET=your_secret
+
+# AI Assistant (Google Gemini)
+GOOGLE_API_KEY=your_api_key
+
+# Maps & Geolocation
+NEXT_PUBLIC_GOOGLE_MAPS_API_KEY=your_maps_key
 ```
 
 See [.env.example](.env.example) for the complete list.
@@ -392,6 +402,29 @@ nearserve/
 | `npm run start` | Start production server |
 | `npm run lint` | Run ESLint |
 
+
+<br/>
+
+---
+
+<br/>
+
+## Development Roadmap
+
+| Phase | What We Built | Key Achievement |
+|-------|---------------|-----------------|
+| Phase 1: Foundation (e2596b0-5f273b3) | Landing page, UI components, animations, theme switching | Core design system |
+| Phase 2: Core Features (efbab7a-dbb4d26) | Maps API, Chatbot, Profiles, Jobs, Onboarding, Pricing | Feature-complete marketplace |
+| Phase 3: Real-time Shift (b5ad8b2-b4000d7) | Firestore, FCM notifications, Firebase Auth, i18n | PostgreSQL → Firestore migration |
+| Phase 4: Production Polish (0bcc2e5-f7b39ca) | Mobile optimization, Analytics, Code cleanup | Production-ready deployment |
+
+### Strategic Architectural Decisions
+
+- **Phase 3**: Migrated from PostgreSQL to Firebase Firestore for real-time data synchronization and scalability
+- **Phase 3**: Switched authentication from Clerk to Firebase-auth for unified backend integration
+- **Phase 4**: Removed unused dependencies and optimized codebase for production deployment
+
+**Current Status**: All development phases completed and deployed on Vercel
 
 <br/>
 
