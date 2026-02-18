@@ -15,7 +15,7 @@
 [![Next.js](https://img.shields.io/badge/Next.js-15.5-000?style=for-the-badge&logo=next.js&logoColor=white)](https://nextjs.org/)
 [![TypeScript](https://img.shields.io/badge/TypeScript-5.0-235a97?style=for-the-badge&logo=typescript&logoColor=white)](https://typescriptlang.org/)
 [![Firebase](https://img.shields.io/badge/Firebase-11-dd2c00?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com/)
-[![PostgreSQL](https://img.shields.io/badge/PostgreSQL-316192?style=for-the-badge&logo=postgresql&logoColor=white)](https://postgresql.org/)
+[![Firestore](https://img.shields.io/badge/Firestore-NoSQL-dd2c00?style=for-the-badge&logo=firebase&logoColor=white)](https://firebase.google.com/firestore)
 
 <br/>
 
@@ -210,19 +210,9 @@ This project is a complete rewrite of *Rozgaarsetu*, originally developed as a c
      │                          │  │                          │  │                          │
      │  Jobs API                │  │  Firestore (Real-time)   │  │  Razorpay (Payments)     │
      │  Workers API             │  │  FCM (Push)              │  │  Cloudinary (Images)     │
-     │  Customers API           │  │                          │  │  Gemini (AI)             │
+     │  Customers API           │  │  Auth                    │  │  Gemini (AI)             │
      │  Notifications API       │  │                          │  │                          │
-     └────────────┬─────────────┘  └──────────────────────────┘  └──────────────────────────┘
-                  │
-                  ▼
-     ┌──────────────────────────┐
-     │       DATA LAYER         │
-     │                          │
-     │  Prisma ORM              │
-     │         │                │
-     │         ▼                │
-     │  PostgreSQL Database     │
-     └──────────────────────────┘
+     └──────────────────────────┘  └──────────────────────────┘  └──────────────────────────┘
 ```
 
 <br/>
@@ -238,7 +228,6 @@ This project is a complete rewrite of *Rozgaarsetu*, originally developed as a c
 | Requirement | Version |
 |:------------|:--------|
 | Node.js | 18.x or higher |
-
 | npm / pnpm | Latest |
 
 You will also need accounts for: **Firebase-auth**, **Firebase**, and optionally **Razorpay**, **Cloudinary**.
